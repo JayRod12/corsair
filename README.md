@@ -1,7 +1,11 @@
 CORSAIR
 
+
 Group Directory:
 /vol/project/2015/271/g1527124/web/
+
+Web address for group directory:
+http://www.doc.ic.ac.uk/project/2015/271/g1527124/web/
 
 Go to group directory and clone it from:
 
