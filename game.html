@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <title>Corsair</title>
+    <link rel="stylesheet" type="text/css" href="game.css">
+  </head>
+
+  
+  <body>
+    <h1> Corsair. Conquering the seas.</h1>
+    <p>Stuff</p>
+
+  <script src="http://cloud.github.com/downloads/uxebu/bonsai/bonsai-0.4.0.min.js"></script>
+
+  <div id=content>
+
+  <div id=player></div>
+  <script type="bs" id="bs">
+  /*
+  var width = 700;
+  var height = 400;
+  var sectors = ['red', 'orange', 'yellow', 'green', 'blue', 'indigo', 'violet'];
+
+  var sectorWidth = width / sectors.length;
+    // make bars at top of stage:
+  for (var s = 0, l = sectors.length; s < l; ++s) {
+    new Rect(s * sectorWidth, 0, sectorWidth, 20).attr('fillColor', sectors[s]).addTo(stage);
+  }
+  */
+
+  function Ship(x, y){
+    this.width = 20;
+    this.height = 20;
+
+    this.speed = 1;
+    this.angle = 0;
+
+    this.shape = new Rect(0, 0, this.width, this.height);
+    this.shape.fill("red");
+    this.x = x;
+    this.y = y;
+
+    this.setLocation(x, y);
+    this.shape.addTo(stage);
+  };
+
+  Ship.prototype.move = function(){
+    this.speed = Math.sqrt(Math.pow(this.x - mouse_x,2) + Math.pow(this.y -
+          mouse_y,2)) / 100;
+    this.setLocation(this.x + Math.cos(this.angle) * this.speed,
+                this.y + Math.sin(this.angle) * this.speed);
+  };
+
+  Ship.prototype.updateAngle = function(mouse_x, mouse_y){
+    this.angle = Math.atan2(mouse_y - this.y, mouse_x - this.x);
+  };
+
+  Ship.prototype.setLocation = function(x, y){
+    this.x = x;
+    this.y = y;
+    this.shape.attr({
+      x: x - this.width/2,
+      y: y - this.height/2
+    });
+  };
+
+
+  var player = new Ship(50, 60);
+
+
+  var mouse_x = 0;
+  var mouse_y = 0;
+
+
+
+  stage.on('tick', function(e, f) {
+    player.move();
+    player.updateAngle(mouse_x, mouse_y);
+  });
+
+  stage.on('pointermove', function(e) {
+
+    mouse_x = e.stageX;
+    mouse_y = e.stageY;
+    //  Move ship towards pointer
+      //console.log(e.stageX);
+
+    //player.setLocation(e.stageX, e.stageY);
+//
+  });
+
+
+  //var blobs = [];
+
+  /*
+  function makeBlob(x, y) {
+    var t = new Rect(0, 0, 12, 12, 3).attr(
+      'fillColor',
+      color( sectors[0|x/(width/sectors.length)] ).randomize('h', .1).randomize('l')
+    ).addTo(stage);
+    t.attr({
+      x: x,
+      y: y,
+      scale: 1 + Math.random()*2
+    });
+    return {
+      kill: function() {
+        t.animate(Math.random() * 20, {
+          opacity: 0,
+          scale: 0
+        }, {
+          onEnd: function() {
+            t.remove();
+          }
+        });
+      }
+    };
+  }
+
+  var d;
+  stage.on('pointermove', function(e) {
+    blobs.push(makeBlob(e.stageX, e.stageY));
+    while (blobs.length > 50) {
+      blobs.shift().kill();
+    }
+  });
+  */
+  </script>
+
+
+<script>
+
+  var player = document.getElementById('player');
+
+  var b = bonsai.run(player, {
+    code: document.getElementById('bs').innerHTML,
+    height: 400,
+    width: 700,
+    framerate: 60
+  });
+
+  window.onresize = function() {
+    player.style.left = (window.innerWidth - 202)/2 - 350 + 'px';
+    player.style.top = window.innerHeight/2 - 200 + 'px';
+  };
+
+  window.onresize();
+
+</script>
+  </div>
+
+
+  </div>
+  </body>
+
+</html>
