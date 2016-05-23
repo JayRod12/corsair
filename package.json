@@ -1,0 +1,18 @@
+{
+  "name": "corsair",
+  "version": "1.0.0",
+  "description": "CORSAIR",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@gitlab.doc.ic.ac.uk:web5app/treas.git"
+  },
+  "author": "Nacho, Dan, Tom, Mery and Jaime",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.13.4"
+  }
+}

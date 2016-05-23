@@ -1,9 +1,0 @@
-body {
-  background: url("bg.jpg");
-  filter: alpha(opacity=40);
-  opacity: 0.4;
-}
-
-h1 {
-  color: black
-}
