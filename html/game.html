@@ -16,38 +16,25 @@
   <div id=content>
 
   <div id=player></div>
+
+  <!-- TODO make framerate independent - add deltatime to tick updates -->
+
   <script type="bs" id="bs">
+
+  const speed_norm = 100;
+  const max_angular_vel = 0.1;
 
   var sea = new Rect(0, 0, 1000, 1000).fill("blue").addTo(stage);
 
   function Ship(x, y){
     this.width = 40;
     this.height = 20;
-    
- //   this.x = x;
-   // this.y = y;
 
     this.speed = 1;
     this.angle = 0;
 
-    this.shape = new Rect(0, 0, this.width, this.height);
-	var origin = new Point(this.width/2, this.height/2);
-	this.shape.setOrigin(origin);
+    this.shape = new Ellipse(0, 0, this.width, this.height);
     this.shape.fill("white");
-    this.shape.attr({
-	  origin: new Point(this.width/2, this.height/2),
-      x: x - this.width/2,
-      y: y - this.height/2,
-      rotation: this.angle
-    });
-
-
-
-
-  //  this.shape.attr({
-//  	origin: { x: this.width/2, y: this.height/2}
- 
-	//});
 
     this.setLocation(x, y);
     this.shape.addTo(stage);
@@ -56,14 +43,28 @@
   Ship.prototype.move = function(){
     player.updateAngle(mouse_x, mouse_y);
     this.speed = Math.sqrt(Math.pow(this.x - mouse_x,2) + Math.pow(this.y -
-          mouse_y,2)) / 100;
+          mouse_y,2)) / speed_norm;
     this.setLocation(this.x + Math.cos(this.angle) * this.speed,
                 this.y + Math.sin(this.angle) * this.speed);
   };
 
   Ship.prototype.updateAngle = function(mouse_x, mouse_y){
+
     this.angle = Math.atan2(mouse_y - this.y, mouse_x - this.x);
-  //  th//is.shape.attr.rotation = this.angle;
+
+    /*
+    Try and add 'momentum' to angular velocity, so you cant spin on the spot
+    currently spins 360's
+    Fix, do some modular arithmatic, 
+    var newAngle = Math.atan2(mouse_y - this.y, mouse_x - this.x);
+    if (Math.abs(newAngle - this.angle) > max_angular_vel){
+      this.angle += (newAngle > 0) ? max_angular_vel : -max_angular_vel;
+    }
+    else{
+      this.angle = newAngle;
+    }
+    */
+
     this.shape.attr({
       rotation: this.angle
     });
@@ -77,7 +78,6 @@
     this.shape.attr({
       x: x - this.width/2,
       y: y - this.height/2,
-    //  rotation: this.angle
     });
   };
 
