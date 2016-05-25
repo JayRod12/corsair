@@ -41,10 +41,20 @@ io.on('connection', function(client){
 
   players[client.userid] = new Player(0,0);
 
-  //  Give client their id
-  client.emit('onconnected', {id : client.userid});
+  //  Give client their id and list of players
+  var playerlist = []
+  /*
+  for (var userid in players){
+    playerlist.push(userid);
+  }
+  */
+  client.emit('on_connected', {id : client.userid, //playerIds : playerlist,
+    players : players});
 
-  client.broadcast.emit('player_joined', {id : client.userid});
+  //  Tell other users that a new player has joined
+  client.broadcast.emit('player_joined', {id : client.userid, x : 0, y : 0});
+
+  client.emit('playerlist', playerlist);
 
   //  Log
   console.log('\t socket.io:: player ' + client.userid + ' connected');

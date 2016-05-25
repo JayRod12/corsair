@@ -107,25 +107,35 @@ function client_update(player){
     speed: player.speed});
 }
 
+function addServerShip(userid, x, y, angle, speed){
+  console.log("Creating new ship"); 
+  other_ships[userid] = {x : x, y: y, angle: angle, speed: speed};
+  var newship = new Ship(x, y,
+      createServerInput(userid));
+  newship.speed = speed;
+  newship.angle = angle;
+
+  gameObjects.push(newship);
+  drawObjects.push(newship);
+}
+
 var our_id = 0;
-socket.on('onconnect', function (data){
+socket.on('on_connected', function (data){
   our_id = data.id;
   console.log("Our id is " + our_id);
+  for (var userid in data.players){
+    var player = data.players[userid];
+    addServerShip(userid, player.x, player.y, player.angle, player.speed);
+  }
 });
 
 var other_ships = {};
 
 socket.on('player_joined', function (data){
-  var userid = data.id;
-  console.log("Creating new ship"); 
-  other_ships[userid] = {x : 0, y: 0, angle: 0, speed: 0};
-  var newship = new Ship(0, 0,
-      createServerInput(userid));
-
-  gameObjects.push(newship);
-  drawObjects.push(newship);
+  addServerShip(data.id, data.x, data.y, 0, 0);
 });
 
+/*
 //  TODO delete
 socket.on('player_left', function (data){
   var userid = data.id;
@@ -133,6 +143,7 @@ socket.on('player_left', function (data){
   delete other_ships[userid];
 });
   
+*/
 
 //  On update from server
 socket.on('server_update', function (data){
