@@ -20,7 +20,7 @@ app.get('/game', function(req, res) {
 });
 
 app.get('/client/game.js', function(req, res) {
-  res.sendFile(path.resolve(__dirname + '/../client/game.js'));
+  res.sendFile(path.resolve(__dirname + '/../html/client/game.js'));
 });
 
 http.listen(port, function() {
