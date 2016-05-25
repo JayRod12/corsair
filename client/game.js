@@ -1,3 +1,7 @@
+//  Set up sockets
+var socket = io();
+
+
 var canvas = $("#canvas")[0];
 var ctx = canvas.getContext("2d");
 var w = $("#canvas").width();
@@ -85,23 +89,76 @@ $( "#canvas" ).mousemove(function(event){
 
 const speed_norm = 100/60;
 
-var playerInput = function(){
+var localInput = function(){
   this.angle = Math.atan2(mouse_y - this.y, mouse_x - this.x);  
   this.speed = Math.sqrt(Math.pow(this.x - mouse_x,2) + Math.pow(this.y
       -mouse_y,2)) / speed_norm;
 }
 
+function createServerInput(id){
+  return function(){
+    this.angle = other_ships[id].angle;
+    this.speed = other_ships[id].speed;
+  }
+}
+
+function client_update(player){
+  socket.emit('client_update', {x : player.x, y : player.y, angle: player.angle,
+    speed: player.speed});
+}
+
+var our_id = 0;
+socket.on('onconnect', function (data){
+  our_id = data.id;
+  console.log("Our id is " + our_id);
+});
+
+var other_ships = {};
+
+socket.on('player_joined', function (data){
+  var userid = data.id;
+  console.log("Creating new ship"); 
+  other_ships[userid] = {x : 0, y: 0, angle: 0, speed: 0};
+  var newship = new Ship(0, 0,
+      createServerInput(userid));
+
+  gameObjects.push(newship);
+  drawObjects.push(newship);
+});
+
+//  TODO delete
+socket.on('player_left', function (data){
+  var userid = data.id;
+  console.log("Removing ship"); 
+  delete other_ships[userid];
+});
+  
+
+//  On update from server
+socket.on('server_update', function (data){
+  for (var userid in data){
+    if (userid != our_id){
+      other_ships[userid] = data[userid];
+    }
+  }
+});
+
 function init(){
-  var player = new Ship(20, 20, playerInput);
+  var player = new Ship(20, 20, localInput);
   gameObjects.push(player);
   drawObjects.push(player);
 
   //  Todo measure dt properly every tick to compensate for dropped frames
   const dt = 1/60;
+  //  Delay between time we update the server
+  const s_delay = 1/40;
 
   if(typeof game_loop != "undefined") clearInterval(game_loop);
   //  Third argument is the delay time to pass to tick on each call
   var game_loop = setInterval(tick, dt, dt);
+
+  if(typeof server_loop != "undefined") clearInterval(server_loop);
+  var server_loop = setInterval(client_update, s_delay, player);
 }
 init();
 
