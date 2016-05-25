@@ -82,7 +82,6 @@ var mouse_y = 0;
 
 //  Update mouse position on movement
 $( "#canvas" ).mousemove(function(event){
-//canvas.mousemove(function(event){
   mouse_x = event.clientX;
   mouse_y = event.clientY;
 });

@@ -12,19 +12,15 @@ app.use(express.static(path.resolve(__dirname + '/../public/')));
   //console.log(path.resolve(__dirname + '/../html/index.html'));
 
 app.get('/', function(req, res) {
-    console.log("AFWAF");
   res.sendFile(path.resolve(__dirname + '/../html/index.html'));
-  //res.sendFile(__dirname + '/../html/index.html');
 });
 
 app.get('/game', function(req, res) {
   res.sendFile(path.resolve(__dirname + '/../html/game.html'));
-  //res.sendFile(__dirname + '../html/game.html');
 });
 
-app.get('/game.js', function(req, res) {
+app.get('/client/game.js', function(req, res) {
   res.sendFile(path.resolve(__dirname + '/../client/game.js'));
-  //res.sendFile(__dirname + '../html/game.html');
 });
 
 http.listen(port, function() {
@@ -43,11 +39,7 @@ io.on('connection', function(client){
 
   //  Give client their id and list of players
   var playerlist = []
-  /*
-  for (var userid in players){
-    playerlist.push(userid);
-  }
-  */
+
   client.emit('on_connected', {id : client.userid, //playerIds : playerlist,
     players : players});
 
