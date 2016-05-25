@@ -136,10 +136,9 @@ function client_update(player){
 //  Add a new ship to the local world from information from the server
 
 function addServerShip(userid, x, y, angle, speed){
-  console.log("Creating new ship"); 
-  other_ships[userid] = {x : x, y: y, angle: angle, speed: speed};
   var newship = new Ship(x, y,
       createServerShipInput(userid));
+  other_ships[userid] = {object: newship, x : x, y: y, angle: angle, speed: speed};
   newship.speed = speed;
   newship.angle = angle;
 
@@ -154,16 +153,29 @@ socket.on('player_joined', function (data){
   addServerShip(data.id, data.x, data.y, 0, 0);
 });
 
-/*
 //  Recieved when another player leaves the server
-//  TODO delete
+//  We delete the local ship
+
+//  This will leave holes in the gameObject, drawObject arrays
 socket.on('player_left', function (data){
   var userid = data.id;
-  console.log("Removing ship"); 
+  var doomed_ship = other_ships[userid].object;
+  for (var i = 0; i < gameObjects.length; i++){
+  console.log(gameObjects[i] + " not " + doomed_ship);
+    if (gameObjects[i] == doomed_ship) {
+      gameObjects.splice(i,1);
+      break;
+    }
+  }
+  for (var i = 0; i < drawObjects.length; i++){
+    if (drawObjects[i] == doomed_ship) {
+      drawObjects.splice(i,1);
+      break;
+    }
+  }
+  delete other_ships[userid].object;
   delete other_ships[userid];
 });
-  
-*/
 
 //  On update from server
 
@@ -175,7 +187,11 @@ socket.on('player_left', function (data){
 socket.on('server_update', function (data){
   for (var userid in data){
     if (userid != our_id){
-      other_ships[userid] = data[userid];
+      var update = data[userid];
+      other_ships[userid].x = update.x;
+      other_ships[userid].y = update.y;
+      other_ships[userid].speed = update.speed;
+      other_ships[userid].angle = update.angle;
     }
   }
 });
