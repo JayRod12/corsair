@@ -93,7 +93,7 @@ $( "#canvas" ).mousemove(function(event){
   mouse_y = event.clientY;
 });
 
-const speed_norm = 100/60;
+const speed_norm = 1000/60;
 
 var localShipInput = function(){
   var delta_angle = (Math.atan2(mouse_y - this.y, mouse_x - this.x) 
