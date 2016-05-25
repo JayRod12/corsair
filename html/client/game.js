@@ -77,6 +77,7 @@ function Ship(x, y, inputFunction){
   }
 }
 
+//  Store current mouse position
 var mouse_x = 0;
 var mouse_y = 0;
 
@@ -88,29 +89,57 @@ $( "#canvas" ).mousemove(function(event){
 
 const speed_norm = 100/60;
 
-var localInput = function(){
+var localShipInput = function(){
   this.angle = Math.atan2(mouse_y - this.y, mouse_x - this.x);  
   this.speed = Math.sqrt(Math.pow(this.x - mouse_x,2) + Math.pow(this.y
       -mouse_y,2)) / speed_norm;
 }
 
-function createServerInput(id){
+//  Creates a serverInput function that is a closure using the given id
+//  The output can be passed into a new Ship
+
+function createServerShipInput(id){
   return function(){
     this.angle = other_ships[id].angle;
     this.speed = other_ships[id].speed;
   }
 }
 
+//  Hashmap of player ids to ship states
+//  Does not include the local player's ship
+var other_ships = {};
+
+//  Our id assigned to us by the server
+var our_id = 0;
+
+//  On connecting to the server
+
+socket.on('on_connected', function (data){
+  our_id = data.id;
+  console.log("Our id is " + our_id);
+
+  //  Set our world up in the config described by the server
+
+  for (var userid in data.players){
+    var player = data.players[userid];
+    addServerShip(userid, player.x, player.y, player.angle, player.speed);
+  }
+});
+
+//  Update the server about the player's position
+
 function client_update(player){
   socket.emit('client_update', {x : player.x, y : player.y, angle: player.angle,
     speed: player.speed});
 }
 
+//  Add a new ship to the local world from information from the server
+
 function addServerShip(userid, x, y, angle, speed){
   console.log("Creating new ship"); 
   other_ships[userid] = {x : x, y: y, angle: angle, speed: speed};
   var newship = new Ship(x, y,
-      createServerInput(userid));
+      createServerShipInput(userid));
   newship.speed = speed;
   newship.angle = angle;
 
@@ -118,23 +147,15 @@ function addServerShip(userid, x, y, angle, speed){
   drawObjects.push(newship);
 }
 
-var our_id = 0;
-socket.on('on_connected', function (data){
-  our_id = data.id;
-  console.log("Our id is " + our_id);
-  for (var userid in data.players){
-    var player = data.players[userid];
-    addServerShip(userid, player.x, player.y, player.angle, player.speed);
-  }
-});
 
-var other_ships = {};
+//  Recieved when another player joins the server
 
 socket.on('player_joined', function (data){
   addServerShip(data.id, data.x, data.y, 0, 0);
 });
 
 /*
+//  Recieved when another player leaves the server
 //  TODO delete
 socket.on('player_left', function (data){
   var userid = data.id;
@@ -145,6 +166,12 @@ socket.on('player_left', function (data){
 */
 
 //  On update from server
+
+//  TODO lag compensation - we currently do not use the x, y coordinates given
+//  by the server, we only simulate based on angle and speed
+//  We need to ease any inaccurcies in position out rather than directly
+//  'snapping' back into position
+
 socket.on('server_update', function (data){
   for (var userid in data){
     if (userid != our_id){
@@ -153,8 +180,11 @@ socket.on('server_update', function (data){
   }
 });
 
+
 function init(){
-  var player = new Ship(20, 20, localInput);
+
+  //  Create player
+  var player = new Ship(0, 0, localShipInput);
   gameObjects.push(player);
   drawObjects.push(player);
 
@@ -167,8 +197,10 @@ function init(){
   //  Third argument is the delay time to pass to tick on each call
   var game_loop = setInterval(tick, dt, dt);
 
+  //  Send information about the local player to the server every s_delay
   if(typeof server_loop != "undefined") clearInterval(server_loop);
   var server_loop = setInterval(client_update, s_delay, player);
 }
+
 init();
 
