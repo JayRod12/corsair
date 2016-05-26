@@ -1,7 +1,6 @@
 //  Set up sockets
 var socket = io();
 
-
 var canvas = $("#canvas")[0];
 var ctx = canvas.getContext("2d");
 var w = $("#canvas").width();
@@ -123,7 +122,6 @@ var localShipInput = function(){
   if (this.angle < -Math.PI) {
     this.angle += 2*Math.PI;
   }
-  console.log(this.angle);
   this.speed = Math.sqrt(Math.pow(this.x - mouse_x,2) + Math.pow(this.y
       -mouse_y,2)) / speed_norm;
 }
@@ -148,6 +146,9 @@ var our_id = 0;
 //  On connecting to the server
 
 socket.on('on_connected', function (data){
+  // Initialize Grid
+  initializeGrid();
+
   our_id = data.id;
   console.log("Our id is " + our_id);
 
@@ -162,6 +163,10 @@ socket.on('on_connected', function (data){
 //  Update the server about the player's position
 
 function client_update(player){
+  var cell = coordinateToCell(player.x, player.y);
+  if (cell != null) {
+    console.log('Grid number %s', cell.number);
+  }
   socket.emit('client_update', {x : player.x, y : player.y, angle: player.angle,
     speed: player.speed});
 }

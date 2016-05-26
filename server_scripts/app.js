@@ -6,7 +6,7 @@ var http = require('http').Server(app);
 var path = require('path');
 var io = require('socket.io')(http);
 var UUID = require('node-uuid');
-var Game = require('../shared_game.js');
+var Game = require('../public/shared_game.js');
 
 
 app.use(express.static(path.resolve(__dirname + '/../public/')));
