@@ -1,4 +1,3 @@
-
 const server = false;
 
 //  Set up sockets
@@ -134,8 +133,7 @@ socket.on('on_connected', function (data){
   //  Set our world up in the config described by the server
 
   for (var userid in data.players){
-    var player = data.players[userid];
-    addServerShip(userid, data.players[userid].state);
+    addServerShip(userid, data.players[userid]);
   }
 
   //  Delay between updating the server
@@ -156,8 +154,11 @@ function client_update(player){
 //  Add a new ship to the local world from information from the server
 
 function addServerShip(userid, state){
+  console.log("adding new player");
   newPlayer(userid, state);
-  sim.addShip(state, getPlayers()[userid], createServerShipInput(userid));
+  sim.addShip(state, getPlayers()[userid], 
+      createServerShipInput(userid),
+        shipOnDraw);
 
 }
 
@@ -180,11 +181,9 @@ socket.on('player_left', function (data){
 //  On update from server
 
 socket.on('server_update', function (data){
-    //console.log(data);
   for (var uid in data){
     var update = data[uid];
-    //console.log(update.state);
-    updatePlayer(uid, update.state);
+    updatePlayer(uid, update);
   }
 });
 

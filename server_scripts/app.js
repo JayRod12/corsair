@@ -1,4 +1,5 @@
 const port = 3000;
+const server = true;
 
 var express = require('express');
 var app = express();
@@ -47,7 +48,7 @@ io.on('connection', function(client){
   Game.newPlayer(client.userid, initState);
 
   client.emit('on_connected', {id : client.userid,
-    players : Game.getPlayers, state: initState});
+    players : Game.getPlayers(), state: initState});
 
   //  Tell other users that a new player has joined
   client.broadcast.emit('player_joined', {id : client.userid, state : 
