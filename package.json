@@ -4,7 +4,7 @@
   "description": "CORSAIR",
   "main": "app.js",
   "scripts": {
-    "app": "node server_scripts/app.js",
+    "start": "node server_scripts/app.js",
     "test": "echo Error"
   },
   "repository": {
