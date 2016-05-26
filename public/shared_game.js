@@ -25,12 +25,10 @@ function Ship(state, playerState, inputFunction, onDraw){
     //console.log('update');
 
     //  If player has left the server remove their ship from the sim
-    /*
     if (typeof this.playerState == "undefined"){
       sim.removeShip(this);
       return;
     }
-    */
 
     //  Updates speed and angle
     this.inputFunction();
@@ -40,10 +38,8 @@ function Ship(state, playerState, inputFunction, onDraw){
 
 
     //  TODO better interpolation
-    /*
     this.state.x = (this.state.x + this.playerState.x) / 2
     this.state.y = (this.state.y + this.playerState.y) / 2
-    */
   }
 
   this.onDraw = onDraw;
@@ -82,6 +78,14 @@ function Sim(){
   }
 
 }
+
+function createServerShipInput(id){
+  return function(){
+    this.angle = getPlayers()[id].angle;
+    this.speed = getPlayers()[id].speed;
+  }
+}
+    
 
 /*
 function CorsairState(sim){
@@ -136,3 +140,6 @@ exports.newPlayer = newPlayer;
 exports.removePlayer = removePlayer;
 exports.updatePlayer = updatePlayer;
 exports.getPlayers = getPlayers;
+
+exports.createServerShipInput = createServerShipInput;
+exports.Sim = Sim;

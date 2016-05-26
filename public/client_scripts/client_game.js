@@ -112,12 +112,14 @@ var localShipInput = function(){
 //  Creates a serverInput function that is a closure using the given id
 //  The output can be passed into a new Ship
 
+/*
 function createServerShipInput(id){
   return function(){
     this.angle = getPlayers()[id].angle;
     this.speed = getPlayers()[id].speed;
   }
 }
+*/
 
 //  Our id assigned to us by the server
 var our_id;

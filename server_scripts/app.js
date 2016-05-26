@@ -25,8 +25,6 @@ http.listen(port, function() {
   console.log('Listening on 3000');
 });
 
-Game.initializeGame();
-
 //  On client connection
 io.on('connection', function(client){
 
@@ -45,10 +43,13 @@ io.on('connection', function(client){
     speed: 0
   };
 
-  Game.newPlayer(client.userid, initState);
 
   client.emit('on_connected', {id : client.userid,
     players : Game.getPlayers(), state: initState});
+
+  Game.newPlayer(client.userid, initState);
+  sim.addShip(initState, Game.getPlayers()[client.userid],
+    Game.createServerShipInput);
 
   //  Tell other users that a new player has joined
   client.broadcast.emit('player_joined', {id : client.userid, state : 
@@ -75,3 +76,9 @@ io.on('connection', function(client){
 
 });
 
+
+Game.initializeGame();
+
+var sim = new Game.Sim();
+var sim_t = 1000 / 60;
+var sim_loop = setInterval(sim.tick, sim_t, sim_t);
