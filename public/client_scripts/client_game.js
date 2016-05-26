@@ -131,7 +131,7 @@ socket.on('on_connected', function (data){
   our_id = data.id;
   console.log("Our id is " + our_id);
   newPlayer(our_id, data.state);
-  var player = sim.addShip(data.state, getPlayers()[our_id], localShipInput, shipOnDraw);
+  var player = sim.addShip(data.state, our_id, localShipInput, shipOnDraw);
 
   //  Set our world up in the config described by the server
 
@@ -159,7 +159,7 @@ function client_update(player){
 function addServerShip(userid, state){
   console.log("adding new player");
   newPlayer(userid, state);
-  sim.addShip(state, getPlayers()[userid], 
+  sim.addShip(state, userid, 
       createServerShipInput(userid),
         shipOnDraw);
 

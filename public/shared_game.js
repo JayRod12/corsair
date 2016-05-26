@@ -11,24 +11,29 @@ var remoteStates;
 //  Inputfunction determines updates to the ship
 //  onDraw can be null
 
-function Ship(state, remoteState, inputFunction, onDraw){
+function Ship(sim, state, uid, inputFunction, onDraw){
+
+  this.sim = sim;
 
   //  Should contain:
   //  x, y, angle, speed
   this.state = state;
 
-  this.remoteState = remoteState;
+  this.getRemoteState = function(){
+    return remoteStates[uid];
+  };
 
   this.scale = 1;
 
   this.inputFunction = inputFunction;
 
   this.onTick = function(dt){
-    console.log("shared " + this.remoteState.x);
     //console.log('update');
 
+    var remoteState = this.getRemoteState();
+
     //  If player has left the server remove their ship from the sim
-    if (typeof this.remoteState == "undefined"){
+    if (typeof remoteState == "undefined"){
       sim.removeShip(this);
       return;
     }
@@ -41,17 +46,17 @@ function Ship(state, remoteState, inputFunction, onDraw){
 
 
     //  TODO better interpolation
-    this.state.x = (this.state.x + this.remoteState.x) / 2
-    this.state.y = (this.state.y + this.remoteState.y) / 2
+    this.state.x = (this.state.x + remoteState.x) / 2
+    this.state.y = (this.state.y + remoteState.y) / 2
 
     //this.state.x = this.pla
     /*
     if (!server){
-      this.state.x = this.remoteState.x;
-      this.state.y = this.remoteState.y;
+      this.state.x = remoteState.x;
+      this.state.y = remoteState.y;
     }
     */
-    //console.log (this.remoteState.x - this.state.x);
+    //console.log (remoteState.x - this.state.x);
   }
 
   this.onDraw = onDraw;
@@ -75,8 +80,8 @@ function Sim(){
     }
   }
 
-  this.addShip = function (state, remoteState, inputFunction, onDraw){
-    var ship = new Ship(state, remoteState, inputFunction, onDraw);
+  this.addShip = function (state, uid, inputFunction, onDraw){
+    var ship = new Ship(this, state, uid, inputFunction, onDraw);
     gameObjects.push(ship);
     return ship;
   }
@@ -93,8 +98,9 @@ function Sim(){
 
 function createServerShipInput(id){
   return function(){
-    this.state.angle = this.remoteState.angle;
-    this.state.speed = this.remoteState.speed;
+    var remoteState = this.getRemoteState();
+    this.state.angle = remoteState.angle;
+    this.state.speed = remoteState.speed;
   }
 }
     
