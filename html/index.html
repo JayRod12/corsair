@@ -13,6 +13,15 @@
       <button id="play_button" type="submit">Play</button>
     </form>
     <p>Stuff</p>
+    <!-- Set up socket -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      var socket = io();
+      socket.on('news', function (data) {
+        console.log(data);
+        socket.emit('my other event', { my: 'data' });
+      });
+    </script>
   </body>
 
 
