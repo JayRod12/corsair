@@ -9,7 +9,6 @@ var UUID = require("node-uuid");
 
 
 app.use(express.static(path.resolve(__dirname + '/../public/')));
-  //console.log(path.resolve(__dirname + '/../html/index.html'));
 
 app.get('/', function(req, res) {
   res.sendFile(path.resolve(__dirname + '/../html/index.html'));
@@ -19,9 +18,6 @@ app.get('/game', function(req, res) {
   res.sendFile(path.resolve(__dirname + '/../html/game.html'));
 });
 
-app.get('/client/game.js', function(req, res) {
-  res.sendFile(path.resolve(__dirname + '/../html/client/game.js'));
-});
 
 http.listen(port, function() {
   console.log('Listening on 3000');
@@ -65,9 +61,14 @@ io.on('connection', function(client){
     //  Respond with current server state, instead broadcast regularly?
     client.emit('server_update', players)
   });
+
 });
 
-
+  //function server_update() {
+  //  io.emit('server_update', players);
+  //}
+  //
+  //server_updates = setInterval(server_update, 60);
 //  Temporary basic world representation
 
 const width = 1000;
