@@ -12,13 +12,26 @@ var gameObjects = [];
 var drawObjects = [];
 
 
-//  Called fps times a second, dt is delta time
-function tick(dt){
+var lastTime;
+
+//  Called repeatedly, holds game loop
+//  TODO maybe skip frames if at more than 60fps?
+function tick(currentTime){
+
+  window.requestAnimationFrame(tick);
+
+  if (!lastTime) lastTime = currentTime-1;//  Subtract one to avoid any divide
+                                          //  by zero
+  var dt = currentTime - lastTime;
+  lastTime = currentTime;
+
   //  Updates all game object with their onTick functions
   for (var i = 0; i < gameObjects.length; i++){
     gameObjects[i].onTick(dt);
   }
   draw();
+
+
 }
 
 //  Draws all objects
@@ -123,7 +136,6 @@ var localShipInput = function(){
   if (this.angle < -Math.PI) {
     this.angle += 2*Math.PI;
   }
-  console.log(this.angle);
   this.speed = Math.sqrt(Math.pow(this.x - mouse_x,2) + Math.pow(this.y
       -mouse_y,2)) / speed_norm;
 }
@@ -233,20 +245,14 @@ socket.on('server_update', function (data){
 function init(){
 
   //  Create player
-  var player = new Ship(0, 0, localShipInput);
+  var player = new Ship(500, 500, localShipInput);
   gameObjects.push(player);
   drawObjects.push(player);
 
-  //  Todo measure dt properly every tick to compensate for dropped frames
-  //  const dt = 1/60;
-  const dt = 15;
-  //  Delay between time we update the server
-  //const s_delay = 60;
-  const s_delay = 40;
+  //  Delay between updating the server
+  const s_delay = 1000/40;
 
-  if(typeof game_loop != "undefined") clearInterval(game_loop);
-  //  Third argument is the delay time to pass to tick on each call
-  var game_loop = setInterval(tick, dt, dt);
+  window.requestAnimationFrame(tick);
 
   //  Send information about the local player to the server every s_delay
   if(typeof server_loop != "undefined") clearInterval(server_loop);
@@ -254,4 +260,3 @@ function init(){
 }
 
 init();
-
