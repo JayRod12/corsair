@@ -45,20 +45,24 @@ function draw(){
 
 function shipOnDraw(){
 
+  var width = shipBaseWidth * this.scale;
+  var height = shipBaseHeight * this.scale;
+
+
   //We translate to the origin of our ship
-  ctx.translate(this.x, this.y);
+  ctx.translate(this.state.x, this.state.y);
 
   //We rotate around this origin 
-  ctx.rotate(this.angle);
+  ctx.rotate(this.state.angle);
 
     //We draw the ship, ensuring that we start drawing from the correct location 
   //(the fillRect function draws from the topmost left corner of the rectangle 
   ctx.fillStyle = "brown";
-  ctx.fillRect(-this.width/2, -this.height/2, this.width, this.height);
+  ctx.fillRect(-width/2, -height/2, width, height);
 
   //We undo our transformations for the next draw/calculations
-  ctx.rotate(-this.angle);
-  ctx.translate(-this.x, -this.y);
+  ctx.rotate(-this.state.angle);
+  ctx.translate(-this.state.x, -this.state.y);
 }
 
 //  Store current mouse position
@@ -74,8 +78,8 @@ $( "#canvas" ).mousemove(function(event){
 const speed_norm = 100 * 40;
 
 var localShipInput = function(){
-  var delta_angle = (Math.atan2(mouse_y - this.y, mouse_x - this.x) 
-						- this.angle); 
+  var delta_angle = (Math.atan2(mouse_y - this.state.y, mouse_x - this.state.x) 
+						- this.state.angle); 
 
   //Ensure delta_angle stays within the range [-PI, PI]
   if (delta_angle > Math.PI) {
@@ -92,16 +96,17 @@ var localShipInput = function(){
     delta_angle = -delta_angle_limit;
   }
 
-  this.angle += delta_angle;
+  this.state.angle += delta_angle;
 
-  if (this.angle > Math.PI) {
-	this.angle -= 2*Math.PI;
+  if (this.state.angle > Math.PI) {
+	this.state.angle -= 2*Math.PI;
   } 
 
-  if (this.angle < -Math.PI) {
-    this.angle += 2*Math.PI;
+  if (this.state.angle < -Math.PI) {
+    this.state.angle += 2*Math.PI;
   }
-  this.speed = Math.sqrt(Math.pow(this.x - mouse_x,2) + Math.pow(this.y
+  this.state.speed = Math.sqrt(Math.pow(this.state.x - mouse_x,2) +
+      Math.pow(this.state.y
       -mouse_y,2)) / speed_norm;
 }
 
@@ -175,8 +180,10 @@ socket.on('player_left', function (data){
 //  On update from server
 
 socket.on('server_update', function (data){
+    //console.log(data);
   for (var uid in data){
     var update = data[uid];
+    //console.log(update.state);
     updatePlayer(uid, update.state);
   }
 });

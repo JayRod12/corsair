@@ -67,6 +67,7 @@ io.on('connection', function(client){
   //  On tick
   client.on('client_update', function(data) {
     Game.updatePlayer(client.userid, data.state);
+    console.log(Game.getPlayers());
     //  Respond with current server state, instead broadcast regularly?
     client.emit('server_update', Game.getPlayers())
   });
