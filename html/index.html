@@ -27,17 +27,15 @@
         </h1>
       </div>
       <div>
-        <form>
-          <input id="textField" type="text" name="shipName" placeholder="Ship's Name" onfocus="this.placeholder = ''"
+        <form action="/game" method="get">
+          <input id="textField" type="text" name="shipName" placeholder="Ship's Name""
           onblur="this.placeholder = 'Ship's Name'">
-        </form>
-      </div>
-      <div id="buttonContainer">
-          <form method="get" action="game.html">
+          <div id="buttonContainer">
             <button>
               Play
             </button>
-          </form>
+          </div>
+        </form>
       </div>
     </div>
 
