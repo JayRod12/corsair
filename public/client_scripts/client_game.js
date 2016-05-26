@@ -1,4 +1,5 @@
-const server = false;
+//const server = false;
+server = false;
 
 //  Set up sockets
 var socket = io();

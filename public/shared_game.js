@@ -1,31 +1,34 @@
+var server;
+
 const width = 1000;
 const height = 1000;
 
 const shipBaseWidth = 90;
 const shipBaseHeight = 40;
 
-var playerStates;
+var remoteStates;
 
 //  Inputfunction determines updates to the ship
 //  onDraw can be null
 
-function Ship(state, playerState, inputFunction, onDraw){
+function Ship(state, remoteState, inputFunction, onDraw){
 
   //  Should contain:
   //  x, y, angle, speed
   this.state = state;
 
-  this.playerState = playerState;
+  this.remoteState = remoteState;
 
   this.scale = 1;
 
   this.inputFunction = inputFunction;
 
   this.onTick = function(dt){
+    console.log("shared " + this.remoteState.x);
     //console.log('update');
 
     //  If player has left the server remove their ship from the sim
-    if (typeof this.playerState == "undefined"){
+    if (typeof this.remoteState == "undefined"){
       sim.removeShip(this);
       return;
     }
@@ -38,8 +41,17 @@ function Ship(state, playerState, inputFunction, onDraw){
 
 
     //  TODO better interpolation
-    this.state.x = (this.state.x + this.playerState.x) / 2
-    this.state.y = (this.state.y + this.playerState.y) / 2
+    this.state.x = (this.state.x + this.remoteState.x) / 2
+    this.state.y = (this.state.y + this.remoteState.y) / 2
+
+    //this.state.x = this.pla
+    /*
+    if (!server){
+      this.state.x = this.remoteState.x;
+      this.state.y = this.remoteState.y;
+    }
+    */
+    //console.log (this.remoteState.x - this.state.x);
   }
 
   this.onDraw = onDraw;
@@ -63,8 +75,8 @@ function Sim(){
     }
   }
 
-  this.addShip = function (state, playerState, inputFunction, onDraw){
-    var ship = new Ship(state, playerState, inputFunction, onDraw);
+  this.addShip = function (state, remoteState, inputFunction, onDraw){
+    var ship = new Ship(state, remoteState, inputFunction, onDraw);
     gameObjects.push(ship);
     return ship;
   }
@@ -81,8 +93,8 @@ function Sim(){
 
 function createServerShipInput(id){
   return function(){
-    this.angle = getPlayers()[id].angle;
-    this.speed = getPlayers()[id].speed;
+    this.state.angle = this.remoteState.angle;
+    this.state.speed = this.remoteState.speed;
   }
 }
     
@@ -104,28 +116,34 @@ function CorsairState(sim){
 
 function initializeGame(){
   console.log("game inited");
-  playerStates = {};
+  remoteStates = {};
 }
 
 function newPlayer(id, state) {
-  playerStates[id] = state;
-  console.log('newplayer' + id + " " + playerStates[id].x);
+  remoteStates[id] = state;
+  console.log('newplayer' + id + " " + remoteStates[id].x);
 }
 
 function removePlayer(id) {
-  delete playerStates[id];
+  delete remoteStates[id];
   console.log('remplayer');
 }
 
 function updatePlayer(id, state){
-  if (!playerStates[id]) {
+  if (!remoteStates[id]) {
     console.log('shared_game.js :: update of unknown userid ' + id);
   }
-  playerStates[id] = state;
+//  remoteStates[id] = state;
+  remoteStates[id] = {
+    x: state.x,
+    y: state.y,
+    angle: state.angle,
+    speed: state.speed,
+  }
 }
 
 function getPlayers() {
-  return playerStates;
+  return remoteStates;
 }
 
 

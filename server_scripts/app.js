@@ -49,7 +49,7 @@ io.on('connection', function(client){
 
   Game.newPlayer(client.userid, initState);
   sim.addShip(initState, Game.getPlayers()[client.userid],
-    Game.createServerShipInput);
+    Game.createServerShipInput(client.userid));
 
   //  Tell other users that a new player has joined
   client.broadcast.emit('player_joined', {id : client.userid, state : 
@@ -68,8 +68,9 @@ io.on('connection', function(client){
 
   //  On tick
   client.on('client_update', function(data) {
+    console.log("from client " + data.state.x);
     Game.updatePlayer(client.userid, data.state);
-    console.log(Game.getPlayers());
+    console.log("from client " + Game.getPlayers()[client.userid].x);
     //  Respond with current server state, instead broadcast regularly?
     client.emit('server_update', Game.getPlayers())
   });
