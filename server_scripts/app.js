@@ -20,7 +20,7 @@ app.get('/game', function(req, res) {
 });
 
 
-http.listen(process.env.port || port, function() {
+http.listen(process.env.PORT || port, function() {
   console.log('Listening on 3000');
 });
 
