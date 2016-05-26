@@ -4,7 +4,7 @@
   "description": "CORSAIR",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "app": "node server_scripts/app.js"
   },
   "repository": {
     "type": "git",
@@ -14,6 +14,7 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.13.4",
+    "node-uuid": "^1.4.7",
     "socket.io": "~1.4.6"
   }
 }

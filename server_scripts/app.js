@@ -5,7 +5,8 @@ var app = express();
 var http = require('http').Server(app);
 var path = require('path');
 var io = require('socket.io')(http);
-var UUID = require("node-uuid");
+var UUID = require('node-uuid');
+var Game = require('../shared_game.js');
 
 
 app.use(express.static(path.resolve(__dirname + '/../public/')));
@@ -23,6 +24,7 @@ http.listen(port, function() {
   console.log('Listening on 3000');
 });
 
+Game.initializeGame();
 
 //  On client connection
 io.on('connection', function(client){
@@ -31,18 +33,16 @@ io.on('connection', function(client){
   //  Generate new client id associate with their connection
   client.userid = UUID();
 
-  players[client.userid] = new Player(0,0);
 
-  //  Give client their id and list of players
-  var playerlist = []
+  Game.newPlayer(client.userid);
 
-  client.emit('on_connected', {id : client.userid, //playerIds : playerlist,
-    players : players});
+
+  client.emit('on_connected', {id : client.userid,
+    players : Game.getPlayers});
 
   //  Tell other users that a new player has joined
   client.broadcast.emit('player_joined', {id : client.userid, x : 0, y : 0});
 
-  client.emit('playerlist', playerlist);
 
   //  Log
   console.log('\t socket.io:: player ' + client.userid + ' connected');
@@ -51,34 +51,16 @@ io.on('connection', function(client){
   client.on('disconnect', function () {
     console.log('\t socket.io:: client disconnected ' + client.userid );
     client.broadcast.emit('player_left',  {id : client.userid});
-    delete players[client.userid];
+    Game.deletePlayer(client.userid);
   });
 
   //  On tick
   client.on('client_update', function(data) {
-    players[client.userid] = {x : data.x, y : data.y, speed : data.speed, angle
-    : data.angle};
+    Game.updatePlayer({userid: client.userid, x : data.x, y : data.y, speed : data.speed, angle
+    : data.angle});
     //  Respond with current server state, instead broadcast regularly?
-    client.emit('server_update', players)
+    client.emit('server_update', Game.getPlayers())
   });
 
 });
 
-  //function server_update() {
-  //  io.emit('server_update', players);
-  //}
-  //
-  //server_updates = setInterval(server_update, 60);
-//  Temporary basic world representation
-
-const width = 1000;
-const height = 1000;
-
-var players = {};
-
-function Player(x, y){
-  this.x = x;
-  this.y = y;
-  this.speed = 0;
-  this.angle = 0;
-}
