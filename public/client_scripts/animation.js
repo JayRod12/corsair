@@ -18,7 +18,13 @@ var s = false;
 var d = false;
 
 function init() {
-  camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1000);
+  HEIGHT = 884;
+  WIDTH = 1780;
+
+  console.log(window.innerHeight);
+  console.log(window.innerWidth);
+
+  camera = new THREE.PerspectiveCamera(75, WIDTH / HEIGHT, 1, 1000);
   camera.position.z = 600;
 
   scene = new THREE.Scene();
@@ -27,8 +33,6 @@ function init() {
     alpha: true,
     antialias: true
   });
-  HEIGHT = window.innerHeight;
-  WIDTH = window.innerWidth;
 
   renderer.setSize(WIDTH, HEIGHT);
   renderer.shadowMapEnabled = true;

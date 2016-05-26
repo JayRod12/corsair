@@ -1,3 +1,7 @@
+body {
+  background: black;
+}
+
 #scene{
   position:absolute;
   max-width: 250px;
