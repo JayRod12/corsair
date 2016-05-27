@@ -3,14 +3,13 @@ server = false;
 
 //  Set up sockets
 var socket = io();
-
-var canvas = $("#canvas")[0];
+var canvas = $("#main_canvas")[0];
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
 var ctx = canvas.getContext("2d");
-
 var sim;
-
-
 var lastTime;
+
 
 //  Called repeatedly, holds game loop
 //  TODO maybe skip frames if at more than 60fps?
@@ -38,7 +37,9 @@ function draw(){
   //fixed object to ensure no hickery dickery 
   
   ctx.fillStyle = "white";
-  ctx.fillRect(0, 0, 50, 60);
+  ctx.fillRect(800, 400, 50, 60);
+  ctx.fillRect(500, 500, 50, 60);
+  ctx.fillRect(30, 50, 50, 60);
   ctx.fillRect(400, 100, 120, 60);
 
 }
@@ -70,12 +71,12 @@ var mouse_x = 0;
 var mouse_y = 0;
 
 //  Update mouse position on movement
-$( "#canvas" ).mousemove(function(event){
-  mouse_x = event.clientX;
-  mouse_y = event.clientY;
+$( "#main_canvas" ).mousemove(function(event){
+  mouse_x = event.offsetX;
+  mouse_y = event.offsetY;
 });
 
-const speed_norm = 100 * 40;
+const speed_norm = 100 * 5;
 
 var localShipInput = function(){
   var delta_angle = (Math.atan2(mouse_y - this.state.y, mouse_x - this.state.x) 
@@ -89,11 +90,11 @@ var localShipInput = function(){
   if(delta_angle < -Math.PI) {
   delta_angle = 2*Math.PI + delta_angle;
   }
-  var delta_angle_limit = Math.PI/120; 
+  var delta_angle_limit = Math.PI/90;
   if (delta_angle > delta_angle_limit) {
     delta_angle = delta_angle_limit;
   } else if (delta_angle < -delta_angle_limit) {
-    delta_angle = -delta_angle_limit;
+    delta_angle = -delta_angle_limi9t;
   }
 
   this.state.angle += delta_angle;
