@@ -3,14 +3,13 @@ server = false;
 
 //  Set up sockets
 var socket = io();
-
-var canvas = $("#canvas")[0];
+var canvas = $("#main_canvas")[0];
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
 var ctx = canvas.getContext("2d");
-
 var sim;
-
-
 var lastTime;
+
 
 //  Called repeatedly, holds game loop
 //  TODO maybe skip frames if at more than 60fps?
@@ -38,31 +37,34 @@ function draw(){
   //fixed object to ensure no hickery dickery 
   
   ctx.fillStyle = "white";
-  ctx.fillRect(0, 0, 50, 60);
+  ctx.fillRect(800, 400, 50, 60);
+  ctx.fillRect(500, 500, 50, 60);
+  ctx.fillRect(30, 50, 50, 60);
   ctx.fillRect(400, 100, 120, 60);
 
 }
 
-function shipOnDraw(){
+function createShipOnDraw(colour){
+  return function(){
+    var width = shipBaseWidth * this.scale;
+    var height = shipBaseHeight * this.scale;
 
-  var width = shipBaseWidth * this.scale;
-  var height = shipBaseHeight * this.scale;
 
+    //We translate to the origin of our ship
+    ctx.translate(this.state.x, this.state.y);
 
-  //We translate to the origin of our ship
-  ctx.translate(this.state.x, this.state.y);
+    //We rotate around this origin 
+    ctx.rotate(this.state.angle);
 
-  //We rotate around this origin 
-  ctx.rotate(this.state.angle);
+      //We draw the ship, ensuring that we start drawing from the correct location 
+    //(the fillRect function draws from the topmost left corner of the rectangle 
+    ctx.fillStyle = colour;
+    ctx.fillRect(-width/2, -height/2, width, height);
 
-    //We draw the ship, ensuring that we start drawing from the correct location 
-  //(the fillRect function draws from the topmost left corner of the rectangle 
-  ctx.fillStyle = "brown";
-  ctx.fillRect(-width/2, -height/2, width, height);
-
-  //We undo our transformations for the next draw/calculations
-  ctx.rotate(-this.state.angle);
-  ctx.translate(-this.state.x, -this.state.y);
+    //We undo our transformations for the next draw/calculations
+    ctx.rotate(-this.state.angle);
+    ctx.translate(-this.state.x, -this.state.y);
+  }
 }
 
 //  Store current mouse position
@@ -70,12 +72,12 @@ var mouse_x = 0;
 var mouse_y = 0;
 
 //  Update mouse position on movement
-$( "#canvas" ).mousemove(function(event){
-  mouse_x = event.clientX;
-  mouse_y = event.clientY;
+$( "#main_canvas" ).mousemove(function(event){
+  mouse_x = event.offsetX;
+  mouse_y = event.offsetY;
 });
 
-const speed_norm = 100 * 40;
+const speed_norm = 100 * 5;
 
 var localShipInput = function(){
   var delta_angle = (Math.atan2(mouse_y - this.state.y, mouse_x - this.state.x) 
@@ -89,7 +91,7 @@ var localShipInput = function(){
   if(delta_angle < -Math.PI) {
   delta_angle = 2*Math.PI + delta_angle;
   }
-  var delta_angle_limit = Math.PI/120; 
+  var delta_angle_limit = Math.PI/90;
   if (delta_angle > delta_angle_limit) {
     delta_angle = delta_angle_limit;
   } else if (delta_angle < -delta_angle_limit) {
@@ -138,7 +140,8 @@ socket.on('on_connected', function (data){
 
 
   newPlayer(our_id, data.state);
-  var player = sim.addShip(data.state, our_id, localShipInput, shipOnDraw);
+  var player = sim.addShip(data.state, our_id, localShipInput,
+    createShipOnDraw("black"));
 
   //  Set our world up in the config described by the server
 
@@ -169,7 +172,7 @@ function addServerShip(userid, state){
   newPlayer(userid, state);
   sim.addShip(state, userid, 
       createServerShipInput(userid),
-        shipOnDraw);
+        createShipOnDraw("brown"));
 
 }
 
