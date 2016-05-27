@@ -128,11 +128,15 @@ var our_id;
 //  On connecting to the server
 
 socket.on('on_connected', function (data){
-  // Initialize Grid
-  initializeGrid();
+
+  initializeGame();
+  sim = new Sim(data.meta.gridNumber, data.meta.cellWidth, data.meta.cellHeight,
+    data.meta.activeCells);
 
   our_id = data.id;
   console.log("Our id is " + our_id);
+
+
   newPlayer(our_id, data.state);
   var player = sim.addShip(data.state, our_id, localShipInput, shipOnDraw);
 
@@ -149,6 +153,7 @@ socket.on('on_connected', function (data){
   if(typeof server_loop != "undefined") clearInterval(server_loop);
   var server_loop = setInterval(client_update, s_delay, player);
 
+  window.requestAnimationFrame(clientTick);
 });
 
 //  Update the server about the player's position
@@ -192,16 +197,3 @@ socket.on('server_update', function (data){
     updatePlayer(uid, update);
   }
 });
-
-
-function init(){
-
-  initializeGame();
-
-  sim = new Sim();
-
-  window.requestAnimationFrame(clientTick);
-
-}
-
-init();

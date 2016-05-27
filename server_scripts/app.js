@@ -1,5 +1,9 @@
+console.log("Starting...");
+
 const port = 3000;
 const server = true;
+
+var init = false;
 
 var express = require('express');
 var app = express();
@@ -43,9 +47,16 @@ io.on('connection', function(client){
     speed: 0
   };
 
+  var metadata = {
+    gridNumber: gridNumber,
+    cellWidth: cellWidth,
+    cellHeight: cellHeight,
+    //  Temp
+    activeCells: allCells
+  }
 
   client.emit('on_connected', {id : client.userid,
-    players : Game.getPlayers(), state: initState});
+    players : Game.getPlayers(), state: initState, meta: metadata});
 
   Game.newPlayer(client.userid, initState);
   sim.addShip(initState, client.userid,
@@ -59,9 +70,11 @@ io.on('connection', function(client){
 
   //  If we are not simulating we now have at least one player so we should
   //  begin simulating
-  if (typeof sim_loop == "undefined"){
+  if (typeof sim_loop == "undefined" && init){
     console.log("starting simulation");
-    sim_loop = setInterval(sim.tick, sim_t, sim_t);
+    console.log(sim.activeCells.length);
+    sim_loop = setInterval(sim_loop_func, sim_t, sim_t);
+    //sim_loop = setInterval(sim.tick, sim_t, sim_t);
   }
 
 
@@ -94,10 +107,26 @@ io.on('connection', function(client){
 
 });
 
+var sim_loop_func = function(dt){
+  //console.log(sim.activeCells);
+  sim.tick(dt);
+}
+
 
 Game.initializeGame();
 
-var sim = new Game.Sim();
+const gridNumber = 5;
+const cellWidth  = 200;
+const cellHeight = 200;
+var allCells = [];
+for (var y = 0; y < gridNumber; y++){
+  for (var x = 0; x < gridNumber; x++){
+    allCells.push({x:x, y:y});
+  }
+}
+
+var sim = new Game.Sim(gridNumber, cellWidth, cellHeight, allCells);
 var sim_t = 1000 / 60;
 var sim_loop;
 var playerCount = 0;
+var init = true;
