@@ -1,5 +1,10 @@
 language: node_js
 node_js:
-  - "5"
-  - "4"
-  - "4.4.4"
+- '5'
+- '4'
+- 4.4.4
+deploy:
+  provider: heroku
+  api_key:
+    secure: WS/eybbLH89XIyFIYRmTkatby/wFvNvaVDTJX4z1DYgIv8wjTGHQBjgRklHWewwwZK6MueNYkGRzZlRZ+0oKG4AVzJsHsNc9r+YxZb94gNAq2SUV0NjOG8iqfDMu1pW8bzHiYdEaPmZh/mEEtF601TUkfOmHZNNV0+kQigoWsBgfi6H3byskeBg76TTHn3eyKEdZ9bSbqx7qyKw/F085CNSQUOfnqHFY+eqzM1L1KvMgRyvEJdYs5Hk0+bHfXEYlFTZvSRxCwt4d8OXFpbq7B4jLO78DV9GpyG143F4MRQOi9FBbFRcQd/8N+Q7jFqEa9i+sQIwTPixzW1CNTgrEMl8e+sWJIKdLE51HC08N48xZaBpcnKmfZcRtmRJBmdkCLx1P7dEVu2WVJgITFhPYvWIfCMIozVXPK3kwLQ8P7QYVt5h6KUK8UQ1kIOOt3i+ztA2NtQ3RMR9AbEjJxOG66+zgsXgiqkdld7OswbPLmiXH4OxQYjukAYv+G0pj53nHoUNuXR7OxttjpuL8UwsbEQH8254IfbQWtGg4tI7DH+G5WSP2ZqZzQ9z80V9vA2z5xApTWP9m2/jrdWrpEtIM1neFNaFsx2cRGmfhsZwHHamXaUDkemY/dJfL8hIV2mHIzA1m7xpoNaw6AOFxn7iA5ghY7XnM4TPgQYB/ZqQZEIQ=
+  app: corsair
