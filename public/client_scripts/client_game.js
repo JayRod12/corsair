@@ -43,26 +43,27 @@ function draw(){
 
 }
 
-function shipOnDraw(){
+function createShipOnDraw(colour){
+  return function(){
+    var width = shipBaseWidth * this.scale;
+    var height = shipBaseHeight * this.scale;
 
-  var width = shipBaseWidth * this.scale;
-  var height = shipBaseHeight * this.scale;
 
+    //We translate to the origin of our ship
+    ctx.translate(this.state.x, this.state.y);
 
-  //We translate to the origin of our ship
-  ctx.translate(this.state.x, this.state.y);
+    //We rotate around this origin 
+    ctx.rotate(this.state.angle);
 
-  //We rotate around this origin 
-  ctx.rotate(this.state.angle);
+      //We draw the ship, ensuring that we start drawing from the correct location 
+    //(the fillRect function draws from the topmost left corner of the rectangle 
+    ctx.fillStyle = colour;
+    ctx.fillRect(-width/2, -height/2, width, height);
 
-    //We draw the ship, ensuring that we start drawing from the correct location 
-  //(the fillRect function draws from the topmost left corner of the rectangle 
-  ctx.fillStyle = "brown";
-  ctx.fillRect(-width/2, -height/2, width, height);
-
-  //We undo our transformations for the next draw/calculations
-  ctx.rotate(-this.state.angle);
-  ctx.translate(-this.state.x, -this.state.y);
+    //We undo our transformations for the next draw/calculations
+    ctx.rotate(-this.state.angle);
+    ctx.translate(-this.state.x, -this.state.y);
+  }
 }
 
 //  Store current mouse position
@@ -134,7 +135,8 @@ socket.on('on_connected', function (data){
   our_id = data.id;
   console.log("Our id is " + our_id);
   newPlayer(our_id, data.state);
-  var player = sim.addShip(data.state, our_id, localShipInput, shipOnDraw);
+  var player = sim.addShip(data.state, our_id, localShipInput,
+    createShipOnDraw("black"));
 
   //  Set our world up in the config described by the server
 
@@ -164,7 +166,7 @@ function addServerShip(userid, state){
   newPlayer(userid, state);
   sim.addShip(state, userid, 
       createServerShipInput(userid),
-        shipOnDraw);
+        createShipOnDraw("brown"));
 
 }
 
