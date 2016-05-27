@@ -95,7 +95,7 @@ var localShipInput = function(){
   if (delta_angle > delta_angle_limit) {
     delta_angle = delta_angle_limit;
   } else if (delta_angle < -delta_angle_limit) {
-    delta_angle = -delta_angle_limi9t;
+    delta_angle = -delta_angle_limit;
   }
 
   this.state.angle += delta_angle;
