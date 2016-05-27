@@ -93,10 +93,18 @@ function Cell(x, y, gridNumber) {
     }
   }
 
-  this.draw = function(dt){
+  this.draw = function(){
     for (var i = 0; i < this.gameObjects.length; i++){
       if (typeof this.gameObjects[i].onDraw != "undefined"){
         this.gameObjects[i].onDraw();
+      }
+    }
+  }
+
+  this.drawViewport = function(){
+    for (var i = 0; i < this.gameObjects.length; i++){
+      if (typeof this.gameObjects[i].onViewportDraw != "undefined"){
+        this.gameObjects[i].onViewportDraw();
       }
     }
   }
@@ -151,6 +159,21 @@ function Sim(gridNumber, cellWidth, cellHeight, activeCells){
     return this.grid[x_coord][y_coord];
   };
 
+  //  Given a function f of a cell and some auxilary data,
+  //  apply that function to all cells in a given area
+  this.applyToCells = function(f, aux, x, y, width, height){
+    var x_coord = Math.floor(x / this.cellWidth);
+    var y_coord = Math.floor(y / this.cellHeight);
+    var x_cellcount = Math.floor(width / this.cellWidth);
+    var y_cellcount = Math.floor(height / this.cellWidth);
+    for (var y = y_coord; y < y_cellcount; y++){
+      for (var x = x_coord; x < x_cellcount; x++){
+        f(this.grid[x_coord][y_coord], aux);
+      }
+    }
+  }
+
+
   this.tick = function(dt){
     for (var i = 0; i < this.activeCells.length; i++){
       var x = this.activeCells[i].x;
@@ -160,6 +183,12 @@ function Sim(gridNumber, cellWidth, cellHeight, activeCells){
   };
 
   this.draw = function(dt){
+    ctx.fillStyle = "green";
+    ctx.fillRect(10, 10, 20, 20);
+    ctx.fillRect(610, 10, 20, 20);
+    ctx.fillRect(410, 210, 20, 20);
+    ctx.fillRect(110, 610, 20, 20);
+    ctx.fillRect(810, 510, 20, 20);
     for (var i = 0; i < this.activeCells.length; i++){
       var x = this.activeCells[i].x;
       var y = this.activeCells[i].y;

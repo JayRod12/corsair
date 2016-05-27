@@ -8,8 +8,45 @@ var canvas = $("#main_canvas")[0];
     canvas.height = window.innerHeight;
 var ctx = canvas.getContext("2d");
 var sim;
+var viewport;
 var lastTime;
+var player;
 
+
+//  Viewport maps world area to canvas for printing
+function Viewport(sim, x, y, baseWidth, baseHeight, scale){
+
+  this.sim = sim;
+
+  this.x = x;
+  this.y = y;
+  this.baseHeight = baseHeight / baseWidth;
+  this.baseWidth = 1;
+  this.scale = scale;
+
+  this.getWidth = function(){
+    return this.baseWidth * scale;
+  }
+
+  this.getHeight = function(){
+    return this.baseWidth * scale;
+  }
+
+  this.draw = function(ctx, canvaswidth, canvasheight){
+
+
+    // Scale
+    ctx.scale(scale, scale);
+    ctx.translate(-this.x, -this.y);
+
+    sim.draw();
+
+    // Inverse scale
+    ctx.translate(this.x, this.y); 
+    ctx.scale(1/scale, 1/scale);
+
+  }
+}
 
 //  Called repeatedly, holds game loop
 //  TODO maybe skip frames if at more than 60fps?
@@ -23,24 +60,32 @@ function clientTick(currentTime){
   lastTime = currentTime;
 
   sim.tick(dt);
+
+
   draw();
 }
 
 //  Draws all objects
 function draw(){
+  viewport.x = player.state.x - canvas.width / (2 * viewport.scale);
+  viewport.y = player.state.y - canvas.height / (2 * viewport.scale);
+
   //  Fastest way to clear entire canvas
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.fillStyle = "blue";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  sim.draw();
+  //sim.draw();
+  viewport.draw(ctx, canvas.width, canvas.height);
   //fixed object to ensure no hickery dickery 
   
+  /*
   ctx.fillStyle = "white";
   ctx.fillRect(800, 400, 50, 60);
   ctx.fillRect(500, 500, 50, 60);
   ctx.fillRect(30, 50, 50, 60);
   ctx.fillRect(400, 100, 120, 60);
+  */
 
 }
 
@@ -67,14 +112,43 @@ function createShipOnDraw(colour){
   }
 }
 
+function createShipOnViewportDraw(colour){
+  return function(translation, scale){
+    var width = shipBaseWidth * this.scale;
+    var height = shipBaseHeight * this.scale;
+
+    //We translate to the origin of our ship
+    ctx.translate(this.state.x, this.state.y);
+
+    //We rotate around this origin 
+    ctx.rotate(this.state.angle);
+
+      //We draw the ship, ensuring that we start drawing from the correct location 
+    //(the fillRect function draws from the topmost left corner of the rectangle 
+    ctx.fillStyle = colour;
+    ctx.fillRect(-width/2, -height/2, width, height);
+
+    //We undo our transformations for the next draw/calculations
+    ctx.rotate(-this.state.angle);
+    ctx.translate(-this.state.x, -this.state.y);
+  }
+}
+
 //  Store current mouse position
 var mouse_x = 0;
 var mouse_y = 0;
 
 //  Update mouse position on movement
 $( "#main_canvas" ).mousemove(function(event){
-  mouse_x = event.offsetX;
-  mouse_y = event.offsetY;
+  //  TEMP
+  var scale = viewport.scale;
+  mouse_x = (event.offsetX/scale + viewport.x);
+  mouse_y = (event.offsetY/scale + viewport.y);
+
+  console.log('player.x: ' + player.state.x);
+  console.log('mouseX: ' + mouse_x);
+  console.log('viewportx: ' + viewport.x);
+  console.log('offsetx: ' + event.offsetX);
 });
 
 const speed_norm = 100 * 5;
@@ -135,12 +209,15 @@ socket.on('on_connected', function (data){
   sim = new Sim(data.meta.gridNumber, data.meta.cellWidth, data.meta.cellHeight,
     data.meta.activeCells);
 
+  //  Using 16:9 aspect ratio
+  viewport = new Viewport(sim, 0, 0, 1.6, 0.9, 2);
+
   our_id = data.id;
   console.log("Our id is " + our_id);
 
 
   newPlayer(our_id, data.state);
-  var player = sim.addShip(data.state, our_id, localShipInput,
+  player = sim.addShip(data.state, our_id, localShipInput,
     createShipOnDraw("black"));
 
   //  Set our world up in the config described by the server
