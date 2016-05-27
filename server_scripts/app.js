@@ -55,15 +55,34 @@ io.on('connection', function(client){
   client.broadcast.emit('player_joined', {id : client.userid, state : 
     initState});
 
+  playerCount += 1;
+
+  //  If we are not simulating we now have at least one player so we should
+  //  begin simulating
+  if (typeof sim_loop == "undefined"){
+    console.log("starting simulation");
+    sim_loop = setInterval(sim.tick, sim_t, sim_t);
+  }
+
 
   //  Log
-  console.log('\t socket.io:: player ' + client.userid + ' connected');
+  console.log('\t socket.io:: player ' + client.userid + ' connected, ' +
+      playerCount + ' players');
 
   //  On client disconnect
   client.on('disconnect', function () {
-    console.log('\t socket.io:: client disconnected ' + client.userid );
+
+    console.log('\t socket.io:: client disconnected ' + client.userid + '  ' +
+      playerCount + ' players');
     client.broadcast.emit('player_left',  {id : client.userid});
     Game.removePlayer(client.userid);
+    playerCount -= 1;
+
+    //  Stop simulating if noone is connected
+    if (playerCount < 1){
+      console.log("stopping simulation");
+      clearInterval(sim_loop);
+    }
   });
 
   //  On tick
@@ -80,4 +99,5 @@ Game.initializeGame();
 
 var sim = new Game.Sim();
 var sim_t = 1000 / 60;
-var sim_loop = setInterval(sim.tick, sim_t, sim_t);
+var sim_loop;
+var playerCount = 0;
