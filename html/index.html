@@ -8,6 +8,11 @@
   </head>
 
   <body>
+      <form action="/highScores" method="post">
+        <button id="trophyButton"><img id="trophyImage" 
+          src="media/trophy.png" alt="Hall of Fame"></button>
+      </form>
+
     <!--ANIMATION-->
     <div id="titleContainer">
       <div id="scene"></div>
@@ -33,7 +38,7 @@
           <input id="textField" type="text" name="shipName" placeholder="Ship's Name"
           onblur="this.placeholder = 'Ship's Name'">
           <div id="buttonContainer">
-            <button>
+            <button id="playButton">
               Play
             </button>
           </div>

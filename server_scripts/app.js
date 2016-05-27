@@ -24,6 +24,14 @@ app.post('/game', function(req, res) {
   res.sendFile(path.resolve(__dirname + '/../html/game.html'));
 });
 
+app.post('/highScores', function(req, res) {
+  res.sendFile(path.resolve(__dirname + '/../html/highScores.html'));
+});
+
+app.post('/index', function(req, res) {
+  res.sendFile(path.resolve(__dirname + '/../html/index.html'));
+});
+
 
 http.listen(process.env.PORT || port, function() {
   console.log('Listening on 3000');

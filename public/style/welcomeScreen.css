@@ -8,6 +8,25 @@ body {
   max-height: 100px;
 }
 
+
+#trophyButton {
+  padding: 0;
+  border: none;
+  background: none;
+}
+
+#trophyImage{
+  height: 80px;  
+  width: 80px;
+  opacity: 0.4;
+}
+ 
+ 
+#trophyImage:hover {  
+   opacity: 1;
+}  
+
+
 #buttonContainer {
   text-align: center;
 }
@@ -33,7 +52,7 @@ body {
   outline: none;
 }
 
-button {
+#playButton {
   position: relative;
   top: 40px;
   left: 8px;
@@ -56,7 +75,7 @@ button {
   border-style: none;
 }
 
-button:hover {
+#playButton:hover {
   background: #3cb0fd;
   background-image: -webkit-linear-gradient(top, #3cb0fd, #3498db);
   background-image: -moz-linear-gradient(top, #3cb0fd, #3498db);
