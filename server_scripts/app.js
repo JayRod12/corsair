@@ -8,15 +8,19 @@ var path = require('path');
 var io = require('socket.io')(http);
 var UUID = require('node-uuid');
 var Game = require('../public/shared_game.js');
+var bodyParser = require('body-parser');
 
 
 app.use(express.static(path.resolve(__dirname + '/../public/')));
+app.use(bodyParser.urlencoded({extended: true}));
 
 app.get('/', function(req, res) {
   res.sendFile(path.resolve(__dirname + '/../html/index.html'));
 });
 
-app.get('/game', function(req, res) {
+app.post('/game', function(req, res) {
+  // TODO: use name variable
+  var name = req.body.shipName;
   res.sendFile(path.resolve(__dirname + '/../html/game.html'));
 });
 
