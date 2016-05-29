@@ -109,6 +109,13 @@ function createShipOnDraw(colour){
     //We undo our transformations for the next draw/calculations
     ctx.rotate(-this.state.angle);
     ctx.translate(-this.state.x, -this.state.y);
+
+    ctx.fillStyle = "white";
+    ctx.font = "5px Courier";
+    var text = localStorage['nickname'] == "" ? "Corsair" : localStorage['nickname'];
+    var metrics = ctx.measureText(text);
+    var textWidth = metrics.width;
+    ctx.fillText(text, this.state.x - textWidth/2, this.state.y);
   }
 }
 

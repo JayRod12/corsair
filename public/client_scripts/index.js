@@ -5,9 +5,13 @@ $(document).ready(function () {
 
      $('#textField').keydown(function(event) {
         if (event.keyCode == 13) {
-            this.form.submit();
-            return false;
+          $('#playButton').click();
          }
-    });
+     });
 
+     $('#playButton').click(function(event) {
+       localStorage['nickname'] = $('#textField').val(); 
+       this.form.submit();
+       return false;
+     });
 });
