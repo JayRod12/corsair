@@ -89,11 +89,13 @@ io.on('connection', function(client){
   //  On client disconnect
   client.on('disconnect', function () {
 
+    // Decrement count
+    playerCount -= 1;
+
     console.log('\t socket.io:: client disconnected ' + client.userid + '  ' +
       playerCount + ' players');
     client.broadcast.emit('player_left',  {id : client.userid});
     Game.removePlayer(client.userid);
-    playerCount -= 1;
 
     //  Stop simulating if noone is connected
     if (playerCount < 1){

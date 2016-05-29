@@ -241,6 +241,9 @@ socket.on('on_connected', function (data){
   var server_loop = setInterval(client_update, s_delay, player);
 
   window.requestAnimationFrame(clientTick);
+  $('document').unload(function() {
+    socket.emit('disconnect');
+  });
 });
 
 //  Update the server about the player's position
