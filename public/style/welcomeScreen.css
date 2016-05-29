@@ -93,7 +93,7 @@ body {
 }
 
 div div canvas {
-  display: none;
+  /*display: none;*/
   max-width: 850px;
   max-height: 500px;
   position: relative;
