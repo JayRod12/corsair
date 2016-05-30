@@ -11,6 +11,7 @@ var sim;
 var viewport;
 var lastTime;
 var player;
+var meta;
 
 
 //  Viewport maps world area to canvas for printing
@@ -39,7 +40,7 @@ function Viewport(sim, x, y, baseWidth, baseHeight, scale){
     ctx.scale(scale, scale);
     ctx.translate(-this.x, -this.y);
 
-    sim.draw();
+    sim.draw(ctx);
 
     // Inverse scale
     ctx.translate(this.x, this.y); 
@@ -65,6 +66,19 @@ function clientTick(currentTime){
   draw();
 }
 
+const backColor = "rgb(104, 104, 104)";
+const seaColor = "rgb(102, 204, 255)";
+
+function drawBehindGrid(ctx){
+  ctx.fillStyle = backColor;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+}
+function drawCellBackground(cx, cy, ctx){
+  ctx.fillStyle = seaColor;
+  ctx.fillRect(cx*meta.cellWidth, cy*meta.cellHeight, meta.cellWidth+2,
+      meta.cellHeight+2);
+}
+
 //  Draws all objects
 function draw(){
   viewport.x = player.state.x - canvas.width / (2 * viewport.scale);
@@ -72,20 +86,10 @@ function draw(){
 
   //  Fastest way to clear entire canvas
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.fillStyle = "blue";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  //sim.draw();
+  drawBehindGrid(ctx);
+
   viewport.draw(ctx, canvas.width, canvas.height);
-  //fixed object to ensure no hickery dickery 
-  
-  /*
-  ctx.fillStyle = "white";
-  ctx.fillRect(800, 400, 50, 60);
-  ctx.fillRect(500, 500, 50, 60);
-  ctx.fillRect(30, 50, 50, 60);
-  ctx.fillRect(400, 100, 120, 60);
-  */
 
 }
 
@@ -206,8 +210,9 @@ var our_id;
 socket.on('on_connected', function (data){
 
   initializeGame();
-  sim = new Sim(data.meta.gridNumber, data.meta.cellWidth, data.meta.cellHeight,
-    data.meta.activeCells);
+  meta = data.meta;
+  sim = new Sim(meta.gridNumber, meta.cellWidth, meta.cellHeight,
+    meta.activeCells);
 
   //  Using 16:9 aspect ratio
   viewport = new Viewport(sim, 0, 0, 1.6, 0.9, 2);

@@ -182,7 +182,7 @@ function Sim(gridNumber, cellWidth, cellHeight, activeCells){
     }
   };
 
-  this.draw = function(dt){
+  this.draw = function(ctx){
     ctx.fillStyle = "green";
     ctx.fillRect(10, 10, 20, 20);
     ctx.fillRect(610, 10, 20, 20);
@@ -192,6 +192,7 @@ function Sim(gridNumber, cellWidth, cellHeight, activeCells){
     for (var i = 0; i < this.activeCells.length; i++){
       var x = this.activeCells[i].x;
       var y = this.activeCells[i].y;
+      drawCellBackground(x, y, ctx);
       this.grid[x][y].draw();
     }
   };
