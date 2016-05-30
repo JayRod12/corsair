@@ -196,7 +196,7 @@ function Sim(gridNumber, cellWidth, cellHeight, activeCells){
       console.log('Initialising ' + i + ', ' + j);
     }
   }
-  /*
+
   this.activateCell = function (x,y){
     this.activeCells.push({x:x, y:y});
   };
@@ -209,7 +209,6 @@ function Sim(gridNumber, cellWidth, cellHeight, activeCells){
       }
     }
   };
-  */
 
   // Get Cell given pixel position
   this.coordinateToCell = function(x, y) {
