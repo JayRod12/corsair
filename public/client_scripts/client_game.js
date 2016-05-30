@@ -208,7 +208,7 @@ socket.on('on_connect', function (data){
   var our_name = (localStorage['nickname'] == "") ? "Corsair" : localStorage['nickname'];
   newPlayer(our_id, our_name, data.state);
   player = sim.addShip(data.state, our_id, localShipInput,
-    createShipOnDraw("black", our_name, drawCannonBalls));
+    createShipOnDraw("black", our_name), drawCannonBalls);
 
   //  Set our world up in the config described by the server
 
@@ -251,7 +251,7 @@ function addServerShip(userid, name, state){
   newPlayer(userid, name, state);
   sim.addShip(state, userid, 
       createServerShipInput(userid),
-        createShipOnDraw("brown", name));
+        createShipOnDraw("brown", name), drawCannonBalls);
 
 }
 
