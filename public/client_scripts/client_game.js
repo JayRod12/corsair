@@ -136,6 +136,61 @@ $( "#main_canvas" ).mousemove(function(event){
   mouse_y = (event.offsetY/scale + viewport.y);
 });
 
+
+//  Disable right click context menu
+
+$(document).ready(function(){ 
+  document.oncontextmenu = function() {return false;};
+  $(document).mousedown(function(e){ 
+    if( e.button == 2 ) { 
+      return false; 
+    }
+  return true;
+  });
+});
+
+//  Detect mouseclicks
+$( "#main_canvas" ).mousedown(function(event){
+
+  switch(event.which){
+
+    case 1:
+      //  Left click
+      player.cannon.onShoot(1);
+      return false;
+    case 3:
+      //  Right click
+      player.cannon.onShoot(-1);
+      return false;
+
+    return true;
+
+  }
+});
+
+/*
+$( "#target" ).click(function() {
+  alert( "Handler for .click() called." );
+});
+
+$(document).ready(function(){ 
+  document.oncontextmenu = function() {return false;};
+
+  $(document).mousedown(function(e){ 
+    if( e.button == 1 ) {
+      player.cannon.onShoot(1);
+      return false;
+    }
+    if( e.button == 2 ) { 
+      player.cannon.onShoot(1);
+      return false; 
+    } 
+    return true; 
+  }); 
+});
+*/
+
+
 $("body").keyup(function(event) {
   // Press space bar == 32
   if (event.keyCode == 32) {

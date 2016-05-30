@@ -61,13 +61,16 @@ function Cannon(ship, onDraw) {
   this.ballSpeed = 1;
   this.ship = ship;
   this.level = 1;
-  this.onShoot = function() {
-    var ballR = new CannonBall(this.ship, 1, this.ballSpeed, onDraw, this.level);
-    var ballL = new CannonBall(this.ship, -1, this.ballSpeed, onDraw, this.level);
+  this.onShoot = function(side) {
+    console.log('Ship direction: ' + this.ship.state.angle);
+    //var ballR = new CannonBall(this.ship, 1, this.ballSpeed, onDraw, this.level);
+    //var ballL = new CannonBall(this.ship, -1, this.ballSpeed, onDraw, this.level);
+    var ball = new CannonBall(this.ship, side, this.ballSpeed, onDraw, this.level);
     var cell = this.ship.sim.coordinateToCell(this.ship.state.x, this.ship.state.y)
 
-    cell.gameObjects.push(ballR);
-    cell.gameObjects.push(ballL);
+    //cell.gameObjects.push(ballR);
+    //cell.gameObjects.push(ballL);
+    cell.gameObjects.push(ball);
   }
 }
 
