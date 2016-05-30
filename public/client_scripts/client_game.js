@@ -11,6 +11,7 @@ var sim;
 var viewport;
 var lastTime;
 var player;
+var meta;
 
 
 //  Viewport maps world area to canvas for printing
@@ -39,7 +40,7 @@ function Viewport(sim, x, y, baseWidth, baseHeight, scale){
     ctx.scale(scale, scale);
     ctx.translate(-this.x, -this.y);
 
-    sim.draw();
+    sim.draw(ctx);
 
     // Inverse scale
     ctx.translate(this.x, this.y); 
@@ -65,6 +66,19 @@ function clientTick(currentTime){
   draw();
 }
 
+const backColor = "rgb(104, 104, 104)";
+const seaColor = "rgb(102, 204, 255)";
+
+function drawBehindGrid(ctx){
+  ctx.fillStyle = backColor;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+}
+function drawCellBackground(cx, cy, ctx){
+  ctx.fillStyle = seaColor;
+  ctx.fillRect(cx*meta.cellWidth, cy*meta.cellHeight, meta.cellWidth+2,
+      meta.cellHeight+2);
+}
+
 //  Draws all objects
 function draw(){
   viewport.x = player.state.x - canvas.width / (2 * viewport.scale);
@@ -72,20 +86,10 @@ function draw(){
 
   //  Fastest way to clear entire canvas
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.fillStyle = "blue";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  //sim.draw();
+  drawBehindGrid(ctx);
+
   viewport.draw(ctx, canvas.width, canvas.height);
-  //fixed object to ensure no hickery dickery 
-  
-  /*
-  ctx.fillStyle = "white";
-  ctx.fillRect(800, 400, 50, 60);
-  ctx.fillRect(500, 500, 50, 60);
-  ctx.fillRect(30, 50, 50, 60);
-  ctx.fillRect(400, 100, 120, 60);
-  */
 
 }
 
@@ -109,6 +113,14 @@ function createShipOnDraw(colour){
     //We undo our transformations for the next draw/calculations
     ctx.rotate(-this.state.angle);
     ctx.translate(-this.state.x, -this.state.y);
+
+    // Ship name
+    ctx.fillStyle = "white";
+    ctx.font = "5px Courier";
+    var text = localStorage['nickname'] == "" ? "Corsair" : localStorage['nickname'];
+    var metrics = ctx.measureText(text);
+    var textWidth = metrics.width;
+    ctx.fillText(text, this.state.x - textWidth/2, this.state.y);
   }
 }
 
@@ -144,11 +156,13 @@ $( "#main_canvas" ).mousemove(function(event){
   var scale = viewport.scale;
   mouse_x = (event.offsetX/scale + viewport.x);
   mouse_y = (event.offsetY/scale + viewport.y);
+});
 
-  console.log('player.x: ' + player.state.x);
-  console.log('mouseX: ' + mouse_x);
-  console.log('viewportx: ' + viewport.x);
-  console.log('offsetx: ' + event.offsetX);
+$("body").keyup(function(event) {
+  // Press space bar == 32
+  if (event.keyCode == 32) {
+    player.cannon.onShoot();
+  }
 });
 
 const speed_norm = 100 * 5;
@@ -186,17 +200,14 @@ var localShipInput = function(){
       -mouse_y,2)) / speed_norm;
 }
 
-//  Creates a serverInput function that is a closure using the given id
-//  The output can be passed into a new Ship
-
-/*
-function createServerShipInput(id){
-  return function(){
-    this.angle = getPlayers()[id].angle;
-    this.speed = getPlayers()[id].speed;
-  }
+function drawCannonBalls() {
+  console.log('Shoot cannon');
+  var radius = 5; // 5 pixels
+  ctx.beginPath();
+  ctx.arc(this.state.x, this.state.y, radius, 2 * Math.PI, false);
+  ctx.fillStyle = "black";
+  ctx.fill();
 }
-*/
 
 //  Our id assigned to us by the server
 var our_id;
@@ -206,8 +217,9 @@ var our_id;
 socket.on('on_connected', function (data){
 
   initializeGame();
-  sim = new Sim(data.meta.gridNumber, data.meta.cellWidth, data.meta.cellHeight,
-    data.meta.activeCells);
+  meta = data.meta;
+  sim = new Sim(meta.gridNumber, meta.cellWidth, meta.cellHeight,
+    meta.activeCells);
 
   //  Using 16:9 aspect ratio
   viewport = new Viewport(sim, 0, 0, 1.6, 0.9, 2);
@@ -218,7 +230,7 @@ socket.on('on_connected', function (data){
 
   newPlayer(our_id, data.state);
   player = sim.addShip(data.state, our_id, localShipInput,
-    createShipOnDraw("black"));
+    createShipOnDraw("black"), drawCannonBalls);
 
   //  Set our world up in the config described by the server
 
@@ -234,6 +246,9 @@ socket.on('on_connected', function (data){
   var server_loop = setInterval(client_update, s_delay, player);
 
   window.requestAnimationFrame(clientTick);
+  $('document').unload(function() {
+    socket.emit('disconnect');
+  });
 });
 
 //  Update the server about the player's position

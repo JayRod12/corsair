@@ -52,12 +52,17 @@ io.on('connection', function(client){
 
 
   //  TODO don't spawn on top of other people or in 'danger'
+  //  TODO fix initial vars
   var initState = {
     x: Math.random()*Game.width,
     y: Math.random()*Game.height,
-    angle: Math.random()*2*Math.PI,
+    x: 0,
+    y: 0,
+    angle: Math.random()*Math.PI/2,
+    angle: +Math.PI/3,
     speed: 0
   };
+  console.log('angle ' + initState.angle);
 
   var metadata = {
     gridNumber: gridNumber,
@@ -97,11 +102,13 @@ io.on('connection', function(client){
   //  On client disconnect
   client.on('disconnect', function () {
 
+    // Decrement count
+    playerCount -= 1;
+
     console.log('\t socket.io:: client disconnected ' + client.userid + '  ' +
       playerCount + ' players');
     client.broadcast.emit('player_left',  {id : client.userid});
     Game.removePlayer(client.userid);
-    playerCount -= 1;
 
     //  Stop simulating if noone is connected
     if (playerCount < 1){
