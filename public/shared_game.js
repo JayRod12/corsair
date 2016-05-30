@@ -11,20 +11,24 @@ var remoteStates;
 //  Inputfunction determines updates to the ship
 //  onDraw can be null
 
-function Ship(sim, state, uid, inputFunction, onDraw){
+function Ship(sim, state, uid, inputFunction, onDraw, onDrawCannon){
 
+  // Simulation in which the ship is.
   this.sim = sim;
 
   //  Should contain:
   //  x, y, angle, speed
   this.state = state;
+  this.cell = sim.coordinateToCell(this.state.x, this.state.y);
 
   this.getRemoteState = function(){
     return remoteStates[uid];
   };
 
+  // Scale of the ship ?
   this.scale = 1;
 
+  this.cannon = new Cannon(this, onDrawCannon);
   this.inputFunction = inputFunction;
 
   this.onTick = function(dt){
@@ -48,38 +52,63 @@ function Ship(sim, state, uid, inputFunction, onDraw){
     //  TODO better interpolation
     this.state.x = (this.state.x + remoteState.x) / 2
     this.state.y = (this.state.y + remoteState.y) / 2
+    updateCell(this.sim, this, this.state.x, this.state.y);
 
-    //this.state.x = this.pla
-    /*
-    if (!server){
-      this.state.x = remoteState.x;
-      this.state.y = remoteState.y;
-    }
-    */
-    //console.log (remoteState.x - this.state.x);
   }
 
   this.onDraw = onDraw;
 }
 
-//  Grid logic
+function Cannon(ship, onDraw) {
+  this.ballSpeed = 5;
+  this.ship = ship;
+  this.level = 1;
+  this.onShoot = function() {
+    console.log('Ship direction: ' + this.ship.state.angle);
+    var ballR = new CannonBall(this.ship, 1, this.ballSpeed, onDraw, this.level);
+    var ballL = new CannonBall(this.ship, -1, this.ballSpeed, onDraw, this.level);
+    var cell = this.ship.sim.coordinateToCell(this.ship.state.x, this.ship.state.y)
 
-/*
-var grid_number = 10;
-var cell_size = 200; 
-var grid;
-
-function initializeGrid() {
-  grid = new Array(grid_number)
-  for (var i = 0; i < grid_number; i++) {
-    grid[i] = new Array(grid_number);
-    for (var j = 0; j < grid_number; j++) {
-      grid[i][j] = new Cell(i, j);
-      console.log('Initialising ' + i + ', ' + j);
-    }
+    cell.gameObjects.push(ballR);
+    cell.gameObjects.push(ballL);
   }
 }
-*/
+
+//TODO: use dt as in Ship.tick??????
+function CannonBall(ship, side, speed, onDraw, level) {
+  this.sim = ship.sim;
+  this.ship = ship;
+  this.side = side;
+  this.shipState = { speed : ship.state.speed
+                   , angle : -ship.state.angle };
+  // TODO: angles are fucked up pi/2 when going down, -pi/2 up. 0 ok.
+  this.state = { x : ship.state.x
+               , y : ship.state.y
+               , angle : ((this.shipState.angle - side * Math.PI / 2 +
+                           2 * Math.PI) % (2 * Math.PI))
+               , level : level
+               , speed : speed
+               , life : 300 * level
+  };
+  this.cell = this.sim.coordinateToCell(this.state.x, this.state.y);
+
+  this.onTick = function() {
+    console.log('ship angle' + this.shipState.angle);
+    if (this.state.life == 0) {
+      this.sim.removeCannonBall(this);
+    }
+    // TODO interpolation with remote state
+    this.state.x += (-this.shipState.speed * Math.cos(this.shipState.angle) +
+              this.state.speed * Math.cos(this.state.angle));
+
+    this.state.y -= (-this.shipState.speed * Math.sin(this.shipState.angle) + 
+              this.state.speed * Math.sin(this.state.angle));
+    this.state.life -= 1;
+    updateCell(this.sim, this, this.state.x, this.state.y);
+  };
+  this.onDraw = onDraw;
+
+}
 
 function Cell(x, y, gridNumber) {
   this.number = gridNumber * y + x;
@@ -97,6 +126,8 @@ function Cell(x, y, gridNumber) {
     for (var i = 0; i < this.gameObjects.length; i++){
       if (typeof this.gameObjects[i].onDraw != "undefined"){
         this.gameObjects[i].onDraw();
+      } else {
+        console.log('Undefined draw for cannon');
       }
     }
   }
@@ -107,6 +138,39 @@ function Cell(x, y, gridNumber) {
         this.gameObjects[i].onViewportDraw();
       }
     }
+  }
+}
+
+// Update cell in which the object is
+function updateCell(sim, object, x, y) {
+  var curCell = object.cell;
+  var realCell = sim.coordinateToCell(x, y);
+  if (!curCell) {
+    console.log('updateCell::Invalid cells ' + curCell + '.');
+    return;
+  }
+  if (curCell != realCell) {
+    var found = 0;
+    for (var i = 0; i < curCell.gameObjects.length; i++){
+      if (curCell.gameObjects[i] == object) {
+        curCell.gameObjects.splice(i,1);
+        found = 1;
+      }
+    }
+
+    if (found == 0) {
+      console.log('updateCell::Could not remove object from previous current cell');
+      return;
+    } else {
+      if (realCell == null) {
+        // Object has gone out of the grid, delete it
+        sim.removeObject(object);
+      } else {
+        realCell.gameObjects.push(object);
+        object.cell = realCell;
+      }
+    }
+    console.log('cell updated');
   }
 }
 
@@ -147,11 +211,15 @@ function Sim(gridNumber, cellWidth, cellHeight, activeCells){
   };
   */
 
-  //this.
-
   // Get Cell given pixel position
   this.coordinateToCell = function(x, y) {
     if (!this.grid) {
+      console.log('No grid defined');
+      return null;
+    }
+    if (x < 0 || y < 0 || x > this.gridNumber * this.cellWidth ||
+        y > this.gridNumber * this.cellHeight) {
+      console.log('Object in undefined cell');
       return null;
     }
     var x_coord = Math.floor(x / this.cellWidth);
@@ -197,21 +265,44 @@ function Sim(gridNumber, cellWidth, cellHeight, activeCells){
   };
 
 
-  this.addShip = function (state, uid, inputFunction, onDraw){
+  this.addShip = function (state, uid, inputFunction, onDraw, onDrawCannon){
     var cell = this.coordinateToCell(state.x, state.y);
-    var ship = new Ship(this, state, uid, inputFunction, onDraw);
+    var ship = new Ship(this, state, uid, inputFunction, onDraw, onDrawCannon);
     cell.gameObjects.push(ship);
     return ship;
   };
 
   this.removeShip = function (doomed_ship){
-    var cell = this.coordinateToCell(doomed_ship.state.x, doomed_ship.state.y);
+    var cell = doomed_ship.cell;
     for (var i = 0; i < cell.gameObjects.length; i++){
       if (cell.gameObjects[i] == doomed_ship) {
         cell.gameObjects.splice(i,1);
       }
     }
   };
+
+  this.removeCannonBall = function(ball) {
+    var cell = ball.cell;
+    for (var i = 0; i < cell.gameObjects.length; i++){
+      if (cell.gameObjects[i] == ball) {
+        console.log('found it');
+        cell.gameObjects.splice(i,1);
+      }
+      console.log('removeCannonBall: not found');
+    }
+  };
+
+  // TODO: use this method to remove all objects,
+  // substitutes removeShip, removeCannonBall, etc.
+  this.removeObject = function(object) {
+    var cell = object.cell;
+    for (var i = 0; i < cell.gameObjects.length; i++){
+      if (cell.gameObjects[i] == object) {
+        cell.gameObjects.splice(i,1);
+      }
+    }
+  };
+
 
 }
 

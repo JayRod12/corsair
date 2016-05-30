@@ -44,12 +44,17 @@ io.on('connection', function(client){
 
 
   //  TODO don't spawn on top of other people or in 'danger'
+  //  TODO fix initial vars
   var initState = {
     x: Math.random()*Game.width,
     y: Math.random()*Game.height,
-    angle: Math.random()*2*Math.PI,
+    x: 0,
+    y: 0,
+    angle: Math.random()*Math.PI/2,
+    angle: +Math.PI/3,
     speed: 0
   };
+  console.log('angle ' + initState.angle);
 
   var metadata = {
     gridNumber: gridNumber,

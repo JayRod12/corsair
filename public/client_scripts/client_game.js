@@ -110,6 +110,7 @@ function createShipOnDraw(colour){
     ctx.rotate(-this.state.angle);
     ctx.translate(-this.state.x, -this.state.y);
 
+    // Ship name
     ctx.fillStyle = "white";
     ctx.font = "5px Courier";
     var text = localStorage['nickname'] == "" ? "Corsair" : localStorage['nickname'];
@@ -151,11 +152,13 @@ $( "#main_canvas" ).mousemove(function(event){
   var scale = viewport.scale;
   mouse_x = (event.offsetX/scale + viewport.x);
   mouse_y = (event.offsetY/scale + viewport.y);
+});
 
-  console.log('player.x: ' + player.state.x);
-  console.log('mouseX: ' + mouse_x);
-  console.log('viewportx: ' + viewport.x);
-  console.log('offsetx: ' + event.offsetX);
+$("body").keyup(function(event) {
+  // Press space bar == 32
+  if (event.keyCode == 32) {
+    player.cannon.onShoot();
+  }
 });
 
 const speed_norm = 100 * 5;
@@ -193,6 +196,15 @@ var localShipInput = function(){
       -mouse_y,2)) / speed_norm;
 }
 
+function drawCannonBalls() {
+  console.log('Shoot cannon');
+  var radius = 5; // 5 pixels
+  ctx.beginPath();
+  ctx.arc(this.state.x, this.state.y, radius, 2 * Math.PI, false);
+  ctx.fillStyle = "black";
+  ctx.fill();
+}
+
 //  Creates a serverInput function that is a closure using the given id
 //  The output can be passed into a new Ship
 
@@ -225,7 +237,7 @@ socket.on('on_connected', function (data){
 
   newPlayer(our_id, data.state);
   player = sim.addShip(data.state, our_id, localShipInput,
-    createShipOnDraw("black"));
+    createShipOnDraw("black"), drawCannonBalls);
 
   //  Set our world up in the config described by the server
 
