@@ -26,7 +26,7 @@
     smoothed.push([]);
   }
 
-  const permutation = [ 151,160,137,91,90,15,         // Hash lookup table as defined by Ken Perlin.  This is a randomly
+  const p = [ 151,160,137,91,90,15,         // Hash lookup table as defined by Ken Perlin.  This is a randomly
     131,13,201,95,96,53,194,233,7,225,140,36,
     103,30,69,142,8,99,37,240,21,10,23,190,6,         // arranged array of all numbers from 0-255 inclusive.
     148,247,120,234,75,0,26,197,62,94,252,219,
@@ -74,22 +74,29 @@
   }
 
   function perlin(x, y){
+
+    var xi = Math.floor(x) % 255;
+    var yi = Math.floor(y) % 255;
+
     var xf = x - Math.floor(x);
     var yf = y - Math.floor(y);
 
     var u = fade(xf);
     var v = fade(yf);
+    
 
     var aa, ab, ba, bb;
-    aa = p[p[x  ] + y  ];
-    ab = p[p[x+1] + y  ];
-    ba = p[p[x  ] + y+1];
-    bb = p[p[x+1] + y+1];
+    aa = p[p[xi  ] + yi  ];
+    ab = p[p[xi+1] + yi  ];
+    ba = p[p[xi  ] + yi+1];
+    bb = p[p[xi+1] + yi+1];
 
     var i = lerp( grad(aa, xf, yf), grad(ba, xf, yf-1), u);
     var j = lerp( grad(ab, xf-1, yf), grad(bb, xf-1, yf-1), u);
 
-    return (lerp (i, j, v) + 1) / 2;
+    var ret = (lerp (i, j, v) + 1) / 2;
+    console.log(ret);
+    return ret;
 
   }
 
@@ -107,6 +114,7 @@
 
   function generatePerlin(){
     //  Init grid
+    /*
     for (var x = 0; x < gridWidth; x++){
       var col = [];
       for (var y = 0; y < gridWidth; y++){
@@ -118,9 +126,10 @@
     for (var x = 1; x < gridWidth-1; x++){
       for (var y = 1; y < gridWidth-1; y++){
         //smooth(x, y);
-        perlin(x,y);
+        perlin(x/10,y/10);
       }
     }
+    */
 
   }
   function makeRGB(b){
@@ -138,7 +147,8 @@
     for (var x = 0; x < gridWidth; x++){
       for (var y = 0; y < gridWidth; y++){
         ctx.translate(x*cellWidth, y*cellWidth);
-        ctx.fillStyle = makeRGB(smoothed[x][y]);
+        //ctx.fillStyle = makeRGB(smoothed[x][y]);
+        ctx.fillStyle = makeRGB(perlin(x/50,y/50));
         //console.log(makeRGB(grid[x][y]));
         //ctx.fillStyle = "black";
         ctx.fillRect(-cellWidth, -cellWidth, cellWidth, cellWidth);
