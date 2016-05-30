@@ -201,7 +201,6 @@ var localShipInput = function(){
 }
 
 function drawCannonBalls() {
-  console.log('Shoot cannon');
   var radius = 5; // 5 pixels
   ctx.beginPath();
   ctx.arc(this.state.x, this.state.y, radius, 2 * Math.PI, false);

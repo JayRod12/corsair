@@ -12,19 +12,15 @@ var path = require('path');
 var io = require('socket.io')(http);
 var UUID = require('node-uuid');
 var Game = require('../public/shared_game.js');
-var bodyParser = require('body-parser');
 
 
 app.use(express.static(path.resolve(__dirname + '/../public/')));
-app.use(bodyParser.urlencoded({extended: true}));
 
 app.get('/', function(req, res) {
   res.sendFile(path.resolve(__dirname + '/../html/index.html'));
 });
 
-app.post('/game', function(req, res) {
-  // TODO: use name variable
-  var name = req.body.shipName;
+app.get('/game', function(req, res) {
   res.sendFile(path.resolve(__dirname + '/../html/game.html'));
 });
 
@@ -54,7 +50,6 @@ io.on('connection', function(client){
     angle: +Math.PI/3,
     speed: 0
   };
-  console.log('angle ' + initState.angle);
 
   var metadata = {
     gridNumber: gridNumber,
@@ -81,7 +76,6 @@ io.on('connection', function(client){
   //  begin simulating
   if (typeof sim_loop == "undefined" && init){
     console.log("starting simulation");
-    console.log(sim.activeCells.length);
     sim_loop = setInterval(sim_loop_func, sim_t, sim_t);
     //sim_loop = setInterval(sim.tick, sim_t, sim_t);
   }
