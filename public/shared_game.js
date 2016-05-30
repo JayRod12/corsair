@@ -74,35 +74,29 @@ function Cannon(ship, onDraw) {
   }
 }
 
-//TODO: use dt as in Ship.tick??????
 function CannonBall(ship, side, speed, onDraw, level) {
   this.sim = ship.sim;
-  this.ship = ship;
+  this.ship = ship; // Ship can be used when doing collision detection
   this.side = side;
-  this.shipState = { speed : ship.state.speed
-                   , angle : -ship.state.angle };
   // TODO: angles are fucked up pi/2 when going down, -pi/2 up. 0 ok.
+  var angle = ((-ship.state.angle - side * Math.PI / 2 + 2 * Math.PI) % (2 * Math.PI));
+
   this.state = { x : ship.state.x
                , y : ship.state.y
-               , angle : ((this.shipState.angle - side * Math.PI / 2 +
-                           2 * Math.PI) % (2 * Math.PI))
                , level : level
-               , speed : speed
                , life : 300 * level
+               , xvel: ship.state.speed * Math.cos(-ship.state.angle) + speed * Math.cos(angle)
+               , yvel: ship.state.speed * Math.sin(-ship.state.angle) + speed * Math.sin(angle)
   };
   this.cell = this.sim.coordinateToCell(this.state.x, this.state.y);
 
   this.onTick = function(dt) {
-    console.log('ship angle' + this.shipState.angle);
     if (this.state.life == 0) {
       this.sim.removeCannonBall(this);
     }
     // TODO interpolation with remote state
-    this.state.x += dt * (-this.shipState.speed * Math.cos(this.shipState.angle) +
-              this.state.speed * Math.cos(this.state.angle));
-
-    this.state.y -= dt * (-this.shipState.speed * Math.sin(this.shipState.angle) + 
-              this.state.speed * Math.sin(this.state.angle));
+    this.state.x += dt * this.state.xvel;
+    this.state.y -= dt * this.state.yvel;
     this.state.life -= 1;
     updateCell(this.sim, this, this.state.x, this.state.y);
   };
@@ -223,6 +217,7 @@ function Sim(gridNumber, cellWidth, cellHeight, activeCells){
     }
     var x_coord = Math.floor(x / this.cellWidth);
     var y_coord = Math.floor(y / this.cellHeight);
+    console.log('x,y = ' + x_coord + ', ' +  y_coord);
     return this.grid[x_coord][y_coord];
   };
 
