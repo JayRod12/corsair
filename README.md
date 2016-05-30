@@ -24,8 +24,8 @@ Sockets and Networking Details
 
 Connection handshake:
 
+~~~
           CLIENT                            SERVER
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 (http connection)       ->
 
                         <-    (deliver client sources)
@@ -52,16 +52,20 @@ Connection handshake:
                              no data, used to signify that the server is ready
                              for the client to begin simulating the game
 
-                       <-     'player_joined'
+                             
+  To all other players <-     'player_joined'
                               data =
                                 id    : id of new player
                                 name  : name of new player
                                 state : state of new player
-                      
-                             
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~
+
+Tick cycle
 
 
+
+~~~
+          CLIENT                            SERVER
  'client_update'      ->
  data = 
   state : ship state of the client
@@ -70,16 +74,21 @@ Connection handshake:
                       <-    'server_update'
                              data = 
                                mapping from userid to ship state
+~~~
 
 
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+On disconnect
 
-  'disconnect'        ->
+~~~
+          CLIENT                            SERVER
 
-                      <-     'player_left'
-                              data = 
-                                 id : userid of leaving player
+ 'disconnect'        ->
+
+ To all other players <-     'player_left'
+                             data = 
+                              id : userid of leaving player
+~~~
 
 
 
