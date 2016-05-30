@@ -152,11 +152,11 @@ $( "#main_canvas" ).mousedown(function(event){
 
     case 1:
       //  Left click
-      player.cannon.onShoot(1);
+      player.cannon.onShoot(-1);
       return false;
     case 3:
       //  Right click
-      player.cannon.onShoot(-1);
+      player.cannon.onShoot(1);
       return false;
 
     return true;
