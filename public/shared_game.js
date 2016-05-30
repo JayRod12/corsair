@@ -321,16 +321,19 @@ function createServerShipInput(id){
 function initializeGame(){
   console.log("game inited");
   remoteStates = {};
+  playerNames = {};
 }
 
-function newPlayer(id, state) {
+function newPlayer(id, name, state) {
   remoteStates[id] = state;
-  console.log('newplayer' + id + " " + remoteStates[id].x);
+  playerNames[id] = name;
+  console.log('Adding player: ' + name + ' ' + name);
 }
 
 function removePlayer(id) {
+  console.log('Removing player: ' + playerNames[id] + ' ' + id);
   delete remoteStates[id];
-  console.log('remplayer');
+  delete playerNames[id];
 }
 
 function updatePlayer(id, state){
@@ -350,6 +353,10 @@ function getPlayers() {
   return remoteStates;
 }
 
+function getPlayerNames() {
+  return playerNames;
+}
+
 
 //  Nodejs exports for use in server
 //var exports = module.exports = {};
@@ -362,6 +369,7 @@ exports.newPlayer = newPlayer;
 exports.removePlayer = removePlayer;
 exports.updatePlayer = updatePlayer;
 exports.getPlayers = getPlayers;
+exports.getPlayerNames = getPlayerNames;
 
 exports.createServerShipInput = createServerShipInput;
 exports.Sim = Sim;
