@@ -140,13 +140,9 @@ $( "#main_canvas" ).mousemove(function(event){
 //  Disable right click context menu
 
 $(document).ready(function(){ 
-  document.oncontextmenu = function() {return false;};
-  $(document).mousedown(function(e){ 
-    if( e.button == 2 ) { 
-      return false; 
-    }
-  return true;
-  });
+  $(document).bind("contextmenu", function(event){
+      return false;
+    });
 });
 
 //  Detect mouseclicks
