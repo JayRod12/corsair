@@ -14,13 +14,17 @@
   const width = 1000;
   const height = 1000;
 
-  const cellWidth = 5;
-  const gridWidth = 100;
+  const cellWidth = 10;
+  const gridWidth = 20;
 
-  const octaves = 5;
+  const octaves = 2;
   const persistence = 0.5;
 
   var grid = [];
+  var per = [];
+  for (var i = 0; i < gridWidth; i++){
+    per.push([]);
+  }
   var smoothed = [];
   for (var i = 0; i < gridWidth; i++){
     smoothed.push([]);
@@ -73,6 +77,47 @@
     return t * t * t * (t * (t * 6 - 15) + 10); // 6t^5 - 15t^4 + 10t^3
   }
 
+  function perlin2(x, y, size){
+    var total = 0;
+    var octaves = 2;
+    var persistence = 0.5;
+    
+    for (var i = 0; i < octaves; i++){
+      var f = Math.pow(2, i);
+      var a = Math.pow(persistence, i);
+
+      //var div = size;
+      //var div = cellWidth;
+      var div = 1;
+      var mult = gridWidth;
+      var ix, iy;
+      //ix = ix 
+      //if (Math.floor(x * f / div) >= gridWidth-1 || Math.floor(y * f /
+      //div) >= gridWidth-1) break;
+      total += interpolateNoise(x * f * mult / div, y * f * mult / div) * a;
+      //total += interpolateNoise(x , y) * a;
+    }
+
+    return total;
+
+  }
+
+  function interpolateNoise(x, y){
+    var intx = Math.floor(x);
+    var inty = Math.floor(y);
+    var fracx = x - intx;
+    var fracy = y - inty;
+
+    var i1 = lerp(smoothed[intx][inty], smoothed[intx+1][inty], fracx);
+    var i2 = lerp(smoothed[intx][inty+1], smoothed[intx+1][inty+1], fracx);
+    //console.log(smoothed[intx+1][inty]);
+    //var i1 = lerp(grid[intx][inty], grid[intx+1][inty], fracx);
+    //var i2 = lerp(grid[intx+1][inty], grid[intx+1][inty+1], fracx);
+
+    var ret = lerp(i1, i2, fracy);
+    return ret;
+  }
+
   function perlin(x, y){
 
     var xi = Math.floor(x) % 255;
@@ -86,16 +131,21 @@
     
 
     var aa, ab, ba, bb;
+    /*
     aa = p[p[xi  ] + yi  ];
     ab = p[p[xi+1] + yi  ];
     ba = p[p[xi  ] + yi+1];
     bb = p[p[xi+1] + yi+1];
+    */
+    aa = grid[xi+1][yi];
+    ab = grid[xi-1][yi];
+    ba = grid[xi][yi+1];
+    bb = grid[xi][yi-1];
 
     var i = lerp( grad(aa, xf, yf), grad(ba, xf, yf-1), u);
     var j = lerp( grad(ab, xf-1, yf), grad(bb, xf-1, yf-1), u);
 
     var ret = (lerp (i, j, v) + 1) / 2;
-    console.log(ret);
     return ret;
 
   }
@@ -114,22 +164,27 @@
 
   function generatePerlin(){
     //  Init grid
-    /*
     for (var x = 0; x < gridWidth; x++){
       var col = [];
       for (var y = 0; y < gridWidth; y++){
-        col.push(randVector());
+        //col.push(randVector());
+        col.push(Math.random());
       }
       grid.push(col);
+    }
+    for (var x = 1; x < gridWidth-1; x++){
+      for (var y = 1; y < gridWidth-1; y++){
+        smooth(x, y);
+
+      }
     }
 
     for (var x = 1; x < gridWidth-1; x++){
       for (var y = 1; y < gridWidth-1; y++){
-        //smooth(x, y);
-        perlin(x/10,y/10);
+        //per[x][y] = perlin2(x,y);
+
       }
     }
-    */
 
   }
   function makeRGB(b){
@@ -139,20 +194,61 @@
   }
   function drawPerlin(){
 
+    
+    //const octaves = 1;
+
+    //const amp = 0.5;
     var canvas = $("#main")[0];
     canvas.width = width;
     canvas.height = height;
     var ctx = canvas.getContext("2d");
 
-    for (var x = 0; x < gridWidth; x++){
-      for (var y = 0; y < gridWidth; y++){
-        ctx.translate(x*cellWidth, y*cellWidth);
+    const renderWidth = 100;
+    const renderMult = 8;
+    const seaHue = 222;
+    const seaSat = 49;
+    const landHue = 94;
+    const landSat = 45;
+    const cutoff = 0.6;
+
+    for (var x = 1; x < renderWidth -10; x++){
+      for (var y = 1; y < renderWidth - 10; y++){
+        //ctx.translate(x*cellWidth, y*cellWidth);
+        ctx.translate(x*renderMult,y*renderMult);
         //ctx.fillStyle = makeRGB(smoothed[x][y]);
-        ctx.fillStyle = makeRGB(perlin(x/50,y/50));
+        //var b = 0;
+        //var div = 128;
+        //var div = 64;
+        //var a = amp;
+        //for (var i = 0; i < octaves; i++){
+          //b+=a*perlin(x/div, y/div);
+          //div = div/2;
+          //a = amp * a;
+        //}
+        //ctx.fillStyle = makeRGB(per[x][y]);
+
+        var l = perlin2(x/renderWidth, y/renderWidth);
+        if (l > cutoff){
+          var c = "hsl("+landHue.toString() + ", " + landSat.toString() +
+            "%, " + (l*100).toString() +"%)";
+          //ctx.fillStyle = "hsl(0, 100%, 50%)";
+        }
+        else{
+          var c = "hsl("+seaHue.toString() + ", " + seaSat.toString() +
+          "%, " + (l*100).toString() +"%)";
+        }
+        ctx.fillStyle = c;
+
+        //ctx.fillStyle = makeRGB(perlin2(x/renderWidth,y/renderWidth));
+
+
+        //ctx.fillStyle = makeRGB(perlin(x/128,y/128));
         //console.log(makeRGB(grid[x][y]));
         //ctx.fillStyle = "black";
-        ctx.fillRect(-cellWidth, -cellWidth, cellWidth, cellWidth);
-        ctx.translate(-x*cellWidth, -y*cellWidth);
+        //ctx.fillRect(-cellWidth, -cellWidth, cellWidth, cellWidth);
+        ctx.fillRect(0,0,renderMult,renderMult);
+        ctx.translate(-x*renderMult, -y*renderMult);
+        //ctx.translate(-x*cellWidth, -y*cellWidth);
       }
     }
     //ctx.fillStyle = "black";
