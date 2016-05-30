@@ -1,5 +1,6 @@
 //const server = false;
 server = false;
+var gameInit = false;
 
 //  Set up sockets
 var socket = io();
@@ -93,7 +94,7 @@ function draw(){
 
 }
 
-function createShipOnDraw(colour){
+function createShipOnDraw(colour, name){
   return function(){
     var width = shipBaseWidth * this.scale;
     var height = shipBaseHeight * this.scale;
@@ -117,32 +118,9 @@ function createShipOnDraw(colour){
     // Ship name
     ctx.fillStyle = "white";
     ctx.font = "5px Courier";
-    var text = localStorage['nickname'] == "" ? "Corsair" : localStorage['nickname'];
-    var metrics = ctx.measureText(text);
+    var metrics = ctx.measureText(name);
     var textWidth = metrics.width;
-    ctx.fillText(text, this.state.x - textWidth/2, this.state.y);
-  }
-}
-
-function createShipOnViewportDraw(colour){
-  return function(translation, scale){
-    var width = shipBaseWidth * this.scale;
-    var height = shipBaseHeight * this.scale;
-
-    //We translate to the origin of our ship
-    ctx.translate(this.state.x, this.state.y);
-
-    //We rotate around this origin 
-    ctx.rotate(this.state.angle);
-
-      //We draw the ship, ensuring that we start drawing from the correct location 
-    //(the fillRect function draws from the topmost left corner of the rectangle 
-    ctx.fillStyle = colour;
-    ctx.fillRect(-width/2, -height/2, width, height);
-
-    //We undo our transformations for the next draw/calculations
-    ctx.rotate(-this.state.angle);
-    ctx.translate(-this.state.x, -this.state.y);
+    ctx.fillText(name, this.state.x - textWidth/2, this.state.y);
   }
 }
 
@@ -213,7 +191,7 @@ var our_id;
 
 //  On connecting to the server
 
-socket.on('on_connected', function (data){
+socket.on('on_connect', function (data){
 
   initializeGame();
   meta = data.meta;
@@ -227,15 +205,25 @@ socket.on('on_connected', function (data){
   console.log("Our id is " + our_id);
 
 
-  newPlayer(our_id, data.state);
+  var our_name = (localStorage['nickname'] == "") ? "Corsair" : localStorage['nickname'];
+  newPlayer(our_id, our_name, data.state);
   player = sim.addShip(data.state, our_id, localShipInput,
-    createShipOnDraw("black"), drawCannonBalls);
+    createShipOnDraw("black", our_name, drawCannonBalls));
 
   //  Set our world up in the config described by the server
 
   for (var userid in data.players){
-    addServerShip(userid, data.players[userid]);
+    addServerShip(userid, data.names[userid], data.players[userid]);
   }
+
+  socket.emit('on_connect_response', {name : our_name});
+
+
+});
+
+socket.on('start_game', function(data){
+
+  window.requestAnimationFrame(clientTick);
 
   //  Delay between updating the server
   const s_delay = 1000/40;
@@ -244,10 +232,10 @@ socket.on('on_connected', function (data){
   if(typeof server_loop != "undefined") clearInterval(server_loop);
   var server_loop = setInterval(client_update, s_delay, player);
 
-  window.requestAnimationFrame(clientTick);
-  $('document').unload(function() {
-    socket.emit('disconnect');
-  });
+});
+
+$('document').unload(function() {
+  socket.emit('disconnect');
 });
 
 //  Update the server about the player's position
@@ -258,12 +246,12 @@ function client_update(player){
 
 //  Add a new ship to the local world from information from the server
 
-function addServerShip(userid, state){
+function addServerShip(userid, name, state){
   console.log("adding new player");
-  newPlayer(userid, state);
+  newPlayer(userid, name, state);
   sim.addShip(state, userid, 
       createServerShipInput(userid),
-        createShipOnDraw("brown"));
+        createShipOnDraw("brown", name));
 
 }
 
@@ -272,7 +260,7 @@ function addServerShip(userid, state){
 
 socket.on('player_joined', function (data){
   console.log('player joined');
-  addServerShip(data.id, data.state);
+  addServerShip(data.id, data.name, data.state);
 });
 
 //  Recieved when another player leaves the server

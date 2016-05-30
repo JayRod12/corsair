@@ -59,31 +59,50 @@ io.on('connection', function(client){
     activeCells: allCells
   }
 
-  client.emit('on_connected', {id : client.userid,
+  client.emit('on_connect', {id : client.userid, names : Game.getPlayerNames(),
     players : Game.getPlayers(), state: initState, meta: metadata});
 
-  Game.newPlayer(client.userid, initState);
-  sim.addShip(initState, client.userid,
-    Game.createServerShipInput(client.userid));
 
-  //  Tell other users that a new player has joined
-  client.broadcast.emit('player_joined', {id : client.userid, state : 
-    initState});
+  //  Wait for response
 
-  playerCount += 1;
+  client.on('on_connect_response', function (data){
 
-  //  If we are not simulating we now have at least one player so we should
-  //  begin simulating
-  if (typeof sim_loop == "undefined" && init){
-    console.log("starting simulation");
-    sim_loop = setInterval(sim_loop_func, sim_t, sim_t);
-    //sim_loop = setInterval(sim.tick, sim_t, sim_t);
-  }
+    Game.newPlayer(client.userid, data.name, initState);
+    sim.addShip(initState, client.userid,
+      Game.createServerShipInput(client.userid));
+
+    //  Tell other users that a new player has joined
+    client.broadcast.emit('player_joined', {id : client.userid, name :
+        data.name, state : initState});
+
+    playerCount += 1;
+
+    //  If we are not simulating we now have at least one player so we should
+    //  begin simulating
+    if (typeof sim_loop == "undefined" && init){
+      console.log("starting simulation");
+      console.log(sim.activeCells.length);
+      sim_loop = setInterval(sim_loop_func, sim_t, sim_t);
+      //sim_loop = setInterval(sim.tick, sim_t, sim_t);
+    }
 
 
-  //  Log
-  console.log('\t socket.io:: player ' + client.userid + ' connected, ' +
-      playerCount + ' players');
+    //  Log
+    console.log('\t socket.io:: player ' + client.userid + ' connected, ' +
+        playerCount + ' players');
+
+    client.emit('start_game', {});
+  });
+
+
+
+
+  //  On tick
+  client.on('client_update', function(data) {
+    Game.updatePlayer(client.userid, data.state);
+    //  Respond with current server state, instead broadcast regularly?
+    client.emit('server_update', Game.getPlayers())
+  });
 
   //  On client disconnect
   client.on('disconnect', function () {
@@ -101,13 +120,6 @@ io.on('connection', function(client){
       console.log("stopping simulation");
       clearInterval(sim_loop);
     }
-  });
-
-  //  On tick
-  client.on('client_update', function(data) {
-    Game.updatePlayer(client.userid, data.state);
-    //  Respond with current server state, instead broadcast regularly?
-    client.emit('server_update', Game.getPlayers())
   });
 
 });
