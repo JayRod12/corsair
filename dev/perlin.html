@@ -14,15 +14,11 @@
   const width = 1000;
   const height = 1000;
 
-  const cellWidth = 10;
-  const gridWidth = 20;
-
-  const octaves = 2;
-  const persistence = 0.5;
+  const gridWidth = 32;
 
   var grid = [];
   var per = [];
-  for (var i = 0; i < gridWidth; i++){
+  for (var i = 0; i <= gridWidth; i++){
     per.push([]);
   }
   var smoothed = [];
@@ -53,9 +49,16 @@
   //  Basic smoothing
   function smooth(x, y){
 
-    corners = ( grid[x-1][y-1]+grid[x+1][y-1]+grid[x-1][y+1]+grid[x+1][y+1]
+    var xPrev = (x-1<0) ? gridWidth-1 : x-1;
+    var xNext = (x+1>=gridWidth) ? 0 : x+1;
+
+    var yPrev = (y-1<0) ? gridWidth-1 : y-1;
+    var yNext = (y+1>=gridWidth) ? 0 : y+1;
+
+
+    corners = ( grid[xPrev][yPrev]+grid[xNext][yPrev]+grid[xPrev][yNext]+grid[xNext][yNext]
         ) / 16;
-    sides = ( grid[x-1][y]+grid[x+1][y]+grid[x][y+1]+grid[x][y+1]
+    sides = ( grid[xPrev][y]+grid[xNext][y]+grid[x][yNext]+grid[x][yNext]
         ) / 8;
     centre = grid[x][y]/4;
 
@@ -79,15 +82,16 @@
 
   function perlin2(x, y, size){
     var total = 0;
-    var octaves = 2;
+    var octaves = 3;
     var persistence = 0.5;
+    var norm = 0;
     
     for (var i = 0; i < octaves; i++){
       var f = Math.pow(2, i);
       var a = Math.pow(persistence, i);
+      norm += a;
 
       //var div = size;
-      //var div = cellWidth;
       var div = 1;
       var mult = gridWidth;
       var ix, iy;
@@ -97,83 +101,56 @@
       total += interpolateNoise(x * f * mult / div, y * f * mult / div) * a;
       //total += interpolateNoise(x , y) * a;
     }
-
-    return total;
+    /*
+    var xx, yy;
+    xx = Math.floor(x*gridWidth);
+    yy = Math.floor(y*gridWidth);
+    total = smoothed[xx][yy];
+    */
+    //total = interpolateNoise(x * gridWidth, y * gridWidth);
+    return total / norm;
 
   }
 
   function interpolateNoise(x, y){
     var intx = Math.floor(x);
+    var intxsuc = intx + 1;
     var inty = Math.floor(y);
+    var intysuc = inty + 1;
+
     var fracx = x - intx;
     var fracy = y - inty;
 
-    var i1 = lerp(smoothed[intx][inty], smoothed[intx+1][inty], fracx);
-    var i2 = lerp(smoothed[intx][inty+1], smoothed[intx+1][inty+1], fracx);
-    //console.log(smoothed[intx+1][inty]);
-    //var i1 = lerp(grid[intx][inty], grid[intx+1][inty], fracx);
-    //var i2 = lerp(grid[intx+1][inty], grid[intx+1][inty+1], fracx);
+    intx = intx % gridWidth;
+    intxsuc = intx % gridWidth;
+    inty = inty % gridWidth;
+    intysuc = inty % gridWidth;
+
+    //if (intx+1 >= gridWidth || inty+1 >= gridWidth) return 0;
+    var i1 = lerp(smoothed[intx][inty], smoothed[intxsuc][inty], fracx);
+    var i2 = lerp(smoothed[intx][intysuc], smoothed[intxsuc][intysuc], fracx);
 
     var ret = lerp(i1, i2, fracy);
+    //  DELETE ME
+    //ret = smoothed[intx][inty];
+    //
     return ret;
-  }
-
-  function perlin(x, y){
-
-    var xi = Math.floor(x) % 255;
-    var yi = Math.floor(y) % 255;
-
-    var xf = x - Math.floor(x);
-    var yf = y - Math.floor(y);
-
-    var u = fade(xf);
-    var v = fade(yf);
-    
-
-    var aa, ab, ba, bb;
-    /*
-    aa = p[p[xi  ] + yi  ];
-    ab = p[p[xi+1] + yi  ];
-    ba = p[p[xi  ] + yi+1];
-    bb = p[p[xi+1] + yi+1];
-    */
-    aa = grid[xi+1][yi];
-    ab = grid[xi-1][yi];
-    ba = grid[xi][yi+1];
-    bb = grid[xi][yi-1];
-
-    var i = lerp( grad(aa, xf, yf), grad(ba, xf, yf-1), u);
-    var j = lerp( grad(ab, xf-1, yf), grad(bb, xf-1, yf-1), u);
-
-    var ret = (lerp (i, j, v) + 1) / 2;
-    return ret;
-
-  }
-
-  //  Pick random variable from subset
-  function grad(hash, x, y){
-    switch(hash % 4){
-        case 0: return  x + y;
-        case 1: return -x + y;
-        case 2: return  x - y;
-        case 3: return -x - y;
-    }
   }
 
   
 
   function generatePerlin(){
     //  Init grid
-    for (var x = 0; x < gridWidth; x++){
+    for (var x = 0; x <= gridWidth; x++){
       var col = [];
-      for (var y = 0; y < gridWidth; y++){
+      for (var y = 0; y <= gridWidth; y++){
         //col.push(randVector());
         col.push(Math.random());
       }
       grid.push(col);
     }
-    for (var x = 1; x < gridWidth-1; x++){
-      for (var y = 1; y < gridWidth-1; y++){
+    for (var x = 0; x < gridWidth; x++){
+      for (var y = 0; y < gridWidth; y++){
         smooth(x, y);
 
       }
@@ -203,35 +180,23 @@
     canvas.height = height;
     var ctx = canvas.getContext("2d");
 
-    const renderWidth = 100;
-    const renderMult = 8;
+    const renderWidth = 512;
+    const renderMult = 2;
     const seaHue = 222;
     const seaSat = 49;
     const landHue = 94;
     const landSat = 45;
-    const cutoff = 0.6;
+    const sealevel = 0.55;
 
-    for (var x = 1; x < renderWidth -10; x++){
-      for (var y = 1; y < renderWidth - 10; y++){
-        //ctx.translate(x*cellWidth, y*cellWidth);
+    for (var x = 0; x < renderWidth ; x++){
+      for (var y = 0; y < renderWidth ; y++){
         ctx.translate(x*renderMult,y*renderMult);
-        //ctx.fillStyle = makeRGB(smoothed[x][y]);
-        //var b = 0;
-        //var div = 128;
-        //var div = 64;
-        //var a = amp;
-        //for (var i = 0; i < octaves; i++){
-          //b+=a*perlin(x/div, y/div);
-          //div = div/2;
-          //a = amp * a;
-        //}
-        //ctx.fillStyle = makeRGB(per[x][y]);
 
         var l = perlin2(x/renderWidth, y/renderWidth);
-        if (l > cutoff){
+        //var l = smoothed[x][y];
+        if (l > sealevel){
           var c = "hsl("+landHue.toString() + ", " + landSat.toString() +
             "%, " + (l*100).toString() +"%)";
-          //ctx.fillStyle = "hsl(0, 100%, 50%)";
         }
         else{
           var c = "hsl("+seaHue.toString() + ", " + seaSat.toString() +
@@ -239,16 +204,9 @@
         }
         ctx.fillStyle = c;
 
-        //ctx.fillStyle = makeRGB(perlin2(x/renderWidth,y/renderWidth));
 
-
-        //ctx.fillStyle = makeRGB(perlin(x/128,y/128));
-        //console.log(makeRGB(grid[x][y]));
-        //ctx.fillStyle = "black";
-        //ctx.fillRect(-cellWidth, -cellWidth, cellWidth, cellWidth);
         ctx.fillRect(0,0,renderMult,renderMult);
         ctx.translate(-x*renderMult, -y*renderMult);
-        //ctx.translate(-x*cellWidth, -y*cellWidth);
       }
     }
     //ctx.fillStyle = "black";
