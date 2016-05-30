@@ -60,7 +60,7 @@ function Ship(sim, state, uid, inputFunction, onDraw, onDrawCannon){
 }
 
 function Cannon(ship, onDraw) {
-  this.ballSpeed = 5;
+  this.ballSpeed = 1;
   this.ship = ship;
   this.level = 1;
   this.onShoot = function() {
@@ -92,16 +92,16 @@ function CannonBall(ship, side, speed, onDraw, level) {
   };
   this.cell = this.sim.coordinateToCell(this.state.x, this.state.y);
 
-  this.onTick = function() {
+  this.onTick = function(dt) {
     console.log('ship angle' + this.shipState.angle);
     if (this.state.life == 0) {
       this.sim.removeCannonBall(this);
     }
     // TODO interpolation with remote state
-    this.state.x += (-this.shipState.speed * Math.cos(this.shipState.angle) +
+    this.state.x += dt * (-this.shipState.speed * Math.cos(this.shipState.angle) +
               this.state.speed * Math.cos(this.state.angle));
 
-    this.state.y -= (-this.shipState.speed * Math.sin(this.shipState.angle) + 
+    this.state.y -= dt * (-this.shipState.speed * Math.sin(this.shipState.angle) + 
               this.state.speed * Math.sin(this.state.angle));
     this.state.life -= 1;
     updateCell(this.sim, this, this.state.x, this.state.y);
@@ -261,6 +261,10 @@ function Sim(gridNumber, cellWidth, cellHeight, activeCells){
       var x = this.activeCells[i].x;
       var y = this.activeCells[i].y;
       drawCellBackground(x, y, ctx);
+    }
+    for (var i = 0; i < this.activeCells.length; i++){
+      var x = this.activeCells[i].x;
+      var y = this.activeCells[i].y;
       this.grid[x][y].draw();
     }
   };
