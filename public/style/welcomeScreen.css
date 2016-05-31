@@ -107,3 +107,9 @@ div div canvas {
   font-family: 'Josefin Sans';
   color:white;
 }
+
+#game_canvas {
+  display: none;
+  width: 100%, height: 100%;
+  margin: 0, padding: 0;
+}

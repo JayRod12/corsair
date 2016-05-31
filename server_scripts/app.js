@@ -12,28 +12,17 @@ var path = require('path');
 var io = require('socket.io')(http);
 var UUID = require('node-uuid');
 var Game = require('../public/shared_game.js');
-var bodyParser = require('body-parser');
 
 
 app.use(express.static(path.resolve(__dirname + '/../public/')));
-app.use(bodyParser.urlencoded({extended: true}));
 
 app.get('/', function(req, res) {
   res.sendFile(path.resolve(__dirname + '/../html/index.html'));
 });
 
-app.post('/game', function(req, res) {
-  // TODO: use name variable
-  var name = req.body.shipName;
-  res.sendFile(path.resolve(__dirname + '/../html/game.html'));
-});
 
 app.post('/highScores', function(req, res) {
   res.sendFile(path.resolve(__dirname + '/../html/highScores.html'));
-});
-
-app.post('/index', function(req, res) {
-  res.sendFile(path.resolve(__dirname + '/../html/index.html'));
 });
 
 
@@ -62,7 +51,6 @@ io.on('connection', function(client){
     angle: +Math.PI/3,
     speed: 0
   };
-  console.log('angle ' + initState.angle);
 
   var metadata = {
     gridNumber: gridNumber,
@@ -72,32 +60,50 @@ io.on('connection', function(client){
     activeCells: allCells
   }
 
-  client.emit('on_connected', {id : client.userid,
+  client.emit('on_connect', {id : client.userid, names : Game.getPlayerNames(),
     players : Game.getPlayers(), state: initState, meta: metadata});
 
-  Game.newPlayer(client.userid, initState);
-  sim.addShip(initState, client.userid,
-    Game.createServerShipInput(client.userid));
 
-  //  Tell other users that a new player has joined
-  client.broadcast.emit('player_joined', {id : client.userid, state : 
-    initState});
+  //  Wait for response
 
-  playerCount += 1;
+  client.on('on_connect_response', function (data){
 
-  //  If we are not simulating we now have at least one player so we should
-  //  begin simulating
-  if (typeof sim_loop == "undefined" && init){
-    console.log("starting simulation");
-    console.log(sim.activeCells.length);
-    sim_loop = setInterval(sim_loop_func, sim_t, sim_t);
-    //sim_loop = setInterval(sim.tick, sim_t, sim_t);
-  }
+    Game.newPlayer(client.userid, data.name, initState);
+    sim.addShip(initState, client.userid,
+      Game.createServerShipInput(client.userid));
+
+    //  Tell other users that a new player has joined
+    client.broadcast.emit('player_joined', {id : client.userid, name :
+        data.name, state : initState});
+
+    playerCount += 1;
+
+    //  If we are not simulating we now have at least one player so we should
+    //  begin simulating
+    if (typeof sim_loop == "undefined" && init){
+      console.log("starting simulation");
+      console.log(sim.activeCells.length);
+      sim_loop = setInterval(sim_loop_func, sim_t, sim_t);
+      //sim_loop = setInterval(sim.tick, sim_t, sim_t);
+    }
 
 
-  //  Log
-  console.log('\t socket.io:: player ' + client.userid + ' connected, ' +
-      playerCount + ' players');
+    //  Log
+    console.log('\t socket.io:: player ' + client.userid + ' connected, ' +
+        playerCount + ' players');
+
+    client.emit('start_game', {});
+  });
+
+
+
+
+  //  On tick
+  client.on('client_update', function(data) {
+    Game.updatePlayer(client.userid, data.state);
+    //  Respond with current server state, instead broadcast regularly?
+    client.emit('server_update', Game.getPlayers())
+  });
 
   //  On client disconnect
   client.on('disconnect', function () {
@@ -115,13 +121,6 @@ io.on('connection', function(client){
       console.log("stopping simulation");
       clearInterval(sim_loop);
     }
-  });
-
-  //  On tick
-  client.on('client_update', function(data) {
-    Game.updatePlayer(client.userid, data.state);
-    //  Respond with current server state, instead broadcast regularly?
-    client.emit('server_update', Game.getPlayers())
   });
 
 });

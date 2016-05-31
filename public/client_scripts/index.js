@@ -15,22 +15,20 @@ if (!webgl_support()) {
 }
 
 $(document).ready(function () {
-	$(function () {
-  		if ($.cookie("loaded") != "true") {
-      		$('body.home').hide().fadeIn(3000);
-      		$.cookie("loaded", "true");
- 	 	}
-	});
-
    $('#textField').keydown(function(event) {
       if (event.keyCode == 13) {
         $('#playButton').click();
        }
    });
 
-   $('#playButton').click(function(event) {
-     localStorage['nickname'] = $('#textField').val(); 
-     this.form.submit();
-     return false;
-   });
+     $('#playButton').click(function(event) {
+       localStorage['nickname'] = $('#textField').val(); 
+       $('#welcomeScreen').hide();
+       $('body').css({'margin':'0px',
+                      'padding':'0px',
+                      'display':'block'});
+       $('#game_canvas').fadeIn('slow');
+       startClient();
+       return false;
+     });
 });

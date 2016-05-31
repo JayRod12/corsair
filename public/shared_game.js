@@ -32,13 +32,11 @@ function Ship(sim, state, uid, inputFunction, onDraw, onDrawCannon){
   this.inputFunction = inputFunction;
 
   this.onTick = function(dt){
-    //console.log('update');
-
     var remoteState = this.getRemoteState();
 
     //  If player has left the server remove their ship from the sim
     if (typeof remoteState == "undefined"){
-      sim.removeShip(this);
+      sim.removeObject(this);
       return;
     }
 
@@ -63,45 +61,42 @@ function Cannon(ship, onDraw) {
   this.ballSpeed = 1;
   this.ship = ship;
   this.level = 1;
-  this.onShoot = function() {
+  this.onShoot = function(side) {
     console.log('Ship direction: ' + this.ship.state.angle);
-    var ballR = new CannonBall(this.ship, 1, this.ballSpeed, onDraw, this.level);
-    var ballL = new CannonBall(this.ship, -1, this.ballSpeed, onDraw, this.level);
+    //var ballR = new CannonBall(this.ship, 1, this.ballSpeed, onDraw, this.level);
+    //var ballL = new CannonBall(this.ship, -1, this.ballSpeed, onDraw, this.level);
+    var ball = new CannonBall(this.ship, side, this.ballSpeed, onDraw, this.level);
     var cell = this.ship.sim.coordinateToCell(this.ship.state.x, this.ship.state.y)
 
-    cell.gameObjects.push(ballR);
-    cell.gameObjects.push(ballL);
+    //cell.gameObjects.push(ballR);
+    //cell.gameObjects.push(ballL);
+    cell.gameObjects.push(ball);
   }
 }
 
 function CannonBall(ship, side, speed, onDraw, level) {
   this.sim = ship.sim;
-  this.ship = ship;
+  this.ship = ship; // Ship can be used when doing collision detection
   this.side = side;
-  this.shipState = { speed : ship.state.speed
-                   , angle : -ship.state.angle };
   // TODO: angles are fucked up pi/2 when going down, -pi/2 up. 0 ok.
+  var angle = ((-ship.state.angle - side * Math.PI / 2 + 2 * Math.PI) % (2 * Math.PI));
+
   this.state = { x : ship.state.x
                , y : ship.state.y
-               , angle : ((this.shipState.angle - side * Math.PI / 2 +
-                           2 * Math.PI) % (2 * Math.PI))
                , level : level
-               , speed : speed
-               , life : 300 * level
+               , life : 100 * level
+               , xvel: ship.state.speed * Math.cos(-ship.state.angle) + speed * Math.cos(angle)
+               , yvel: ship.state.speed * Math.sin(-ship.state.angle) + speed * Math.sin(angle)
   };
   this.cell = this.sim.coordinateToCell(this.state.x, this.state.y);
 
   this.onTick = function(dt) {
-    console.log('ship angle' + this.shipState.angle);
     if (this.state.life == 0) {
-      this.sim.removeCannonBall(this);
+      this.sim.removeObject(this);
     }
     // TODO interpolation with remote state
-    this.state.x += dt * (-this.shipState.speed * Math.cos(this.shipState.angle) +
-              this.state.speed * Math.cos(this.state.angle));
-
-    this.state.y -= dt * (-this.shipState.speed * Math.sin(this.shipState.angle) + 
-              this.state.speed * Math.sin(this.state.angle));
+    this.state.x += dt * this.state.xvel;
+    this.state.y -= dt * this.state.yvel;
     this.state.life -= 1;
     updateCell(this.sim, this, this.state.x, this.state.y);
   };
@@ -173,7 +168,6 @@ function updateCell(sim, object, x, y) {
         object.cell = realCell;
       }
     }
-    console.log('cell updated');
   }
 }
 
@@ -197,7 +191,6 @@ function Sim(gridNumber, cellWidth, cellHeight, activeCells){
     this.grid[i] = new Array(this.gridNumber);
     for (var j = 0; j < this.gridNumber; j++) {
       this.grid[i][j] = new Cell(i, j, this.gridNumber);
-      console.log('Initialising ' + i + ', ' + j);
     }
   }
 
@@ -222,7 +215,7 @@ function Sim(gridNumber, cellWidth, cellHeight, activeCells){
     }
     if (x < 0 || y < 0 || x > this.gridNumber * this.cellWidth ||
         y > this.gridNumber * this.cellHeight) {
-      console.log('Object in undefined cell');
+      // 'Object in undefined cell'
       return null;
     }
     var x_coord = Math.floor(x / this.cellWidth);
@@ -236,7 +229,7 @@ function Sim(gridNumber, cellWidth, cellHeight, activeCells){
     var treasure = new Treasure(xTreasure, yTreasure, drawTreasure);
     var cell = this.coordinateToCell(xTreasure, yTreasure);
     cell.staticObjects.push(treasure);
-  }
+  };
 
   //  Given a function f of a cell and some auxilary data,
   //  apply that function to all cells in a given area
@@ -250,7 +243,7 @@ function Sim(gridNumber, cellWidth, cellHeight, activeCells){
         f(this.grid[x_coord][y_coord], aux);
       }
     }
-  }
+  };
 
 
   this.tick = function(dt){
@@ -288,34 +281,16 @@ function Sim(gridNumber, cellWidth, cellHeight, activeCells){
     return ship;
   };
 
-  this.removeShip = function (doomed_ship){
-    var cell = doomed_ship.cell;
-    for (var i = 0; i < cell.gameObjects.length; i++){
-      if (cell.gameObjects[i] == doomed_ship) {
-        cell.gameObjects.splice(i,1);
-      }
-    }
-  };
 
-  this.removeCannonBall = function(ball) {
-    var cell = ball.cell;
-    for (var i = 0; i < cell.gameObjects.length; i++){
-      if (cell.gameObjects[i] == ball) {
-        console.log('found it');
-        cell.gameObjects.splice(i,1);
-      }
-      console.log('removeCannonBall: not found');
-    }
-  };
-
-  // TODO: use this method to remove all objects,
-  // substitutes removeShip, removeCannonBall, etc.
   this.removeObject = function(object) {
     var cell = object.cell;
     for (var i = 0; i < cell.gameObjects.length; i++){
       if (cell.gameObjects[i] == object) {
         cell.gameObjects.splice(i,1);
       }
+    }
+    if (typeof object.onDeath != "undefined") {
+      object.onDeath();
     }
   };
 
@@ -333,16 +308,19 @@ function createServerShipInput(id){
 function initializeGame(){
   console.log("game inited");
   remoteStates = {};
+  playerNames = {};
 }
 
-function newPlayer(id, state) {
+function newPlayer(id, name, state) {
   remoteStates[id] = state;
-  console.log('newplayer' + id + " " + remoteStates[id].x);
+  playerNames[id] = name;
+  console.log('Adding player: ' + name + ' ' + name);
 }
 
 function removePlayer(id) {
+  console.log('Removing player: ' + playerNames[id] + ' ' + id);
   delete remoteStates[id];
-  console.log('remplayer');
+  delete playerNames[id];
 }
 
 function updatePlayer(id, state){
@@ -362,6 +340,10 @@ function getPlayers() {
   return remoteStates;
 }
 
+function getPlayerNames() {
+  return playerNames;
+}
+
 
 //  Nodejs exports for use in server
 //var exports = module.exports = {};
@@ -374,6 +356,7 @@ exports.newPlayer = newPlayer;
 exports.removePlayer = removePlayer;
 exports.updatePlayer = updatePlayer;
 exports.getPlayers = getPlayers;
+exports.getPlayerNames = getPlayerNames;
 
 exports.createServerShipInput = createServerShipInput;
 exports.Sim = Sim;
