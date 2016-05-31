@@ -5,7 +5,7 @@
   "main": "app.js",
   "scripts": {
     "start": "node server_scripts/app.js",
-    "test": "echo Error"
+    "test": "mocha tests/test.js"
   },
   "repository": {
     "type": "git",
@@ -16,6 +16,11 @@
   "dependencies": {
     "express": "^4.13.4",
     "node-uuid": "^1.4.7",
-    "socket.io": "~1.4.6"
+    "socket.io": "~1.4.6",
+    "chai": "~3.5.0",
+    "mocha": "~2.5.3"
+  },
+  "devDependencies": {
+    "chai": "~3.5.0"
   }
 }

@@ -7,29 +7,29 @@
  */
 function collisionDetection(rectangle_1, rectangle_2, first) {	
 //calculate where the corners would be if the rectangle was not rotated and the centre of the rectangle was the origin.
-	 var c1_nr = {x: -rectangle_2.width/2, y: rectangle_2.height/2};
-	 var c2_nr = {x: rectangle_2.width/2, y: rectangle_2.height/2};
-	 var c3_nr = {x: rectangle_2.width/2, y: -rectangle_2.height/2};
-	 var c4_nr = {x: -rectangle_2.width/2, y: -rectangle_2.height/2};
+	var c1_nr = {x: -rectangle_2.width/2, y: rectangle_2.height/2};
+	var c2_nr = {x: rectangle_2.width/2, y: rectangle_2.height/2};
+	var c3_nr = {x: rectangle_2.width/2, y: -rectangle_2.height/2};
+	var c4_nr = {x: -rectangle_2.width/2, y: -rectangle_2.height/2};
 	 
-//rotate the points by the angle of the rectangle, i.e. [x, y] -> [x*cos(t) - y*sin(t), x*sin(t) + y*cos(t)] 
-	 var cos_theta = Math.cos(rectangle_2.angle);
-	 var sin_theta = Math.sin(rectangle_2.angle);
-	 
-	 var c1_nt = {x: (c1_nr.x*cos_theta) - (c1_nr.y*sin_theta), y: (c1_nr.x*sin_theta) + (c1_nr.y*cos_theta)};
-	 var c2_nt = {x: (c2_nr.x*cos_theta) - (c2_nr.y*sin_theta), y: (c2_nr.x*sin_theta) + (c2_nr.y*cos_theta)};
-	 var c3_nt = {x: (c3_nr.x*cos_theta) - (c3_nr.y*sin_theta), y: (c3_nr.x*sin_theta) + (c3_nr.y*cos_theta)};
-	 var c4_nt = {x: (c4_nr.x*cos_theta) - (c4_nr.y*sin_theta), y: (c4_nr.x*sin_theta) + (c4_nr.y*cos_theta)}; 
-	 
-	 var c1 = {x: c1_nt.x + rectangle_2.x, y: c1_nt.y + rectangle_2.y};
-	 var c2 = {x: c2_nt.x + rectangle_2.x, y: c2_nt.y + rectangle_2.y}; 
-	 var c3 = {x: c3_nt.x + rectangle_2.x, y: c3_nt.y + rectangle_2.y};
-	 var c4 = {x: c4_nt.x + rectangle_2.x, y: c4_nt.y + rectangle_2.y};
-	 
-	 var odv_c1 = {x: rectangle_1.x - c1.x, y: rectangle_1.y - c1.y};
-	 var odv_c2 = {x: rectangle_1.x - c2.x, y: rectangle_1.y - c2.y};
-	 var odv_c3 = {x: rectangle_1.x - c3.x, y: rectangle_1.y - c3.y};
-	 var odv_c4 = {x: rectangle_1.x - c4.x, y: rectangle_1.y - c4.y};
+  //rotate the points by the angle of the rectangle, i.e. [x, y] -> [x*cos(t) - y*sin(t), x*sin(t) + y*cos(t)] 
+	var cos_theta = Math.cos(rectangle_2.angle);
+	var sin_theta = Math.sin(rectangle_2.angle);
+	
+	var c1_nt = {x: (c1_nr.x*cos_theta) - (c1_nr.y*sin_theta), y: (c1_nr.x*sin_theta) + (c1_nr.y*cos_theta)};
+	var c2_nt = {x: (c2_nr.x*cos_theta) - (c2_nr.y*sin_theta), y: (c2_nr.x*sin_theta) + (c2_nr.y*cos_theta)};
+	var c3_nt = {x: (c3_nr.x*cos_theta) - (c3_nr.y*sin_theta), y: (c3_nr.x*sin_theta) + (c3_nr.y*cos_theta)};
+	var c4_nt = {x: (c4_nr.x*cos_theta) - (c4_nr.y*sin_theta), y: (c4_nr.x*sin_theta) + (c4_nr.y*cos_theta)}; 
+	
+	var c1 = {x: c1_nt.x + rectangle_2.x, y: c1_nt.y + rectangle_2.y};
+	var c2 = {x: c2_nt.x + rectangle_2.x, y: c2_nt.y + rectangle_2.y}; 
+	var c3 = {x: c3_nt.x + rectangle_2.x, y: c3_nt.y + rectangle_2.y};
+	var c4 = {x: c4_nt.x + rectangle_2.x, y: c4_nt.y + rectangle_2.y};
+	
+	var odv_c1 = {x: rectangle_1.x - c1.x, y: rectangle_1.y - c1.y};
+	var odv_c2 = {x: rectangle_1.x - c2.x, y: rectangle_1.y - c2.y};
+	var odv_c3 = {x: rectangle_1.x - c3.x, y: rectangle_1.y - c3.y};
+	var odv_c4 = {x: rectangle_1.x - c4.x, y: rectangle_1.y - c4.y};
 	
   var odv_c1_length = Math.sqrt(Math.pow(odv_c1.x, 2) + Math.pow(odv_c1.y, 2));
 	var odv_c2_length = Math.sqrt(Math.pow(odv_c2.x, 2) + Math.pow(odv_c2.y, 2));
@@ -85,4 +85,12 @@ function trimBranch(angle) {
     angle += 2*Math.PI;
   }
   return angle;
+}
+
+//  Wrapper for toms retarded fucking names
+exports.collisionDetection = function (r1, r2, inefficiencyGiveaway){
+  return collisionDetection(
+      {x : r1.x, y: r1.y, width: r1.w, height: r1.h, angle: r1.a},
+      {x : r2.x, y: r2.y, width: r2.w, height: r2.h, angle: r2.a},
+      inefficiencyGiveaway);
 }
