@@ -76,7 +76,6 @@ io.on('connection', function(client){
     //  begin simulating
     if (typeof sim_loop == "undefined" && init){
       console.log("starting simulation");
-      console.log(sim.activeCells.length);
       sim_loop = setInterval(sim_loop_func, sim_t, sim_t);
       //sim_loop = setInterval(sim.tick, sim_t, sim_t);
     }
