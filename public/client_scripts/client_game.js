@@ -209,6 +209,13 @@ function drawCannonBalls() {
   ctx.fill();
 }
 
+
+function drawTreasure() {
+    var img = document.getElementById("treasure");
+    ctx.drawImage(img, 0, 0, img.width, img.height, this.xTreasure, this.yTreasure, 20, 20);
+}
+
+
 //  Our id assigned to us by the server
 var our_id;
 
@@ -220,6 +227,7 @@ socket.on('on_connected', function (data){
   meta = data.meta;
   sim = new Sim(meta.gridNumber, meta.cellWidth, meta.cellHeight,
     meta.activeCells);
+  sim.populateMap(drawTreasure);
 
   //  Using 16:9 aspect ratio
   viewport = new Viewport(sim, 0, 0, 1.6, 0.9, 2);
@@ -231,6 +239,7 @@ socket.on('on_connected', function (data){
   newPlayer(our_id, data.state);
   player = sim.addShip(data.state, our_id, localShipInput,
     createShipOnDraw("black"), drawCannonBalls);
+  drawTreasure();
 
   //  Set our world up in the config described by the server
 
