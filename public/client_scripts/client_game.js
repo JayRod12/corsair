@@ -21,8 +21,6 @@ const seaColor = "rgb(102, 204, 255)";
 const s_delay = 1000/40;
 
 
-
-
 ///////////////// DRAW METHODS ////////////////////////////
 
 //  Viewport maps world area to canvas for printing
@@ -124,16 +122,18 @@ function draw(){
 ///////////// MOVEMENT METHODS /////////////
 
 
-//  Store current mouse position
+//  Mouse position on screen
+var mouse_screen_x = 0;
+var mouse_screen_y = 0;
+
+//  Mouse position in world
 var mouse_x = 0;
 var mouse_y = 0;
 
 //  Update mouse position on movement
 $( "#main_canvas" ).mousemove(function(event){
-  //  TEMP
-  var scale = viewport.scale;
-  mouse_x = (event.offsetX/scale + viewport.x);
-  mouse_y = (event.offsetY/scale + viewport.y);
+  mouse_screen_x = event.offsetX;
+  mouse_screen_y = event.offsetY;
 });
 
 
@@ -206,11 +206,18 @@ var localShipInput = function(){
 function clientTick(currentTime){
 
   window.requestAnimationFrame(clientTick);
+
   if (!lastTime) lastTime = currentTime-1;//  Subtract one to avoid any divide
                                           //  by zero
   var dt = currentTime - lastTime;
   lastTime = currentTime;
+
+  mouse_x = (mouse_screen_x/viewport.scale + viewport.x);
+  mouse_y = (mouse_screen_y/viewport.scale + viewport.y);
+
   sim.tick(dt);
+
+
   draw();
 }
 
