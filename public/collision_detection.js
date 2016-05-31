@@ -75,3 +75,14 @@ function getRectangleTravel(theta, rectangle) {
 	}
 	return trav;
 }
+
+//Ensure angles remain between [-Pi, Pi]
+function trimBranch(angle) {
+   if (angle > Math.PI) {
+	angle -= 2*Math.PI;
+  } 
+  if (angle < -Math.PI) {
+    angle += 2*Math.PI;
+  }
+  return angle;
+}
