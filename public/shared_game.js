@@ -268,12 +268,16 @@ function Sim(gridNumber, cellWidth, cellHeight, activeCells){
     return ship;
   };
 
+
   this.removeObject = function(object) {
     var cell = object.cell;
     for (var i = 0; i < cell.gameObjects.length; i++){
       if (cell.gameObjects[i] == object) {
         cell.gameObjects.splice(i,1);
       }
+    }
+    if (typeof object.onDeath != "undefined") {
+      object.onDeath();
     }
   };
 

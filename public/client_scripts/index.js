@@ -11,7 +11,12 @@ $(document).ready(function () {
 
      $('#playButton').click(function(event) {
        localStorage['nickname'] = $('#textField').val(); 
-       this.form.submit();
+       $('#welcomeScreen').hide();
+       $('body').css({'margin':'0px',
+                      'padding':'0px',
+                      'display':'block'});
+       $('#game_canvas').fadeIn('slow');
+       startClient();
        return false;
      });
 });

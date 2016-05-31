@@ -20,10 +20,6 @@ app.get('/', function(req, res) {
   res.sendFile(path.resolve(__dirname + '/../html/index.html'));
 });
 
-app.get('/game', function(req, res) {
-  res.sendFile(path.resolve(__dirname + '/../html/game.html'));
-});
-
 
 http.listen(process.env.PORT || port, function() {
   console.log('Listening on 3000');
