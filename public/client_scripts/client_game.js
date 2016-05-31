@@ -23,8 +23,6 @@ const s_delay = 1000/40;
 
 ///////////////// DRAW METHODS ////////////////////////////
 
-///////////////// DRAW METHODS ////////////////////////////
-
 //  Viewport maps world area to canvas for printing
 function Viewport(sim, x, y, baseWidth, baseHeight, scale){
 
@@ -94,6 +92,7 @@ function createShipOnDraw(colour, name){
     // Ship name
     ctx.fillStyle = "white";
     ctx.font = "5px Courier";
+    ctx.textAlign="left"; 
     var metrics = ctx.measureText(name);
     var textWidth = metrics.width;
     ctx.fillText(name, this.state.x - textWidth/2, this.state.y);
@@ -109,11 +108,18 @@ function drawCannonBalls() {
   ctx.fill();
 }
 
+var treasureX = 300;
+var treasureY = 300;
+
 function drawTreasure() {
     ctx.beginPath();
-    ctx.arc(100, 100, 10, 2 * Math.PI, false);
+    ctx.fillRect(treasureX, treasureY, 20, 20);
     ctx.fillStyle = "yellow";
     ctx.fill();
+}
+
+function drawCompass() {
+  drawCompassScaled(player.state.x, player.state.y, treasureX, treasureY, 50);
 }
 
 //  Draws all objects
@@ -124,6 +130,7 @@ function draw(){
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   drawBehindGrid(ctx);
   viewport.draw(ctx, canvas.width, canvas.height);
+  drawCompass();
 }
 
 
@@ -328,6 +335,7 @@ function playClientGame(data) {
   meta = data.meta;
   sim = new Sim(meta.gridNumber, meta.cellWidth, meta.cellHeight,
     meta.activeCells);
+  sim.populateMap(drawTreasure);
   //  Using 16:9 aspect ratio
   viewport = new Viewport(sim, 0, 0, 1.6, 0.9, 2);
 
