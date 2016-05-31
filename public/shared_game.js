@@ -52,42 +52,106 @@ function Ship(sim, state, uid, inputFunction, onDraw, onDrawCannon){
     this.state.y = (this.state.y + remoteState.y) / 2
     updateCell(this.sim, this, this.state.x, this.state.y);
 
+    this.cannon.onTick(dt);
+
   }
 
   this.onDraw = onDraw;
 }
 
 function Cannon(ship, onDraw) {
-  this.ballSpeed = 1;
-  this.ship = ship;
-  this.level = 1;
-  this.onShoot = function(side) {
-    console.log('Ship direction: ' + this.ship.state.angle);
-    //var ballR = new CannonBall(this.ship, 1, this.ballSpeed, onDraw, this.level);
-    //var ballL = new CannonBall(this.ship, -1, this.ballSpeed, onDraw, this.level);
-    var ball = new CannonBall(this.ship, side, this.ballSpeed, onDraw, this.level);
-    var cell = this.ship.sim.coordinateToCell(this.ship.state.x, this.ship.state.y)
 
-    //cell.gameObjects.push(ballR);
-    //cell.gameObjects.push(ballL);
-    cell.gameObjects.push(ball);
-  }
+  this.ballSpeed = 0.3;
+  this.cannons = 5;
+  this.spacing = 15;
+  this.delay = 30;
+  this.ship = ship;
+  this.level = 3;
+  this.onDraw = onDraw;
+
+  this.baseCooldown = 1800;
+  this.cooldown = 0;
+
+  this.futureShots = [];  //  List of future firing events
+
+  this.onShoot = function(side) {
+
+    if (this.cooldown > 0) return false;
+    this.cooldown = this.baseCooldown;
+
+    console.log('Ship direction: ' + this.ship.state.angle);
+
+
+
+    for (var i = 0; i < this.cannons; i++){
+
+      var ship = this.ship;
+      var level = this.level;
+      var onDraw = this.onDraw;
+      var ballSpeed = this.ballSpeed;
+      var spacing = this.spacing;
+      var cannons = this.cannons;
+
+      //var offsetX = this.spacing * (this.cannons / 2 - i) * Math.cos(ship.state.angle);
+      //offsetX = 0;
+      //offsetY = 0;
+
+      var shot = function(i){
+        var offsetX = spacing * (cannons / 2 - i) * Math.cos(ship.state.angle);
+        var offsetY = spacing * (cannons / 2 - i) * Math.sin(ship.state.angle);
+        var ball = new CannonBall(ship, offsetX, offsetY, side, ballSpeed, onDraw, level);
+        var cell = ship.sim.coordinateToCell(ship.state.x,ship.state.y);
+        cell.gameObjects.push(ball);
+      }
+      /*
+      var shot = function(){
+        var offsetX, offsetY, cannon;
+        offsetX = this.spacing * (this.cannons / 2 - i) * Math.cos(this.ship.state.angle);
+        offsetY = this.spacing * (this.cannons / 2 - i) * Math.sin(this.ship.state.angle);
+        var ball = new CannonBall(this.ship, offsetX, offsetY, side, this.ballSpeed, onDraw, this.level);
+        var cell = this.ship.sim.coordinateToCell(this.ship.state.x,
+            this.ship.state.y);
+        cell.gameObjects.push(ball);
+      }
+      */
+
+      this.futureShots.push({time: i*this.delay, f : shot, i: i});
+    }
+
+  };
+
+  this.onTick = function(dt){
+    if (this.cooldown > 0) this.cooldown -= dt;
+    for (var i = 0; i < this.futureShots.length; i++){
+      //  Inefficient?
+      //this.futureShots[i] = {time: this.futureShots[i].time - dt, f:
+        //this.futureShots[i].f};
+      this.futureShots[i].time -= dt;
+      if (this.futureShots[i].time < 0){
+        this.futureShots[i].f(this.futureShots[i].i);
+        this.futureShots.splice(i,1);
+        i = i - 1;
+      }
+    }
+  };
 }
 
-function CannonBall(ship, side, speed, onDraw, level) {
+function CannonBall(ship, offsetX, offsetY, side, speed, onDraw, level) {
+
+  console.log(offsetX);
+
   this.sim = ship.sim;
-  this.ship = ship; // Ship can be used when doing collision detection
-  this.side = side;
-  // TODO: angles are fucked up pi/2 when going down, -pi/2 up. 0 ok.
+  this.ship = ship; 
+  this.level = level;
+
   var angle = ((-ship.state.angle - side * Math.PI / 2 + 2 * Math.PI) % (2 * Math.PI));
 
-  this.state = { x : ship.state.x
-               , y : ship.state.y
-               , level : level
-               , life : 100 * level
+  this.state = { x : ship.state.x + offsetX
+               , y : ship.state.y + offsetY
                , xvel: ship.state.speed * Math.cos(-ship.state.angle) + speed * Math.cos(angle)
                , yvel: ship.state.speed * Math.sin(-ship.state.angle) + speed * Math.sin(angle)
   };
+
   this.cell = this.sim.coordinateToCell(this.state.x, this.state.y);
 
   this.onTick = function(dt) {
@@ -97,7 +161,7 @@ function CannonBall(ship, side, speed, onDraw, level) {
     // TODO interpolation with remote state
     this.state.x += dt * this.state.xvel;
     this.state.y -= dt * this.state.yvel;
-    this.state.life -= 1;
+    this.life -= 1;
     updateCell(this.sim, this, this.state.x, this.state.y);
   };
   this.onDraw = onDraw;

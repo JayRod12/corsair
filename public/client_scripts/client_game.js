@@ -101,7 +101,7 @@ function createShipOnDraw(colour, name){
 }
 
 function drawCannonBalls() {
-  var radius = 5; // 5 pixels
+  var radius = this.level;
   ctx.beginPath();
   ctx.arc(this.state.x, this.state.y, radius, 2 * Math.PI, false);
   ctx.fillStyle = "black";
