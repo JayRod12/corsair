@@ -20,12 +20,6 @@ app.get('/', function(req, res) {
   res.sendFile(path.resolve(__dirname + '/../html/index.html'));
 });
 
-
-app.post('/highScores', function(req, res) {
-  res.sendFile(path.resolve(__dirname + '/../html/highScores.html'));
-});
-
-
 http.listen(process.env.PORT || port, function() {
   console.log('Listening on 3000');
 });
@@ -43,11 +37,11 @@ io.on('connection', function(client){
   //  TODO don't spawn on top of other people or in 'danger'
   //  TODO fix initial vars
   var initState = {
-    x: Math.random()*Game.width,
-    y: Math.random()*Game.height,
-    x: 0,
-    y: 0,
-    angle: Math.random()*Math.PI/2,
+    //x: Math.random()*Game.width,
+    //y: Math.random()*Game.height,
+    x: 10,
+    y: 10,
+    //angle: Math.random()*Math.PI/2,
     angle: +Math.PI/3,
     speed: 0
   };
@@ -91,7 +85,6 @@ io.on('connection', function(client){
     //  Log
     console.log('\t socket.io:: player ' + client.userid + ' connected, ' +
         playerCount + ' players');
-
     client.emit('start_game', {});
   });
 

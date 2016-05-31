@@ -1,7 +1,3 @@
-//const server = false;
-server = false;
-var gameInit = false;
-
 var socket;
 var canvas = $("#main_canvas")[0];
     canvas.width = window.innerWidth;
@@ -14,12 +10,18 @@ var player;
 var meta;
 var our_id;
 
+// Game loops
+var server_loop;
+var client_loop;
+
+
 // Constants for the game
 const speed_norm = 100 * 5;
 const backColor = "rgb(104, 104, 104)";
 const seaColor = "rgb(102, 204, 255)";
 const s_delay = 1000/40;
 
+///////////////// DRAW METHODS ////////////////////////////
 
 ///////////////// DRAW METHODS ////////////////////////////
 
@@ -99,13 +101,13 @@ function createShipOnDraw(colour, name){
 }
 
 function drawCannonBalls() {
-  var radius = 5; // 5 pixels
+
+  var radius = this.level;
   ctx.beginPath();
   ctx.arc(this.state.x, this.state.y, radius, 2 * Math.PI, false);
   ctx.fillStyle = "black";
   ctx.fill();
 }
-
 
 function drawTreasure() {
     ctx.beginPath();
@@ -114,13 +116,10 @@ function drawTreasure() {
     ctx.fill();
 }
 
-
-
 //  Draws all objects
 function draw(){
   viewport.x = player.state.x - canvas.width / (2 * viewport.scale);
   viewport.y = player.state.y - canvas.height / (2 * viewport.scale);
-
   //  Fastest way to clear entire canvas
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   drawBehindGrid(ctx);
@@ -129,7 +128,6 @@ function draw(){
 
 
 ///////////// MOVEMENT METHODS /////////////
-
 
 //  Mouse position on screen
 var mouse_screen_x = 0;
@@ -143,6 +141,7 @@ var mouse_y = 0;
 $( "#main_canvas" ).mousemove(function(event){
   mouse_screen_x = event.offsetX;
   mouse_screen_y = event.offsetY;
+
 });
 
 
@@ -205,8 +204,6 @@ var localShipInput = function(){
       -mouse_y,2)) / speed_norm;
 }
 
-
-
 // GAME LOOP
 
 
@@ -214,7 +211,7 @@ var localShipInput = function(){
 //  TODO maybe skip frames if at more than 60fps?
 function clientTick(currentTime){
 
-  window.requestAnimationFrame(clientTick);
+  client_loop = window.requestAnimationFrame(clientTick);
 
   if (!lastTime) lastTime = currentTime-1;//  Subtract one to avoid any divide
                                           //  by zero
@@ -230,11 +227,32 @@ function clientTick(currentTime){
   draw();
 }
 
-//  Our id assigned to us by the server
-var our_id;
+//  Add a new ship to the local world from information from the server
+
+function addServerShip(userid, name, state){
+  console.log("adding new player");
+  newPlayer(userid, name, state);
+  sim.addShip(state, userid,
+      createServerShipInput(userid),
+        createShipOnDraw("brown", name), drawCannonBalls);
+
+}
+
+//  Update the server about the player's position
+
+function client_update(player){
+
+  if ((typeof socket != "undefined") && socket.connected) {
+    socket.emit('client_update', {state: player.state});
+  }
+}
 
 function endClient() {
   socket.disconnect();
+
+  if (client_loop) {
+    window.cancelAnimationFrame(client_loop);
+  }
 }
 
 function startClient() {
@@ -251,14 +269,15 @@ function startClient() {
   
   socket.on('start_game', function(data){
   
-    window.requestAnimationFrame(clientTick);
+    client_loop = window.requestAnimationFrame(clientTick);
   
     //  Delay between updating the server
   
     //  Send information about the local player to the server every s_delay
-    if(typeof server_loop != "undefined") clearInterval(server_loop);
-    var server_loop = setInterval(client_update, s_delay, player);
-  
+    if(server_loop) {
+      clearInterval(server_loop);
+    }
+    server_loop = setInterval(client_update, s_delay, player);
   });
 
   //  Recieved when another player joins the server
@@ -286,19 +305,29 @@ function startClient() {
 // Terminate the game when the ship dies
 function onShipDeath() {
   $('#game_canvas').hide();
+  $('body').css({'background':'black'});
   $('#welcomeScreen').fadeIn('slow');
   console.log('Ship death' + mouse_x + ', ' + mouse_y);
   endClient();
 }
 
 function playClientGame(data) {
-  mouse_x = mouse_y = 100;
+  mouse_x = 0;
+  mouse_y = 0;
+  mouse_screen_x = 0;
+  mouse_screen_y = 0;
+
+  sim = null;
+  viewport = null;
+  lastTime = null;
+  player = null;
+  meta = null;
+  our_id = null;
+
   initializeGame();
   meta = data.meta;
   sim = new Sim(meta.gridNumber, meta.cellWidth, meta.cellHeight,
     meta.activeCells);
-  sim.populateMap(drawTreasure);
-
   //  Using 16:9 aspect ratio
   viewport = new Viewport(sim, 0, 0, 1.6, 0.9, 2);
 
@@ -323,28 +352,7 @@ function playClientGame(data) {
 
 
 $('document').unload(function() {
-  if (socket && socket.connected) {
+  if ((typeof socket != "undefined") && socket.connected) {
     socket.emit('disconnect');
   }
 });
-
-//  Update the server about the player's position
-
-function client_update(player){
-  if (socket && socket.connected) {
-    socket.emit('client_update', {state: player.state});
-  }
-}
-
-//  Add a new ship to the local world from information from the server
-
-function addServerShip(userid, name, state){
-  console.log("adding new player");
-  newPlayer(userid, name, state);
-  sim.addShip(state, userid, 
-      createServerShipInput(userid),
-        createShipOnDraw("brown", name), drawCannonBalls);
-
-}
-
-
