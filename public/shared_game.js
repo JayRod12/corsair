@@ -69,7 +69,7 @@ function Cannon(ship, onDraw) {
   this.level = 3;
   this.onDraw = onDraw;
 
-  this.baseCooldown = 1800;
+  this.baseCooldown = 1200;
   this.cooldown = 0;
 
   this.futureShots = [];  //  List of future firing events
@@ -92,10 +92,6 @@ function Cannon(ship, onDraw) {
       var spacing = this.spacing;
       var cannons = this.cannons;
 
-      //var offsetX = this.spacing * (this.cannons / 2 - i) * Math.cos(ship.state.angle);
-      //offsetX = 0;
-      //offsetY = 0;
-
       var shot = function(i){
         var offsetX = spacing * (cannons / 2 - i) * Math.cos(ship.state.angle);
         var offsetY = spacing * (cannons / 2 - i) * Math.sin(ship.state.angle);
@@ -103,17 +99,6 @@ function Cannon(ship, onDraw) {
         var cell = ship.sim.coordinateToCell(ship.state.x,ship.state.y);
         cell.gameObjects.push(ball);
       }
-      /*
-      var shot = function(){
-        var offsetX, offsetY, cannon;
-        offsetX = this.spacing * (this.cannons / 2 - i) * Math.cos(this.ship.state.angle);
-        offsetY = this.spacing * (this.cannons / 2 - i) * Math.sin(this.ship.state.angle);
-        var ball = new CannonBall(this.ship, offsetX, offsetY, side, this.ballSpeed, onDraw, this.level);
-        var cell = this.ship.sim.coordinateToCell(this.ship.state.x,
-            this.ship.state.y);
-        cell.gameObjects.push(ball);
-      }
-      */
 
       this.futureShots.push({time: i*this.delay, f : shot, i: i});
     }
