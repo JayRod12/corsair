@@ -301,7 +301,7 @@ function initializeGame(){
 function newPlayer(id, name, state) {
   remoteStates[id] = state;
   playerNames[id] = name;
-  console.log('Adding player: ' + name + ' ' + name);
+  console.log('Adding player: ' + name);
 }
 
 function removePlayer(id) {

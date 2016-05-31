@@ -38,11 +38,11 @@ io.on('connection', function(client){
   //  TODO don't spawn on top of other people or in 'danger'
   //  TODO fix initial vars
   var initState = {
-    x: Math.random()*Game.width,
-    y: Math.random()*Game.height,
-    x: 0,
-    y: 0,
-    angle: Math.random()*Math.PI/2,
+    //x: Math.random()*Game.width,
+    //y: Math.random()*Game.height,
+    x: 10,
+    y: 10,
+    //angle: Math.random()*Math.PI/2,
     angle: +Math.PI/3,
     speed: 0
   };
@@ -77,15 +77,13 @@ io.on('connection', function(client){
     //  begin simulating
     if (typeof sim_loop == "undefined" && init){
       console.log("starting simulation");
-      console.log(sim.activeCells.length);
       sim_loop = setInterval(sim_loop_func, sim_t, sim_t);
-      //sim_loop = setInterval(sim.tick, sim_t, sim_t);
     }
 
 
     //  Log
     console.log('\t socket.io:: player ' + client.userid + ' connected, ' +
-        playerCount + ' players');
+        playerCount);
 
     client.emit('start_game', {});
   });
