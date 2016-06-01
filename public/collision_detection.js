@@ -41,21 +41,21 @@ function queryRectangleRectangleCollision(rectangle_1, rectangle_2, first) {
 	var c4 = {x: c4_nt.x + rectangle_2.x, y: c4_nt.y + rectangle_2.y};
 	
   //A rectangle only collides with another if vertices points are on or in it
-  if (queryCollisionPointRectangleCollision(c1, rectangle_1)) return true;
-  if (queryCollisionPointRectangleCollision(c2, rectangle_1)) return true;
-  if (queryCollisionPointRectangleCollision(c3, rectangle_1)) return true;
-  if (queryCollisionPointRectangleCollision(c4, rectangle_1)) return true;
+  if (queryPointRectangleCollision(c1, rectangle_1)) return true;
+  if (queryPointRectangleCollision(c2, rectangle_1)) return true;
+  if (queryPointRectangleCollision(c3, rectangle_1)) return true;
+  if (queryPointRectangleCollision(c4, rectangle_1)) return true;
   if (first) {return collisionDetection(rectangle_2, rectangle_1, false);}
   return false;
 }
 
 
 function queryPointRectangleCollision(point, rectangle) {
-	var odv_p = {x: rectangle.x - c1.x, y: rectangle.y - c1.y};
+	var odv_p = {x: rectangle.x - point.x, y: rectangle.y - point.y};
 	var odv_p_square_length = odv_p.x*odv_p.x + odv_p.y*odv_p.y;
 	var odv_p_theta = trimBranch(Math.atan2(odv_p.y, odv_p.x));
 	var odv_p_angle_to_rectangle = trimBranch(odv_p_theta - rectangle.angle);
-	var trav = getRectangleTravel(Math.abs(odv_p_angle_to_rectangle, rectangle);
+	var trav = getRectangleTravel(Math.abs(odv_p_angle_to_rectangle), rectangle);
 	return trav*trav + epsilon >= odv_p_square_length; 
 }
 
@@ -68,7 +68,7 @@ function queryCircleCircleCollision(circle_1, circle_2) {
 }
 
 
-function queryPointPointcollision(p1, p2) {
+function queryPointPointCollision(p1, p2) {
 	return queryCircleCircleCollision({origin: p1, radius: 0}, 
 									                  {origin: p2, radius: 0});
 }
@@ -100,6 +100,16 @@ function trimBranch(angle) {
   }
   return angle;
 }
+
+/*PSEUDO-TESTS*/
+/*
+console.log(queryPointRectangleCollision({x:0, y:5}, 
+            {x:0, y:0, width:10, height:10, angle:0}));
+console.log(queryPointPointCollision({x: 24, y: 32}, {x: 24, y: 32}));
+console.log(queryPointPointCollision({x: 12, y: 42}, {x: 42, y: 12}));
+console.log(queryCircleCircleCollision({origin: {x: 70, y:70}, radius: 24}, {origin: {x:15, y:20}, radius: 25}));
+console.log(queryRectangleRectangleCollision({x: 357, y: 548, height: 22, width: 11.5, angle:(Math.PI/27.5)}, {x: 128, y: 275, height: 528, width: 817, angle: Math.PI}));
+*/
 
 //  Dan is a pretentious twat
 exports.collisionDetection = function (r1, r2, inefficiencyGiveaway){
