@@ -117,10 +117,16 @@ function drawCannonBalls() {
 }
 
 function drawTreasure() {
-    ctx.beginPath();
-    ctx.arc(100, 100, 10, 2 * Math.PI, false);
-    ctx.fillStyle = "yellow";
-    ctx.fill();
+  ctx.beginPath();
+  ctx.arc(100, 100, 10, 2 * Math.PI, false);
+  ctx.fillStyle = "yellow";
+  ctx.fill();
+}
+
+function drawScore() {
+  ctx.fillStyle = "black";
+  ctx.font = "50px Courier";
+  ctx.fillText(player.score, (9/10)*canvas.width, (1/10)*canvas.height);
 }
 
 //  Draws all objects
@@ -131,6 +137,7 @@ function draw(){
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   drawBehindGrid(ctx);
   viewport.draw(ctx, canvas.width, canvas.height);
+  drawScore();
 }
 
 
