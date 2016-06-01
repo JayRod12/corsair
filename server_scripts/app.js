@@ -137,7 +137,7 @@ io.on('connection', function(client){
 
 var sim_loop_func = function(dt){
   //console.log(sim.activeCells);
-  sim.tick(dt);
+  sim.playerName(dt);
 }
 
 var test_loop_func = function(){

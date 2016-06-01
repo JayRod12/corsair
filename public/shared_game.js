@@ -6,6 +6,9 @@ const height = 1000;
 const shipBaseWidth = 90;
 const shipBaseHeight = 40;
 
+var UIDtoShip = [];
+var UIDtoName = [];
+
 var remoteStates;
 
 
@@ -230,8 +233,6 @@ function updateCell(sim, object, x, y) {
   }
 }
 
-
-
 //  Where
 //  gridNumber is the height and width of the world in cells
 //  cellWidth, cellHeight specify cell size
@@ -338,6 +339,8 @@ function Sim(gridNumber, cellWidth, cellHeight, activeCells){
     var cell = this.coordinateToCell(state.x, state.y);
     var ship = new Ship(this, state, uid, inputFunction, onDraw, onDrawCannon);
     cell.gameObjects.push(ship);
+    UIDtoShip[uid] = ship;
+    UIDtoName[uid] = getPlayerNames()[uid];
     return ship;
   };
 

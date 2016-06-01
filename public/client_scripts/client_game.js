@@ -16,7 +16,7 @@ var client_loop;
 
 
 // Constants for the game
-const speed_norm = 100 * 5;
+const speed_norm = 100 * 5 * 100;
 const backColor = "rgb(104, 104, 104)";
 const seaColor = "rgb(102, 204, 255)";
 const seaHighlightColor = "rgb(225, 102, 255)";
@@ -100,7 +100,7 @@ function createShipOnDraw(colour, name){
 
     // Ship name
     ctx.fillStyle = "white";
-    ctx.font = "5px Courier";
+    ctx.font = "15px Josefin Sans";
     ctx.textAlign="left"; 
     var metrics = ctx.measureText(name);
     var textWidth = metrics.width;
@@ -109,7 +109,6 @@ function createShipOnDraw(colour, name){
 }
 
 function drawCannonBalls() {
-
   var radius = this.level;
   ctx.beginPath();
   ctx.arc(this.state.x, this.state.y, radius, 2 * Math.PI, false);
@@ -128,10 +127,35 @@ function drawTreasure() {
     ctx.closePath();
 }
 
+function drawHighScoresTable(UIDtoShip, UIDtoName) {
+  var maxDisplay = 10;
+  var displayNumber = UIDtoShip.length < maxDisplay ? UIDtoShip.length : maxDisplay;
+  var i = 0;
+
+  for (var uid in UIDtoShip) {
+    if (i <= displayNumber) {
+      i++;
+      ctx.beginPath();
+      ctx.font = "20px Josefin Sans";
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = 'black';
+      ctx.textAlign="left"; 
+      ctx.strokeText("#" + i + " " + UIDtoName[uid] + "\t" + UIDtoShip[uid].score + "\n", 
+        (9/10)*canvas.width, (1/10)*canvas.height);
+      console.log(UIDtoName[uid]);
+      ctx.stroke();
+      ctx.closePath();
+    } else {
+      break;
+    }
+  }
+}
+
+
 function drawScore() {
   ctx.fillStyle = "black";
-  ctx.font = "50px Courier";
-  ctx.fillText(player.score, (9/10)*canvas.width, (1/10)*canvas.height);
+  ctx.font = "50px Josefin Sans";
+  ctx.fillText(player.score, (1/15)*canvas.width, (9.5/10)*canvas.height);
 }
 
 function drawCompass() {
@@ -149,6 +173,7 @@ function draw(){
   viewport.draw(ctx, canvas.width, canvas.height);
   drawCompass();
   drawScore();
+  drawHighScoresTable(UIDtoShip, UIDtoName);
 }
 
 
@@ -373,6 +398,7 @@ function playClientGame(data) {
   sim = new Sim(meta.gridNumber, meta.cellWidth, meta.cellHeight,
     meta.activeCells);
   sim.populateMap(drawTreasure);
+
   //  Using 16:9 aspect ratio
   viewport = new Viewport(sim, 0, 0, 1.6, 0.9, 1);
 
