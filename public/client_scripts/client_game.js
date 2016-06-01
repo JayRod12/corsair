@@ -2,7 +2,22 @@ var socket;
 var canvas = $("#main_canvas")[0];
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-var ctx = canvas.getContext("2d");
+    canvas.style.visibility="visible";
+
+//var canvas2 = document.createElement('canvas');
+var canvas = $("#sub_canvas")[0];
+    //canvas2.id = "sub_canvas";
+    canvas2.width = canvas.width;
+    canvas2.height = canvas.height;
+    canvas2.style.visibility="hidden";
+
+var frame_buffer = [canvas, canvas2];
+var display_frame = 0;
+
+//var ctx = canvas.getContext("2d");
+
+var frame_buffer_ctx = [canvas.getContext("2d"), canvas2.getContext("2d")];
+
 var sim;
 var viewport;
 var lastTime;
@@ -69,7 +84,7 @@ function drawCellBackground(cx, cy, ctx){
 
 
 function createShipOnDraw(colour, name){
-  return function(){
+  return function(ctx){
     var width = shipBaseWidth * this.scale;
     var height = shipBaseHeight * this.scale;
 
@@ -101,7 +116,7 @@ function createShipOnDraw(colour, name){
   }
 }
 
-function drawCannonBalls() {
+function drawCannonBalls(ctx) {
 
   var radius = this.level;
   ctx.beginPath();
@@ -113,7 +128,7 @@ function drawCannonBalls() {
 var treasureX = 300;
 var treasureY = 300;
 
-function drawTreasure() {
+function drawTreasure(ctx) {
     ctx.beginPath();
     ctx.arc(treasureX, treasureY, 10, 2 * Math.PI, false);
     ctx.fillStyle = "yellow";
@@ -121,20 +136,33 @@ function drawTreasure() {
     ctx.closePath();
 }
 
-function drawCompass() {
-  drawCompassScaled(player.state.x, player.state.y, treasureX, treasureY, 50);
+function drawCompass(ctx) {
+  drawCompassScaled(ctx, player.state.x, player.state.y, treasureX, treasureY, 50);
 }
 
 //  Draws all objects
 function draw(){
+
+  var draw_frame = 1-display_frame;
+  var ctx = frame_buffer_ctx[draw_frame];
+
+
   viewport.x = player.state.x - canvas.width / (2 * viewport.scale);
   viewport.y = player.state.y - canvas.height / (2 * viewport.scale);
 
   //  Fastest way to clear entire canvas
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  //ctx.clearRect(0, 0, canvas.width, canvas.height);
   drawBehindGrid(ctx);
   viewport.draw(ctx, canvas.width, canvas.height);
-  drawCompass();
+  drawCompass(ctx);
+
+  //  Switch buffers
+  //if (draw_frame != 0) frame_buffer[draw_frame].style.visibility = "visible";
+  frame_buffer[draw_frame].style.visibility = "visible";
+  frame_buffer[display_frame].style.visibility = "hidden";
+  display_frame = draw_frame;
+
+
 }
 
 

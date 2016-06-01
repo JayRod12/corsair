@@ -1,4 +1,4 @@
-function drawCompassScaled(shipX, shipY, treasureX, treasureY, innerRadius) {
+function drawCompassScaled(ctx, shipX, shipY, treasureX, treasureY, innerRadius) {
 
 	var posX = canvas.width/2 + window.innerWidth/2.3;
 	var posY = canvas.height/2 + window.innerHeight/3.2;

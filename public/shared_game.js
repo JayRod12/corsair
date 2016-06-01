@@ -172,17 +172,17 @@ function Cell(x, y, gridNumber) {
     }
   }
 
-  this.draw = function(){
+  this.draw = function(ctx){
     for (var i = 0; i < this.gameObjects.length; i++){
       if (typeof this.gameObjects[i].onDraw != "undefined"){
-        this.gameObjects[i].onDraw();
+        this.gameObjects[i].onDraw(ctx);
       } else {
         console.log('Undefined draw for cannon');
       }
     }
     for (var i = 0; i < this.staticObjects.length; i++){
       if (typeof this.staticObjects[i].onDraw != "undefined"){
-        this.staticObjects[i].onDraw();
+        this.staticObjects[i].onDraw(ctx);
       } 
     }
   }
@@ -319,7 +319,7 @@ function Sim(gridNumber, cellWidth, cellHeight, activeCells){
     for (var i = 0; i < this.activeCells.length; i++){
       var x = this.activeCells[i].x;
       var y = this.activeCells[i].y;
-      this.grid[x][y].draw();
+      this.grid[x][y].draw(ctx);
     }
   };
 
