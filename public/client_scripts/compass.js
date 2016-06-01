@@ -1,7 +1,7 @@
 function drawCompassScaled(shipX, shipY, treasureX, treasureY, innerRadius) {
 
-	var posX = canvas.width/2 + window.innerWidth/2.5;
-	var posY = canvas.height/2 + window.innerHeight/2.8;
+	var posX = canvas.width/2 + window.innerWidth/2.3;
+	var posY = canvas.height/2 + window.innerHeight/3.2;
 
     var normalize = Math.hypot(treasureX - shipX, treasureY - shipY);
     var Cx = (treasureX - shipX)* innerRadius/normalize + posX;
@@ -41,10 +41,10 @@ function drawCompassScaled(shipX, shipY, treasureX, treasureY, innerRadius) {
 	ctx.lineWidth = 1;
 	ctx.strokeStyle = 'black';
 	ctx.textAlign="center"; 
-	ctx.strokeText("N", posX, posY - innerRadius - 25);
-	ctx.strokeText("S", posX, posY + innerRadius + 35);
-	ctx.strokeText("W", posX - innerRadius - 35, posY);	
-	ctx.strokeText("E", posX + innerRadius + 35, posY);
+	ctx.strokeText("N", posX, posY - innerRadius - 20);
+	ctx.strokeText("S", posX, posY + innerRadius + 30);
+	ctx.strokeText("W", posX - innerRadius - 25, posY);	
+	ctx.strokeText("E", posX + innerRadius + 23, posY + 2);
 	ctx.stroke();
 	ctx.closePath();
 
@@ -80,12 +80,12 @@ function drawCompassScaled(shipX, shipY, treasureX, treasureY, innerRadius) {
 
 	// Rectangle (distance to Treasure)
 	ctx.beginPath();
-	ctx.rect(posX - 75, posY + 250, 150, 50);
-	ctx.strokeStyle = '#000080';
+	ctx.rect(posX - 25, posY + 95, 50, 30);
+	ctx.strokeStyle = 'black';
 	ctx.stroke();
-	ctx.fillStyle = 'black';
+	ctx.fillStyle = '#665600';
 	ctx.textAlign="pos"; 
-	ctx.font = "40px Josefin Sans";
-	ctx.fillText(normalize.toFixed(0), posX, posY + 290);
+	ctx.font = "20px Josefin Sans";
+	ctx.fillText(normalize.toFixed(0), posX, posY + 115);
 	ctx.closePath();
 }

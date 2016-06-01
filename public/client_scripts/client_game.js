@@ -84,6 +84,8 @@ function createShipOnDraw(colour, name){
     //(the fillRect function draws from the topmost left corner of the rectangle 
     ctx.fillStyle = colour;
     ctx.fillRect(-width/2, -height/2, width, height);
+    ctx.strokeStyle = "#ffc0cb";
+    ctx.strokeRect(-width/2, -height/2, width, height);
 
     //We undo our transformations for the next draw/calculations
     ctx.rotate(-this.state.angle);
