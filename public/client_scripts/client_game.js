@@ -1,4 +1,3 @@
-
 var socket;
 var canvas = $("#main_canvas")[0];
     canvas.width = window.innerWidth;
@@ -23,6 +22,7 @@ const seaColor = "rgb(102, 204, 255)";
 const seaHighlightColor = "rgb(225, 102, 255)";
 const s_delay = 1000/40;
 
+///////////////// DRAW METHODS ////////////////////////////
 
 ///////////////// DRAW METHODS ////////////////////////////
 
@@ -108,6 +108,7 @@ function createShipOnDraw(colour, name){
 }
 
 function drawCannonBalls() {
+
   var radius = this.level;
   ctx.beginPath();
   ctx.arc(this.state.x, this.state.y, radius, 2 * Math.PI, false);
@@ -115,12 +116,17 @@ function drawCannonBalls() {
   ctx.fill();
 }
 
+function drawTreasure() {
+    ctx.beginPath();
+    ctx.arc(100, 100, 10, 2 * Math.PI, false);
+    ctx.fillStyle = "yellow";
+    ctx.fill();
+}
 
 //  Draws all objects
 function draw(){
   viewport.x = player.state.x - canvas.width / (2 * viewport.scale);
   viewport.y = player.state.y - canvas.height / (2 * viewport.scale);
-
   //  Fastest way to clear entire canvas
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   drawBehindGrid(ctx);
@@ -142,7 +148,7 @@ var mouse_y = 0;
 $( "#main_canvas" ).mousemove(function(event){
   mouse_screen_x = event.offsetX;
   mouse_screen_y = event.offsetY;
-//  console.log('mouse pos ' + mouse_screen_x + ', ' + mouse_screen_y);
+
 });
 
 
@@ -205,8 +211,6 @@ var localShipInput = function(){
       -mouse_y,2)) / speed_norm;
 }
 
-
-
 // GAME LOOP
 
 
@@ -244,6 +248,7 @@ function addServerShip(userid, name, state){
 //  Update the server about the player's position
 
 function client_update(player){
+
   if ((typeof socket != "undefined") && socket.connected) {
     socket.emit('client_update', {state: player.state});
   }
@@ -377,7 +382,3 @@ $('document').unload(function() {
     socket.emit('disconnect');
   }
 });
-
-
-
-

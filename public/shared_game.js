@@ -154,12 +154,19 @@ function CannonBall(ship, offsetX, offsetY, side, speed, onDraw, level) {
 
 }
 
+function Treasure(xTreasure, yTreasure, onDraw) {
+    this.xTreasure = xTreasure;
+    this.yTreasure = yTreasure;
+    this.onDraw = onDraw;
+}
+
 function Cell(x, y, gridNumber) {
   this.number = gridNumber * y + x;
   this.x = x;
   this.y = y;
   this.gameObjects = [];
   this.bufferedUpdates = [];
+  this.staticObjects = [];
 
   this.tick = function(dt){
     for (var i = 0; i < this.gameObjects.length; i++){
@@ -175,13 +182,10 @@ function Cell(x, y, gridNumber) {
         console.log('Undefined draw for cannon');
       }
     }
-  }
-
-  this.drawViewport = function(){
-    for (var i = 0; i < this.gameObjects.length; i++){
-      if (typeof this.gameObjects[i].onViewportDraw != "undefined"){
-        this.gameObjects[i].onViewportDraw();
-      }
+    for (var i = 0; i < this.staticObjects.length; i++){
+      if (typeof this.staticObjects[i].onDraw != "undefined"){
+        this.staticObjects[i].onDraw();
+      } 
     }
   }
 }
@@ -217,6 +221,7 @@ function updateCell(sim, object, x, y) {
     }
   }
 }
+
 
 
 //  Where
@@ -269,6 +274,14 @@ function Sim(gridNumber, cellWidth, cellHeight, activeCells){
     return this.grid[x_coord][y_coord];
   };
 
+  this.populateMap = function(drawTreasure, drawCoins, drawRocks) {
+    var xTreasure = Math.random() * gridNumber * cellWidth;
+    var yTreasure = Math.random() * gridNumber * cellHeight;
+    var treasure = new Treasure(xTreasure, yTreasure, drawTreasure);
+    var cell = this.coordinateToCell(xTreasure, yTreasure);
+    cell.staticObjects.push(treasure);
+  };
+
   //  Given a function f of a cell and some auxilary data,
   //  apply that function to all cells in a given area
   this.applyToCells = function(f, aux, x, y, width, height){
@@ -281,7 +294,7 @@ function Sim(gridNumber, cellWidth, cellHeight, activeCells){
         f(this.grid[x_coord][y_coord], aux);
       }
     }
-  }
+  };
 
 
   this.tick = function(dt){

@@ -8,6 +8,11 @@
   </head>
 
   <body>
+      <form action="/highScores" method="post">
+        <button id="trophyButton"><img id="trophyImage" 
+          src="media/trophy.png" alt="Hall of Fame"></button>
+      </form>
+
     <!--ANIMATION-->
     <div id="welcomeScreen">
       <div id="titleContainer">
@@ -42,7 +47,6 @@
     <div id="game_canvas">
       <script src="/socket.io/socket.io.js"></script>
       <canvas id="main_canvas"></canvas>
-      <script src="grid.js"></script>
       <script src="shared_game.js"></script>
       <script src="client_scripts/client_game.js"></script>
     </div>
