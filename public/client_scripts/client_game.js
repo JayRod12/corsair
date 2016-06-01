@@ -114,8 +114,6 @@ function draw(){
   viewport.x = player.state.x - canvas.width / (2 * viewport.scale);
   viewport.y = player.state.y - canvas.height / (2 * viewport.scale);
 
-  //  Fastest way to clear entire canvas
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
   drawBehindGrid(ctx);
   viewport.draw(ctx, canvas.width, canvas.height);
 }
