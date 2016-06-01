@@ -24,8 +24,6 @@ const s_delay = 1000/40;
 
 ///////////////// DRAW METHODS ////////////////////////////
 
-///////////////// DRAW METHODS ////////////////////////////
-
 //  Viewport maps world area to canvas for printing
 function Viewport(sim, x, y, baseWidth, baseHeight, scale){
 
@@ -93,6 +91,8 @@ function createShipOnDraw(colour, name){
     //(the fillRect function draws from the topmost left corner of the rectangle 
     ctx.fillStyle = colour;
     ctx.fillRect(-width/2, -height/2, width, height);
+    ctx.strokeStyle = "#ffc0cb";
+    ctx.strokeRect(-width/2, -height/2, width, height);
 
     //We undo our transformations for the next draw/calculations
     ctx.rotate(-this.state.angle);
@@ -101,6 +101,7 @@ function createShipOnDraw(colour, name){
     // Ship name
     ctx.fillStyle = "white";
     ctx.font = "5px Courier";
+    ctx.textAlign="left"; 
     var metrics = ctx.measureText(name);
     var textWidth = metrics.width;
     ctx.fillText(name, this.state.x - textWidth/2, this.state.y);
@@ -116,11 +117,15 @@ function drawCannonBalls() {
   ctx.fill();
 }
 
+var treasureX = 300;
+var treasureY = 300;
+
 function drawTreasure() {
-  ctx.beginPath();
-  ctx.arc(100, 100, 10, 2 * Math.PI, false);
-  ctx.fillStyle = "yellow";
-  ctx.fill();
+    ctx.beginPath();
+    ctx.arc(treasureX, treasureY, 10, 2 * Math.PI, false);
+    ctx.fillStyle = "yellow";
+    ctx.fill();
+    ctx.closePath();
 }
 
 function drawScore() {
@@ -129,14 +134,20 @@ function drawScore() {
   ctx.fillText(player.score, (9/10)*canvas.width, (1/10)*canvas.height);
 }
 
+function drawCompass() {
+  drawCompassScaled(player.state.x, player.state.y, treasureX, treasureY, 50);
+}
+
 //  Draws all objects
 function draw(){
   viewport.x = player.state.x - canvas.width / (2 * viewport.scale);
   viewport.y = player.state.y - canvas.height / (2 * viewport.scale);
+
   //  Fastest way to clear entire canvas
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   drawBehindGrid(ctx);
   viewport.draw(ctx, canvas.width, canvas.height);
+  drawCompass();
   drawScore();
 }
 
@@ -361,6 +372,7 @@ function playClientGame(data) {
   meta = data.meta;
   sim = new Sim(meta.gridNumber, meta.cellWidth, meta.cellHeight,
     meta.activeCells);
+  sim.populateMap(drawTreasure);
   //  Using 16:9 aspect ratio
   viewport = new Viewport(sim, 0, 0, 1.6, 0.9, 1);
 
