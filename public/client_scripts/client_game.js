@@ -322,7 +322,7 @@ function playClientGame(data) {
   sim = new Sim(meta.gridNumber, meta.cellWidth, meta.cellHeight,
     meta.activeCells);
   //  Using 16:9 aspect ratio
-  viewport = new Viewport(sim, 0, 0, 1.6, 0.9, 2);
+  viewport = new Viewport(sim, 0, 0, 1.6, 0.9, 1);
 
   our_id = data.id;
   console.log("Our id is " + our_id);
