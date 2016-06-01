@@ -78,7 +78,7 @@ io.on('connection', function(client){
     if (typeof sim_loop == "undefined" && init){
       console.log("starting simulation");
       sim_loop = setInterval(sim_loop_func, sim_t, sim_t);
-      test_loop = setInterval(test_loop_func, sim_t, sim_t);
+      test_loop = setInterval(test_loop_func, test_t);
     }
 
 
@@ -155,7 +155,7 @@ for (var y = 0; y < gridNumber; y++){
 
 var sim = new Game.Sim(gridNumber, cellWidth, cellHeight, allCells);
 var sim_t = 1000 / 30;
-var test_t = 1000 / 10;
+var test_t = 1000 / 1;
 var sim_loop;
 var test_loop;
 var playerCount = 0;

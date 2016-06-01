@@ -20,6 +20,7 @@ var client_loop;
 const speed_norm = 100 * 5;
 const backColor = "rgb(104, 104, 104)";
 const seaColor = "rgb(102, 204, 255)";
+const seaHighlightColor = "rgb(225, 102, 255)";
 const s_delay = 1000/40;
 
 
@@ -64,7 +65,13 @@ function drawBehindGrid(ctx){
 }
 
 function drawCellBackground(cx, cy, ctx){
+  //  If this cell is in activeCells
   ctx.fillStyle = seaColor;
+  for (var i = 0; i < sim.activeCells.length; i++){
+    if (sim.activeCells[i].x == cx && sim.activeCells[i].y == cy){
+      ctx.fillStyle = seaHighlightColor;
+    }
+  }
   ctx.fillRect(cx*meta.cellWidth, cy*meta.cellHeight, meta.cellWidth+2,
       meta.cellHeight+2);
 }
