@@ -20,7 +20,6 @@ app.get('/', function(req, res) {
   res.sendFile(path.resolve(__dirname + '/../html/index.html'));
 });
 
-
 http.listen(process.env.PORT || port, function() {
   console.log('Listening on 3000');
 });
@@ -87,8 +86,7 @@ io.on('connection', function(client){
 
     //  Log
     console.log('\t socket.io:: player ' + client.userid + ' connected, ' +
-        playerCount);
-
+        playerCount + ' players');
     client.emit('start_game', {});
   });
 

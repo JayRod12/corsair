@@ -1,0 +1,146 @@
+/* layout
+------------------------------------*/
+body {
+	background: #000;
+	color:ivory;
+	text-align: center;
+}
+
+#goBackButton {
+	position:fixed;
+	left:0;
+	top:0;
+	padding: 0;
+	border: 12px solid black;
+	background: none;
+}
+
+#goBackImage {
+  height: 33px;  
+  width: 33px;
+  opacity: 0.4;
+}
+ 
+ 
+#goBackImage:hover {  
+   opacity: 1;
+}  
+
+h1 {
+	font-family: 'Josefin Sans';
+	position: relative;
+	display: inline-block;
+	margin-top: .8em;
+	padding:.8em 0 1em 0;
+	border-top: 1px solid #555;
+	border-bottom: 1px solid #555;
+	font-size:55px;
+	font-weight: bold;
+}
+/* style
+------------------------------------*/
+/* bones */
+h1:before {
+	content: "";
+	display: block;
+	position: absolute;
+	width:20px;
+	height:20px;
+	bottom:-10px;
+	left:50%;
+	margin-left: -10px;
+	transform: rotate(-45deg);
+	-webkit-transform: rotate(-45deg);
+
+	box-shadow:
+    /*tips*/
+		39px -2px 0 -9px ivory,
+		39px 1px 0 -9px ivory,
+		-39px -1px 0 -9px ivory,
+		-39px 2px 0 -9px ivory,
+		-2px 39px 0 -9px ivory,
+		1px 39px 0 -9px ivory,
+		-1px -39px 0 -9px ivory,
+		2px -39px 0 -9px ivory,
+    /*bone 1*/
+		-20px -20px 0 10px #000,
+		-19px -19px 0 10px ivory,
+    /*bone 2*/
+		20px 20px 0 10px #000,
+		19px 19px 0 10px ivory
+	;
+}
+/* skull */
+h1:after {
+  /*the content is the nose*/
+	content: "";
+	display: block;
+	position: absolute;
+	width:2px;
+	height:2px;
+	bottom:-6px;
+	left:50%;
+	margin-left: -1px;
+	border-radius: 1px;
+	background: #000;
+
+	box-shadow:
+    /*eyes*/
+		-5px -4px 0 2px #000,
+		5px -4px 0 2px #000,
+		/*head*/
+		0 -5px 0 10px ivory,
+    /*teeth*/
+		-2px 6px 0 0 ivory,
+		2px 6px 0 0 ivory,
+		-6px 5px 0 0 ivory,
+		6px 5px 0 0 ivory,
+    /*border*/
+		0 -5px 0 13px #000
+	;
+}
+
+#tableContainer {
+	position: relative;
+	display: block;
+	top: 100px;
+}
+
+table {
+	position: relative;
+	display: inline-block;
+	font-family: 'Josefin Sans';
+	border-spacing: 10px;
+}
+
+td:first-child {
+	font-style: italic;
+}
+
+td:nth-child(2) {
+	text-align: left;
+}
+
+#first {
+	color:#FFD700;
+}
+
+#second {
+	color:gray;
+}
+
+#third {
+	color:#cd7f32;
+}
+
+
+
+
+
+
+
+
+
+
+
+
