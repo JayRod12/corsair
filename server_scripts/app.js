@@ -160,6 +160,19 @@ function calculateCellsToSend(uid){
   var s = Game.getPlayerShips()[uid];
   var list = [];
   var base = sim.coordinateToCellIndex(s.state.x,s.state.y);
+  const bufferConst = 4;
+  if (base.x + 1 < gridNumber && s.state.x % cellWidth > cellWidth/bufferConst){
+    list.push({x:base.x+1, y:base.y})
+  }
+  if (base.y + 1 < gridNumber && s.state.y % cellHeight > cellHeight/bufferConst){
+    list.push({x:base.x, y:base.y+1})
+  }
+  if (base.x - 1 > 0 && s.state.x % cellWidth < cellWidth/bufferConst){
+    list.push({x:base.x-1, y:base.y})
+  }
+  if (base.y - 1 > 0 && s.state.y % cellHeight < cellHeight/bufferConst){
+    list.push({x:base.x, y:base.y-1})
+  }
   list.push(base);
   return list;
 }

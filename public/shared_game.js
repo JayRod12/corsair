@@ -198,6 +198,7 @@ function updateCell(sim, object, x, y) {
     return;
   }
   if (curCell != realCell) {
+    console.log('updating cell');
     var found = 0;
     for (var i = 0; i < curCell.gameObjects.length; i++){
       if (curCell.gameObjects[i] == object) {
