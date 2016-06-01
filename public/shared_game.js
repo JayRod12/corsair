@@ -288,9 +288,10 @@ function Sim(gridNumber, cellWidth, cellHeight, activeCells){
     return this.grid[x_coord][y_coord];
   };
 
+  var xTreasure = 300;
+  var yTreasure = 300;
+
   this.populateMap = function(drawTreasure, drawCoins, drawRocks) {
-    var xTreasure = Math.random() * gridNumber * cellWidth;
-    var yTreasure = Math.random() * gridNumber * cellHeight;
     var treasure = new Treasure(xTreasure, yTreasure, drawTreasure);
     var cell = this.coordinateToCell(xTreasure, yTreasure);
     cell.staticObjects.push(treasure);

@@ -1,4 +1,3 @@
-
 var socket;
 var canvas = $("#main_canvas")[0];
     canvas.width = window.innerWidth;
@@ -22,7 +21,6 @@ const backColor = "rgb(104, 104, 104)";
 const seaColor = "rgb(102, 204, 255)";
 const seaHighlightColor = "rgb(225, 102, 255)";
 const s_delay = 1000/40;
-
 
 ///////////////// DRAW METHODS ////////////////////////////
 
@@ -66,12 +64,14 @@ function drawBehindGrid(ctx){
 
 function drawCellBackground(cx, cy, ctx){
   //  If this cell is in activeCells
-  ctx.fillStyle = seaColor;
-  for (var i = 0; i < sim.activeCells.length; i++){
-    if (sim.activeCells[i].x == cx && sim.activeCells[i].y == cy){
-      ctx.fillStyle = seaHighlightColor;
-    }
+  var playerCell = sim.coordinateToCellIndex(player.state.x, player.state.y);
+  if (cx == playerCell.x, cy == playerCell.y){
+    ctx.fillStyle = seaHighlightColor;
   }
+  else{
+    ctx.fillStyle = seaColor;
+  }
+
   ctx.fillRect(cx*meta.cellWidth, cy*meta.cellHeight, meta.cellWidth+2,
       meta.cellHeight+2);
 }
@@ -93,6 +93,8 @@ function createShipOnDraw(colour, name){
     //(the fillRect function draws from the topmost left corner of the rectangle 
     ctx.fillStyle = colour;
     ctx.fillRect(-width/2, -height/2, width, height);
+    ctx.strokeStyle = "#ffc0cb";
+    ctx.strokeRect(-width/2, -height/2, width, height);
 
     //We undo our transformations for the next draw/calculations
     ctx.rotate(-this.state.angle);
@@ -101,6 +103,7 @@ function createShipOnDraw(colour, name){
     // Ship name
     ctx.fillStyle = "white";
     ctx.font = "5px Courier";
+    ctx.textAlign="left"; 
     var metrics = ctx.measureText(name);
     var textWidth = metrics.width;
     ctx.fillText(name, this.state.x - textWidth/2, this.state.y);
@@ -116,11 +119,19 @@ function drawCannonBalls() {
   ctx.fill();
 }
 
+var treasureX = 300;
+var treasureY = 300;
+
 function drawTreasure() {
     ctx.beginPath();
-    ctx.arc(100, 100, 10, 2 * Math.PI, false);
+    ctx.arc(treasureX, treasureY, 10, 2 * Math.PI, false);
     ctx.fillStyle = "yellow";
     ctx.fill();
+    ctx.closePath();
+}
+
+function drawCompass() {
+  drawCompassScaled(player.state.x, player.state.y, treasureX, treasureY, 50);
 }
 
 //  Draws all objects
@@ -130,6 +141,7 @@ function draw(){
 
   drawBehindGrid(ctx);
   viewport.draw(ctx, canvas.width, canvas.height);
+  drawCompass();
 }
 
 
@@ -147,6 +159,7 @@ var mouse_y = 0;
 $( "#main_canvas" ).mousemove(function(event){
   mouse_screen_x = event.offsetX;
   mouse_screen_y = event.offsetY;
+
 });
 
 
@@ -208,8 +221,6 @@ var localShipInput = function(){
       Math.pow(this.state.y
       -mouse_y,2)) / speed_norm;
 }
-
-
 
 // GAME LOOP
 
@@ -355,6 +366,7 @@ function playClientGame(data) {
   meta = data.meta;
   sim = new Sim(meta.gridNumber, meta.cellWidth, meta.cellHeight,
     meta.activeCells);
+  sim.populateMap(drawTreasure);
   //  Using 16:9 aspect ratio
   viewport = new Viewport(sim, 0, 0, 1.6, 0.9, 1);
 

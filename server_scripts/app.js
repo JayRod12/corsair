@@ -20,6 +20,10 @@ app.get('/', function(req, res) {
   res.sendFile(path.resolve(__dirname + '/../html/index.html'));
 });
 
+app.get('/highScores', function(req, res) {
+  res.sendFile(path.resolve(__dirname + '/../html/highScores.html'));
+});
+
 http.listen(process.env.PORT || port, function() {
   console.log('Listening on 3000');
 });
@@ -143,6 +147,13 @@ function send_loop_func(){
     }
     client.emit('server_update', {players: Game.getPlayers(), cells: cells, updates: allBufferedUpdates})
   });
+
+  //  Clear update buffer
+  //  ASSUME NO DROPPED PACKETS
+  for (var i = 0; i < allCells.length; i++){
+    sim.grid[allCells[i].x][allCells[i].y].bufferedUpdates = [];
+  }
+
 }
 
 function calculateCellsToSend(uid){
@@ -178,7 +189,7 @@ for (var y = 0; y < gridNumber; y++){
 var sim = new Game.Sim(gridNumber, cellWidth, cellHeight, allCells);
 var sim_t = 1000 / 30;
 var send_t = 1000 / 30;
-var test_t = 1000 / 1;
+var test_t = 1000 / 100;
 var sim_loop;
 var send_loop;
 var test_loop;
