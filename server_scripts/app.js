@@ -78,6 +78,7 @@ io.on('connection', function(client){
     if (typeof sim_loop == "undefined" && init){
       console.log("starting simulation");
       sim_loop = setInterval(sim_loop_func, sim_t, sim_t);
+      test_loop = setInterval(test_loop_func, sim_t, sim_t);
     }
 
 
@@ -95,7 +96,18 @@ io.on('connection', function(client){
   client.on('client_update', function(data) {
     Game.updatePlayer(client.userid, data.state);
     //  Respond with current server state, instead broadcast regularly?
-    client.emit('server_update', Game.getPlayers())
+    var allBufferedUpdates = [];
+    for (var y = 0; y < gridNumber; y++){
+      for (var x = 0; x < gridNumber; x++){
+        var bufferedUpdates = sim.grid[x][y].bufferedUpdates;
+        if (bufferedUpdates.length > 0){
+          allBufferedUpdates.push({x:x, y:y, updates:
+            bufferedUpdates});
+          console.log("AN UPDATE");
+        }
+      }
+    }
+    client.emit('server_update', {players: Game.getPlayers(), updates: allBufferedUpdates})
   });
 
   //  On client disconnect
@@ -113,6 +125,7 @@ io.on('connection', function(client){
     if (playerCount < 1){
       console.log("stopping simulation");
       clearInterval(sim_loop);
+      clearInterval(test_loop);
     }
   });
 
@@ -121,6 +134,10 @@ io.on('connection', function(client){
 var sim_loop_func = function(dt){
   //console.log(sim.activeCells);
   sim.tick(dt);
+}
+
+var test_loop_func = function(){
+  sim.addTestObject();
 }
 
 
@@ -137,7 +154,9 @@ for (var y = 0; y < gridNumber; y++){
 }
 
 var sim = new Game.Sim(gridNumber, cellWidth, cellHeight, allCells);
-var sim_t = 1000 / 60;
+var sim_t = 1000 / 30;
+var test_t = 1000 / 10;
 var sim_loop;
+var test_loop;
 var playerCount = 0;
 var init = true;

@@ -290,9 +290,28 @@ function startClient() {
   
   //  On update from server
   socket.on('server_update', function (data){
-    for (var uid in data){
-      var update = data[uid];
+    var players = data.players;
+    for (var uid in players){
+      var update = players[uid];
       updatePlayer(uid, update);
+    }
+    var allBufferedUpdates = data.updates;
+    if (typeof allBufferedUpdates != "undefined") {
+      for (var i = 0; i < allBufferedUpdates.length; i++){
+        var x = allBufferedUpdates[i].x;
+        var y = allBufferedUpdates[i].y;
+        var updates = allBufferedUpdates[i].updates;
+        for (var j = 0; j < updates.length; j++){
+          var update = updates[j];
+          switch(update.name){
+          case 'create_testObj':
+            sim.grid[x][y].gameObjects.push(new TestObj(sim, update.data));
+            break;
+          default:
+            console.log("Unrecognised command from server " + update.name);
+          }
+        }
+    }
     }
   });
 }
@@ -324,7 +343,7 @@ function playClientGame(data) {
   sim = new Sim(meta.gridNumber, meta.cellWidth, meta.cellHeight,
     meta.activeCells);
   //  Using 16:9 aspect ratio
-  viewport = new Viewport(sim, 0, 0, 1.6, 0.9, 2);
+  viewport = new Viewport(sim, 0, 0, 1.6, 0.9, 1);
 
   our_id = data.id;
   console.log("Our id is " + our_id);

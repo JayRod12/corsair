@@ -8,6 +8,7 @@ const shipBaseHeight = 40;
 
 var remoteStates;
 
+
 //  Inputfunction determines updates to the ship
 //  onDraw can be null
 
@@ -158,6 +159,7 @@ function Cell(x, y, gridNumber) {
   this.x = x;
   this.y = y;
   this.gameObjects = [];
+  this.bufferedUpdates = [];
 
   this.tick = function(dt){
     for (var i = 0; i < this.gameObjects.length; i++){
@@ -330,7 +332,34 @@ function Sim(gridNumber, cellWidth, cellHeight, activeCells){
     }
   };
 
+  this.addTestObject = function(){
+    var w = 20 + 40 * Math.random();
+    var h = 20 + 40 * Math.random();
+    var x = (gridNumber * cellWidth - w) * Math.random();
+    var y = (gridNumber * cellHeight - h) * Math.random();
 
+    var state = {x: x, y: y, w: w, h: h};
+    var obj = new TestObj(this, state);
+    var cell = this.coordinateToCell(state.x, state.y);
+    cell.gameObjects.push(obj);
+    cell.bufferedUpdates.push({name: 'create_testObj', data: state});
+  }
+
+
+}
+
+//  Static object for testing
+function TestObj(sim, state){
+  this.sim = sim;
+  this.state = state;
+  this.onTick = function(){return true;};
+  this.onDraw = function(){
+    ctx.translate(this.state.x, this.state.y);
+    ctx.fillStyle = "white";
+    ctx.fillRect(0,0,this.state.w,this.state.h);
+    ctx.translate(-this.state.x, -this.state.y);
+  }
+  
 }
 
 function createServerShipInput(id){
