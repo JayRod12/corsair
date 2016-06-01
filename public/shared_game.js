@@ -1,3 +1,5 @@
+// IMPORTANT TODO: Move important decisions such as removing Objects from shared to client
+
 var server;
 
 const width = 1000;
@@ -33,12 +35,6 @@ function Ship(sim, state, uid, inputFunction, onDraw, onDrawCannon){
 
   this.onTick = function(dt){
     var remoteState = this.getRemoteState();
-
-    //  If player has left the server remove their ship from the sim
-    if (typeof remoteState == "undefined"){
-      sim.removeObject(this);
-      return;
-    }
 
     //  Updates speed and angle
     this.inputFunction();
@@ -198,7 +194,6 @@ function updateCell(sim, object, x, y) {
     return;
   }
   if (curCell != realCell) {
-    console.log('updating cell');
     var found = 0;
     for (var i = 0; i < curCell.gameObjects.length; i++){
       if (curCell.gameObjects[i] == object) {
@@ -349,6 +344,9 @@ function Sim(gridNumber, cellWidth, cellHeight, activeCells){
     return ship;
   };
 
+  this.removeShip = function (ship) {
+    delete playerShips[ship.uid];
+  };
 
   this.removeObject = function(object) {
     var cell = object.cell;
@@ -357,24 +355,15 @@ function Sim(gridNumber, cellWidth, cellHeight, activeCells){
         cell.gameObjects.splice(i,1);
       }
     }
+
+    if (object instanceof Ship) {
+      this.removeShip(object);
+    }
+
     if (typeof object.onDeath != "undefined") {
       object.onDeath();
     }
   };
-
-  this.addTestObject = function(){
-    var w = 20 + 40 * Math.random();
-    var h = 20 + 40 * Math.random();
-    var x = (gridNumber * cellWidth - w) * Math.random();
-    var y = (gridNumber * cellHeight - h) * Math.random();
-
-    var state = {x: x, y: y, w: w, h: h};
-    var obj = new TestObj(this, state);
-    var cell = this.coordinateToCell(state.x, state.y);
-    cell.gameObjects.push(obj);
-    cell.bufferedUpdates.push({name: 'create_testObj', data: state});
-  }
-
 
 }
 
@@ -463,3 +452,4 @@ exports.getPlayerShips = getPlayerShips;
 
 exports.createServerShipInput = createServerShipInput;
 exports.Sim = Sim;
+exports.TestObj = TestObj;

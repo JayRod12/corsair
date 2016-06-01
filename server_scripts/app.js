@@ -51,19 +51,18 @@ io.on('connection', function(client){
   };
 
   var ac = [];
-  //ac.push(sim.coordinateToCellIndex(initState.x, initState.y));
+  ac.push(sim.coordinateToCellIndex(initState.x, initState.y));
   var metadata = {
     gridNumber: gridNumber,
     cellWidth: cellWidth,
     cellHeight: cellHeight,
     //  Temp
     //activeCells: allCells
-    activeCells: {}
+    activeCells: ac
   }
 
   var data = {id : client.userid, names : Game.getPlayerNames(),
         players : Game.getPlayers(), state: initState, meta: metadata};
-  console.log(data);
   client.emit('on_connect', data);
 
 
@@ -163,6 +162,9 @@ function send_loop_func(){
 
 function calculateCellsToSend(uid){
   var s = Game.getPlayerShips()[uid];
+  if (s == null) {
+    return [];
+  }
   var list = [];
   var base = sim.coordinateToCellIndex(s.state.x,s.state.y);
   if (base != null) {
@@ -187,6 +189,20 @@ function calculateCellsToSend(uid){
 var sim_loop_func = function(dt){
   //console.log(sim.activeCells);
   sim.tick(dt);
+}
+
+Game.Sim.prototype.addTestObject = function() {
+
+  var w = 20 + 40 * Math.random();
+  var h = 20 + 40 * Math.random();
+  var x = (gridNumber * cellWidth - w) * Math.random();
+  var y = (gridNumber * cellHeight - h) * Math.random();
+ 
+  var state = {x: x, y: y, w: w, h: h};
+  var obj = new Game.TestObj(this, state);
+  var cell = this.coordinateToCell(state.x, state.y);
+  cell.gameObjects.push(obj);
+  cell.bufferedUpdates.push({name: 'create_testObj', data: state});
 }
 
 var test_loop_func = function(){

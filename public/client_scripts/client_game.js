@@ -65,6 +65,10 @@ function drawBehindGrid(ctx){
 function drawCellBackground(cx, cy, ctx){
   //  If this cell is in activeCells
   var playerCell = sim.coordinateToCellIndex(player.state.x, player.state.y);
+  if (playerCell == null) {
+    return;
+  }
+
   if (cx == playerCell.x && cy == playerCell.y){
     ctx.fillStyle = seaHighlightColor;
   }
