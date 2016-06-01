@@ -5,6 +5,7 @@
    |      | 
   C4 ----- C3
  */
+const epsilon = 0.00001;
 function collisionDetection(rectangle_1, rectangle_2, first) {	
 //calculate where the corners would be if the rectangle was not rotated and the centre of the rectangle was the origin.
 	
@@ -68,10 +69,10 @@ function collisionDetection(rectangle_1, rectangle_2, first) {
 	var trav_c4 = getRectangleTravel(Math.abs(odv_c4_angle_to_rectangle_1), 
 																rectangle_1);
 	
-	if (trav_c1*trav_c1 >= odv_c1_length) {return true;}
-	if (trav_c2*trav_c2 >= odv_c2_length) {return true;}
-	if (trav_c3*trav_c3 >= odv_c3_length) {return true;}
-	if (trav_c4*trav_c4 >= odv_c4_length) {return true;}
+	if (trav_c1*trav_c1 + epsilon >= odv_c1_length) {return true;}
+	if (trav_c2*trav_c2 + epsilon >= odv_c2_length) {return true;}
+	if (trav_c3*trav_c3 + epsilon >= odv_c3_length) {return true;}
+	if (trav_c4*trav_c4 + epsilon >= odv_c4_length) {return true;}
 	if (first) {return collisionDetection(rectangle_2, rectangle_1, false);}
 	return false;
 }
