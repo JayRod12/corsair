@@ -1,3 +1,9 @@
+function collisionDetector(){
+	this.RectRect = queryRectangleRectangleCollision;
+	this.PointRect = queryPointRectangleCollision;
+	this.PointPoint = queryPointPointCollision;
+  this.CircleCircle = queryCircleCircleCollision;
+}
 /*Checks whether any vertex of rectangle_2 lies interior to or on rectangle_1, then calls itself with the rectangles reversed to 
    perform the reverse check*/
 /*
@@ -6,10 +12,10 @@
   C4 ----- C3
  */
 const epsilon = 0.00001;
-function collisionDetection(rectangle_1, rectangle_2, first) {	
+function queryRectangleRectangleCollision(rectangle_1, rectangle_2, first) {	
 //calculate where the corners would be if the rectangle was not rotated and the centre of the rectangle was the origin.
 	
-	//Get the non-rotated corner values of rectangle_2
+//Get the non-rotated corner values of rectangle_2
 	var c1_nr = {x: -rectangle_2.width/2, y: rectangle_2.height/2};
 	var c2_nr = {x: rectangle_2.width/2, y: rectangle_2.height/2};
 	var c3_nr = {x: rectangle_2.width/2, y: -rectangle_2.height/2};
@@ -34,48 +40,39 @@ function collisionDetection(rectangle_1, rectangle_2, first) {
 	var c3 = {x: c3_nt.x + rectangle_2.x, y: c3_nt.y + rectangle_2.y};
 	var c4 = {x: c4_nt.x + rectangle_2.x, y: c4_nt.y + rectangle_2.y};
 	
-	//Get the origin's difference from each corner
-	var odv_c1 = {x: rectangle_1.x - c1.x, y: rectangle_1.y - c1.y};
-	var odv_c2 = {x: rectangle_1.x - c2.x, y: rectangle_1.y - c2.y};
-	var odv_c3 = {x: rectangle_1.x - c3.x, y: rectangle_1.y - c3.y};
-	var odv_c4 = {x: rectangle_1.x - c4.x, y: rectangle_1.y - c4.y};
-	
- 	var odv_c1_length = odv_c1.x*odv_c1.x + odv_c1.y*odv_c1.y;
-	var odv_c2_length = odv_c2.x*odv_c2.x + odv_c2.y*odv_c2.y;
-	var odv_c3_length = odv_c3.x*odv_c3.x + odv_c3.y*odv_c3.y;
-	var odv_c4_length = odv_c4.x*odv_c4.x + odv_c4.y*odv_c4.y;
-
- 	var odv_c1_theta = trimBranch(Math.atan2(odv_c1.y, odv_c1.x));
-	var odv_c2_theta = trimBranch(Math.atan2(odv_c2.y, odv_c2.x));
-	var odv_c3_theta = trimBranch(Math.atan2(odv_c3.y, odv_c3.x));
-	var odv_c4_theta = trimBranch(Math.atan2(odv_c4.y, odv_c4.x));
-	
-	var odv_c1_angle_to_rectangle_1 = trimBranch(odv_c1_theta 
-													- rectangle_1.angle);
-	var odv_c2_angle_to_rectangle_1 = trimBranch(odv_c2_theta 
-													- rectangle_1.angle);
-	var odv_c3_angle_to_rectangle_1 = trimBranch(odv_c3_theta 
-													- rectangle_1.angle);
-	var odv_c4_angle_to_rectangle_1 = trimBranch(odv_c4_theta 
-													- rectangle_1.angle);
-	
-	//Cases are symmetric about the x-axis 
-	var trav_c1 = getRectangleTravel(Math.abs(odv_c1_angle_to_rectangle_1), 
-																rectangle_1);
-	var trav_c2 = getRectangleTravel(Math.abs(odv_c2_angle_to_rectangle_1), 
-																rectangle_1);
-	var trav_c3 = getRectangleTravel(Math.abs(odv_c3_angle_to_rectangle_1), 
-																rectangle_1);
-	var trav_c4 = getRectangleTravel(Math.abs(odv_c4_angle_to_rectangle_1), 
-																rectangle_1);
-	
-	if (trav_c1*trav_c1 + epsilon >= odv_c1_length) {return true;}
-	if (trav_c2*trav_c2 + epsilon >= odv_c2_length) {return true;}
-	if (trav_c3*trav_c3 + epsilon >= odv_c3_length) {return true;}
-	if (trav_c4*trav_c4 + epsilon >= odv_c4_length) {return true;}
-	if (first) {return collisionDetection(rectangle_2, rectangle_1, false);}
-	return false;
+  //A rectangle only collides with another if vertices points are on or in it
+  if (queryCollisionPointRectangleCollision(c1, rectangle_1)) return true;
+  if (queryCollisionPointRectangleCollision(c2, rectangle_1)) return true;
+  if (queryCollisionPointRectangleCollision(c3, rectangle_1)) return true;
+  if (queryCollisionPointRectangleCollision(c4, rectangle_1)) return true;
+  if (first) {return collisionDetection(rectangle_2, rectangle_1, false);}
+  return false;
 }
+
+
+function queryPointRectangleCollision(point, rectangle) {
+	var odv_p = {x: rectangle.x - c1.x, y: rectangle.y - c1.y};
+	var odv_p_square_length = odv_p.x*odv_p.x + odv_p.y*odv_p.y;
+	var odv_p_theta = trimBranch(Math.atan2(odv_p.y, odv_p.x));
+	var odv_p_angle_to_rectangle = trimBranch(odv_p_theta - rectangle.angle);
+	var trav = getRectangleTravel(Math.abs(odv_p_angle_to_rectangle, rectangle);
+	return trav*trav + epsilon >= odv_p_square_length; 
+}
+
+
+function queryCircleCircleCollision(circle_1, circle_2) {
+	var odv = {x: circle_1.origin.x - circle_2.origin.x, 
+				     y: circle_1.origin.y - circle_2.origin.y};
+	var odv_square_length = odv.x*odv.x + odv.y*odv.y;
+	return circle_1.radius + circle_2.radius + epsilon >= odv_square_length;
+}
+
+
+function queryPointPointcollision(p1, p2) {
+	return queryCircleCircleCollision({origin: p1, radius: 0}, 
+									                  {origin: p2, radius: 0});
+}
+
 
 //returns the travel of the given rectangle in the direction of theta
 function getRectangleTravel(theta, rectangle) {
@@ -104,7 +101,7 @@ function trimBranch(angle) {
   return angle;
 }
 
-//  Wrapper for toms retarded fucking names
+//  Dan is a pretentious twat
 exports.collisionDetection = function (r1, r2, inefficiencyGiveaway){
   return collisionDetection(
       {x : r1.x, y: r1.y, width: r1.w, height: r1.h, angle: r1.a},
