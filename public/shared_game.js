@@ -92,7 +92,7 @@ function Cannon(ship, onDraw) {
         var offsetX = spacing * (cannons / 2 - i) * Math.cos(ship.state.angle);
         var offsetY = spacing * (cannons / 2 - i) * Math.sin(ship.state.angle);
         var ball = new CannonBall(ship, offsetX, offsetY, side, ballSpeed, onDraw, level);
-        var cell = ship.sim.coordinateToCell(ship.state.x,ship.state.y);
+        var cell = ship.sim.coordinateToCell(ship.state.x + offsetX, ship.state.y + offsetY);
         cell.gameObjects.push(ball);
       }
 
