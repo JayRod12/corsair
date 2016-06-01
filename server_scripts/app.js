@@ -111,6 +111,8 @@ io.on('connection', function(client){
   //  On client disconnect
   client.on('disconnect', function () {
 
+    var finalScore = Game.getPlayers()[client.userid].score;
+
     // Decrement count
     playerCount -= 1;
 

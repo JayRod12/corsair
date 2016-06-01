@@ -16,6 +16,8 @@ function Ship(sim, state, uid, inputFunction, onDraw, onDrawCannon){
 
   // Simulation in which the ship is.
   this.sim = sim;
+  this.score = 0;
+  this.scoreTick = 0;
 
   //  Should contain:
   //  x, y, angle, speed
@@ -54,6 +56,12 @@ function Ship(sim, state, uid, inputFunction, onDraw, onDrawCannon){
     updateCell(this.sim, this, this.state.x, this.state.y);
 
     this.cannon.onTick(dt);
+
+    this.scoreTick += 1;
+    if (this.scoreTick % 100 == 0) {
+      this.score +=1;
+      this.scoreTick = 0;
+    }
 
   }
 
