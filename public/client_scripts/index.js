@@ -20,9 +20,9 @@ function mobileBrowser() {
 // For old browsers or for mobile phone browsers,
 //replace the boat animation with just the title.
 if (!webglSupport() || mobileBrowser()) {
-	window.onload = function() {
-    	document.getElementById("titleCorsair").innerHTML = "CORSAIR";
-	}
+    document.getElementById("scene").style.display = "none";
+    document.getElementById("titleCorsair").style.fontFamily = "Josefin Sans";
+    document.getElementById("titleCorsair").innerHTML = "CORSAIR";
 }
 
 $(document).ready(function () {
