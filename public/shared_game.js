@@ -6,7 +6,6 @@ const height = 1000;
 const shipBaseWidth = 90;
 const shipBaseHeight = 40;
 
-var remoteStates;
 
 
 //  Inputfunction determines updates to the ship
@@ -253,6 +252,21 @@ function Sim(gridNumber, cellWidth, cellHeight, activeCells){
     }
   };
 
+  this.coordinateToCellIndex = function(x, y){
+    if (!this.grid) {
+      console.log('No grid defined');
+      return null;
+    }
+    if (x < 0 || y < 0 || x > this.gridNumber * this.cellWidth ||
+        y > this.gridNumber * this.cellHeight) {
+      // 'Object in undefined cell'
+      return null;
+    }
+    var x_coord = Math.floor(x / this.cellWidth);
+    var y_coord = Math.floor(y / this.cellHeight);
+    return {x : x_coord, y : y_coord};
+  }
+
   // Get Cell given pixel position
   this.coordinateToCell = function(x, y) {
     if (!this.grid) {
@@ -316,6 +330,7 @@ function Sim(gridNumber, cellWidth, cellHeight, activeCells){
     var cell = this.coordinateToCell(state.x, state.y);
     var ship = new Ship(this, state, uid, inputFunction, onDraw, onDrawCannon);
     cell.gameObjects.push(ship);
+    playerShips[uid] = ship;
     return ship;
   };
 
@@ -370,10 +385,13 @@ function createServerShipInput(id){
   };
 }
 
+var remoteStates;
+var playerShips;
 function initializeGame(){
   console.log("game inited");
   remoteStates = {};
   playerNames = {};
+  playerShips = {};
 }
 
 function newPlayer(id, name, state) {
@@ -409,6 +427,10 @@ function getPlayerNames() {
   return playerNames;
 }
 
+function getPlayerShips() {
+  return playerShips;
+}
+
 
 //  Nodejs exports for use in server
 //var exports = module.exports = {};
@@ -422,6 +444,7 @@ exports.removePlayer = removePlayer;
 exports.updatePlayer = updatePlayer;
 exports.getPlayers = getPlayers;
 exports.getPlayerNames = getPlayerNames;
+exports.getPlayerShips = getPlayerShips;
 
 exports.createServerShipInput = createServerShipInput;
 exports.Sim = Sim;

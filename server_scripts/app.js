@@ -26,14 +26,14 @@ http.listen(process.env.PORT || port, function() {
 });
 
 //  On client connection
+var socketList = [];
 io.on('connection', function(client){
 
+  //  Add to socketList
+  socketList.push(client);
   
   //  Generate new client id associate with their connection
   client.userid = UUID();
-
-
-
 
   //  TODO don't spawn on top of other people or in 'danger'
   //  TODO fix initial vars
@@ -47,12 +47,14 @@ io.on('connection', function(client){
     speed: 0
   };
 
+  var ac = [];
+  ac.push(sim.coordinateToCell(initState.x, initState.y));
   var metadata = {
     gridNumber: gridNumber,
     cellWidth: cellWidth,
     cellHeight: cellHeight,
     //  Temp
-    activeCells: allCells
+    activeCells: ac
   }
 
   client.emit('on_connect', {id : client.userid, names : Game.getPlayerNames(),
@@ -78,6 +80,7 @@ io.on('connection', function(client){
     if (typeof sim_loop == "undefined" && init){
       console.log("starting simulation");
       sim_loop = setInterval(sim_loop_func, sim_t, sim_t);
+      send_loop = setInterval(send_loop_func, send_t);
       test_loop = setInterval(test_loop_func, test_t);
     }
 
@@ -95,23 +98,17 @@ io.on('connection', function(client){
   //  On tick
   client.on('client_update', function(data) {
     Game.updatePlayer(client.userid, data.state);
-    //  Respond with current server state, instead broadcast regularly?
-    var allBufferedUpdates = [];
-    for (var y = 0; y < gridNumber; y++){
-      for (var x = 0; x < gridNumber; x++){
-        var bufferedUpdates = sim.grid[x][y].bufferedUpdates;
-        if (bufferedUpdates.length > 0){
-          allBufferedUpdates.push({x:x, y:y, updates:
-            bufferedUpdates});
-          console.log("AN UPDATE");
-        }
-      }
-    }
-    client.emit('server_update', {players: Game.getPlayers(), updates: allBufferedUpdates})
   });
 
   //  On client disconnect
   client.on('disconnect', function () {
+    
+    //  Remove from socketlist
+    for (var i = 0; i < socketList.length; i++){
+      if (socketList[i] == client){
+        socketList.splice(i, 1);
+      }
+    }
 
     // Decrement count
     playerCount -= 1;
@@ -131,6 +128,33 @@ io.on('connection', function(client){
 
 });
 
+function send_loop_func(){
+  socketList.forEach(function (client) {
+    var cells = calculateCellsToSend(client.userid);
+
+    //  Respond with current server state, instead broadcast regularly?
+    var allBufferedUpdates = [];
+    for (var i = 0; i < cells.length; i++){
+      var x = cells[i].x;
+      var y = cells[i].y;
+      var bufferedUpdates = sim.grid[x][y].bufferedUpdates;
+      if (bufferedUpdates.length > 0){
+        allBufferedUpdates.push({x:x, y:y, updates:
+          bufferedUpdates});
+      }
+    }
+    client.emit('server_update', {players: Game.getPlayers(), cells: cells, updates: allBufferedUpdates})
+  });
+}
+
+function calculateCellsToSend(uid){
+  var s = Game.getPlayerShips()[uid];
+  var list = [];
+  var base = sim.coordinateToCellIndex(s.state.x,s.state.y);
+  list.push(base);
+  return list;
+}
+
 var sim_loop_func = function(dt){
   //console.log(sim.activeCells);
   sim.tick(dt);
@@ -144,8 +168,8 @@ var test_loop_func = function(){
 Game.initializeGame();
 
 const gridNumber = 5;
-const cellWidth  = 200;
-const cellHeight = 200;
+const cellWidth  = 1500;
+const cellHeight = 1500;
 var allCells = [];
 for (var y = 0; y < gridNumber; y++){
   for (var x = 0; x < gridNumber; x++){
@@ -155,8 +179,10 @@ for (var y = 0; y < gridNumber; y++){
 
 var sim = new Game.Sim(gridNumber, cellWidth, cellHeight, allCells);
 var sim_t = 1000 / 30;
+var send_t = 1000 / 30;
 var test_t = 1000 / 1;
 var sim_loop;
+var send_loop;
 var test_loop;
 var playerCount = 0;
 var init = true;

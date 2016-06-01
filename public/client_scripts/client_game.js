@@ -122,7 +122,7 @@ function draw(){
   viewport.y = player.state.y - canvas.height / (2 * viewport.scale);
 
   //  Fastest way to clear entire canvas
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  //ctx.clearRect(0, 0, canvas.width, canvas.height);
   drawBehindGrid(ctx);
   viewport.draw(ctx, canvas.width, canvas.height);
 }
@@ -302,6 +302,7 @@ function startClient() {
       var update = players[uid];
       updatePlayer(uid, update);
     }
+    sim.activeCells = data.cells;
     var allBufferedUpdates = data.updates;
     if (typeof allBufferedUpdates != "undefined") {
       for (var i = 0; i < allBufferedUpdates.length; i++){
