@@ -20,6 +20,9 @@ app.get('/', function(req, res) {
   res.sendFile(path.resolve(__dirname + '/../html/index.html'));
 });
 
+app.get('/highScores', function(req, res) {
+  res.sendFile(path.resolve(__dirname + '/../html/highScores.html'));
+});
 
 http.listen(process.env.PORT || port, function() {
   console.log('Listening on 3000');
@@ -77,14 +80,15 @@ io.on('connection', function(client){
     //  begin simulating
     if (typeof sim_loop == "undefined" && init){
       console.log("starting simulation");
+      console.log(sim.activeCells.length);
       sim_loop = setInterval(sim_loop_func, sim_t, sim_t);
+      //sim_loop = setInterval(sim.tick, sim_t, sim_t);
     }
 
 
     //  Log
     console.log('\t socket.io:: player ' + client.userid + ' connected, ' +
-        playerCount);
-
+        playerCount + ' players');
     client.emit('start_game', {});
   });
 

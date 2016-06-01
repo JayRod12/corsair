@@ -19,7 +19,7 @@ var d = false;
 
 function init() {
   HEIGHT = 884;
-  WIDTH = 1780;
+  WIDTH = 1880;
 
   console.log(window.innerHeight);
   console.log(window.innerWidth);
