@@ -83,7 +83,7 @@ function drawCompassScaled(shipX, shipY, treasureX, treasureY, innerRadius) {
 	ctx.rect(posX - 25, posY + 95, 50, 30);
 	ctx.strokeStyle = 'black';
 	ctx.stroke();
-	ctx.fillStyle = '#665600';
+	ctx.fillStyle = 'black';
 	ctx.textAlign="pos"; 
 	ctx.font = "20px Josefin Sans";
 	ctx.fillText(normalize.toFixed(0), posX, posY + 115);

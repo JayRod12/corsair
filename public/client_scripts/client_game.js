@@ -115,9 +115,10 @@ var treasureY = 300;
 
 function drawTreasure() {
     ctx.beginPath();
-    ctx.fillRect(treasureX, treasureY, 20, 20);
+    ctx.arc(treasureX, treasureY, 10, 2 * Math.PI, false);
     ctx.fillStyle = "yellow";
     ctx.fill();
+    ctx.closePath();
 }
 
 function drawCompass() {
@@ -128,7 +129,7 @@ function drawCompass() {
 function draw(){
   viewport.x = player.state.x - canvas.width / (2 * viewport.scale);
   viewport.y = player.state.y - canvas.height / (2 * viewport.scale);
-  
+
   //  Fastest way to clear entire canvas
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   drawBehindGrid(ctx);
