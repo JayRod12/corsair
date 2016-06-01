@@ -1,3 +1,4 @@
+
 var socket;
 var canvas = $("#main_canvas")[0];
     canvas.width = window.innerWidth;
@@ -22,7 +23,6 @@ const seaColor = "rgb(102, 204, 255)";
 const seaHighlightColor = "rgb(225, 102, 255)";
 const s_delay = 1000/40;
 
-///////////////// DRAW METHODS ////////////////////////////
 
 ///////////////// DRAW METHODS ////////////////////////////
 
@@ -127,8 +127,7 @@ function drawTreasure() {
 function draw(){
   viewport.x = player.state.x - canvas.width / (2 * viewport.scale);
   viewport.y = player.state.y - canvas.height / (2 * viewport.scale);
-  //  Fastest way to clear entire canvas
-  //ctx.clearRect(0, 0, canvas.width, canvas.height);
+
   drawBehindGrid(ctx);
   viewport.draw(ctx, canvas.width, canvas.height);
 }
@@ -148,7 +147,6 @@ var mouse_y = 0;
 $( "#main_canvas" ).mousemove(function(event){
   mouse_screen_x = event.offsetX;
   mouse_screen_y = event.offsetY;
-
 });
 
 
@@ -210,6 +208,8 @@ var localShipInput = function(){
       Math.pow(this.state.y
       -mouse_y,2)) / speed_norm;
 }
+
+
 
 // GAME LOOP
 
