@@ -51,17 +51,20 @@ io.on('connection', function(client){
   };
 
   var ac = [];
-  ac.push(sim.coordinateToCell(initState.x, initState.y));
+  //ac.push(sim.coordinateToCellIndex(initState.x, initState.y));
   var metadata = {
     gridNumber: gridNumber,
     cellWidth: cellWidth,
     cellHeight: cellHeight,
     //  Temp
-    activeCells: ac
+    //activeCells: allCells
+    activeCells: {}
   }
 
-  client.emit('on_connect', {id : client.userid, names : Game.getPlayerNames(),
-    players : Game.getPlayers(), state: initState, meta: metadata});
+  var data = {id : client.userid, names : Game.getPlayerNames(),
+        players : Game.getPlayers(), state: initState, meta: metadata};
+  console.log(data);
+  client.emit('on_connect', data);
 
 
   //  Wait for response
@@ -145,7 +148,9 @@ function send_loop_func(){
           bufferedUpdates});
       }
     }
-    client.emit('server_update', {players: Game.getPlayers(), cells: cells, updates: allBufferedUpdates})
+    var data = {players: Game.getPlayers(), cells: allCells, updates: {}}; //cells: cells, updates: {}};
+    //allBufferedUpdates};
+    client.emit('server_update', data);
   });
 
   //  Clear update buffer
