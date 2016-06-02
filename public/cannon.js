@@ -19,17 +19,20 @@ function Cannon(ship, onDraw) {
   this.onDraw = onDraw;
 
   this.baseCooldown = 1200;
-  this.cooldown = 0;
+  this.cooldowns = [10, 10];
 
   this.futureShots = [];  //  List of future firing events
 
   this.onShoot = function(side) {
 
-    if (this.cooldown > 0) return false;
-    this.cooldown = this.baseCooldown;
+    var index;
+    var index = ((side == 1) ? 0 : 1);
+    var cooldown = this.cooldowns[index];
+    console.log(cooldown);
 
-    console.log('Ship direction: ' + this.ship.state.angle);
+    if (cooldown > 0) return false;
 
+    this.cooldowns[index] = this.baseCooldown;
 
 
     for (var i = 0; i < this.cannons; i++){
@@ -55,7 +58,9 @@ function Cannon(ship, onDraw) {
   };
 
   this.onTick = function(dt){
-    if (this.cooldown > 0) this.cooldown -= dt;
+    if (this.cooldowns[0] > 0) this.cooldowns[0] -= dt;
+    if (this.cooldowns[1] > 0) this.cooldowns[1] -= dt;
+
     for (var i = 0; i < this.futureShots.length; i++){
       //  Inefficient?
       //this.futureShots[i] = {time: this.futureShots[i].time - dt, f:
@@ -71,8 +76,6 @@ function Cannon(ship, onDraw) {
 }
 
 function CannonBall(ship, offsetX, offsetY, side, speed, onDraw, level) {
-
-  console.log(offsetX);
 
   this.sim = ship.sim;
   this.ship = ship; 
