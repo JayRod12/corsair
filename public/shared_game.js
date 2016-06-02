@@ -241,11 +241,11 @@ function Sim(gridNumber, cellWidth, cellHeight, activeCells){
   }
 
   this.activateCell = function (x,y){
-    this.activeCells.push({x:x, y:y});
+    this.activeCells.push(this.cellTupleToNumber({x:x, y:y}));
   };
 
   this.deactivateCell = function (x,y){
-    var testObj = {x:x, y:y};
+    var testObj = this.cellTupleToNumber({x:x, y:y});
     for (var i = 0; i < this.activeCells.length; i++){
       if (this.activeCells[i] == testObj){
         this.activeCells.splice(i, 1);
@@ -253,6 +253,21 @@ function Sim(gridNumber, cellWidth, cellHeight, activeCells){
     }
   };
 
+  // Tuple to number
+  this.cellTupleToNumber = function(tuple) {
+    return gridNumber * tuple.y + tuple.x;
+  };
+
+  // Number to tuple
+  this.cellNumberToTuple = function(n){
+    return {x : n % gridNumber, y : Math.floor(n/gridNumber) };
+  };
+
+  // Transformations
+  // (x, y) -> { x : x, y : y} <-> gN * y + x
+  //                            -> Cell
+
+  // Coordinate to tuple
   this.coordinateToCellIndex = function(x, y){
     if (!this.grid) {
       console.log('No grid defined');
@@ -266,28 +281,26 @@ function Sim(gridNumber, cellWidth, cellHeight, activeCells){
     var x_coord = Math.floor(x / this.cellWidth);
     var y_coord = Math.floor(y / this.cellHeight);
     return {x : x_coord, y : y_coord};
-  }
+  };
+
+  // Coordinate to number
+  this.coordinateToCellNumber = function(x, y){
+    var tuple = this.coordinateToCellIndex(x,y);
+    return this.cellTupleToNumber(tuple);
+  };
 
   // Get Cell given pixel position
   this.coordinateToCell = function(x, y) {
-    if (!this.grid) {
-      console.log('No grid defined');
+    var tuple = this.coordinateToCellIndex(x, y);
+    if (tuple == null) {
       return null;
     }
-    if (x < 0 || y < 0 || x > this.gridNumber * this.cellWidth ||
-        y > this.gridNumber * this.cellHeight) {
-      // 'Object in undefined cell'
-      return null;
-    }
-    var x_coord = Math.floor(x / this.cellWidth);
-    var y_coord = Math.floor(y / this.cellHeight);
-    return this.grid[x_coord][y_coord];
+    return this.grid[tuple.x][tuple.y];
   };
 
-  var xTreasure = 300;
-  var yTreasure = 300;
-
   this.populateMap = function(drawTreasure, drawCoins, drawRocks) {
+    var xTreasure = Math.random() * gridNumber * cellWidth;
+    var yTreasure = Math.random() * gridNumber * cellHeight;
     var treasure = new Treasure(xTreasure, yTreasure, drawTreasure);
     var cell = this.coordinateToCell(xTreasure, yTreasure);
     cell.staticObjects.push(treasure);
@@ -310,9 +323,10 @@ function Sim(gridNumber, cellWidth, cellHeight, activeCells){
 
   this.tick = function(dt){
     for (var i = 0; i < this.activeCells.length; i++){
-      var x = this.activeCells[i].x;
-      var y = this.activeCells[i].y;
-      this.grid[x][y].tick(dt);
+      var tuple = this.cellNumberToTuple(this.activeCells[i]);
+      debugger;
+      console.log(this.activeCells[i]);
+      this.grid[tuple.x][tuple.y].tick(dt);
     }
   };
 
@@ -324,14 +338,12 @@ function Sim(gridNumber, cellWidth, cellHeight, activeCells){
     ctx.fillRect(110, 610, 20, 20);
     ctx.fillRect(810, 510, 20, 20);
     for (var i = 0; i < this.activeCells.length; i++){
-      var x = this.activeCells[i].x;
-      var y = this.activeCells[i].y;
-      drawCellBackground(x, y, ctx);
+      var tuple = this.cellNumberToTuple(this.activeCells[i]);
+      drawCellBackground(tuple.x, tuple.y, ctx);
     }
     for (var i = 0; i < this.activeCells.length; i++){
-      var x = this.activeCells[i].x;
-      var y = this.activeCells[i].y;
-      this.grid[x][y].draw();
+      var tuple = this.cellNumberToTuple(this.activeCells[i]);
+      this.grid[tuple.x][tuple.y].draw();
     }
   };
 

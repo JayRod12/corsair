@@ -372,7 +372,7 @@ function playClientGame(data) {
     meta.activeCells);
   sim.populateMap(drawTreasure);
   //  Using 16:9 aspect ratio
-  viewport = new Viewport(sim, 0, 0, 1.6, 0.9, 1);
+  viewport = new Viewport(sim, 0, 0, 1.6, 0.9, 1/10);
 
   our_id = data.id;
   console.log("Our id is " + our_id);

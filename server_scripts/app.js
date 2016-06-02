@@ -51,7 +51,8 @@ io.on('connection', function(client){
   };
 
   var ac = [];
-  ac.push(sim.coordinateToCellIndex(initState.x, initState.y));
+  ac.push(sim.coordinateToCellNumber(initState.x, initState.y));
+  console.log(ac);
   var metadata = {
     gridNumber: gridNumber,
     cellWidth: cellWidth,
@@ -84,9 +85,18 @@ io.on('connection', function(client){
     //  begin simulating
     if (typeof sim_loop == "undefined" && init){
       console.log("starting simulation");
-      sim_loop = setInterval(sim_loop_func, sim_t, sim_t);
-      send_loop = setInterval(send_loop_func, send_t);
-      test_loop = setInterval(test_loop_func, test_t);
+
+      if (!sim_loop) {
+        sim_loop = setInterval(sim_loop_func, sim_t, sim_t);
+      }
+
+      if (!send_loop) {
+        send_loop = setInterval(send_loop_func, send_t);
+      }
+
+      if (!test_loop) {
+        test_loop = setInterval(test_loop_func, test_t);
+      }
     }
 
 
@@ -132,30 +142,63 @@ io.on('connection', function(client){
 
 });
 
+// Allows array difference computation
+Array.prototype.diff = function(a) {
+    return this.filter(function(i) {return a.indexOf(i) < 0;});
+};
+
+Array.prototype.intersection = function(a) {
+  return this.filter(function(n) {
+    return a.indexOf(n) != -1;
+  });
+};
+
+//var a1 = new Array({x:1, y:2},{x:1, y:1},{x:1, y:0},{x:-1, y:2},{x:11, y:31});
+//var a2 = new Array({x:1, y:2},{x:1, y:1},{x:1, y:1},{x:1, y:-2},{x:111, y:13});
+//console.log('thing ' + a1.indexOf({x:1, y:2}));
+//var a1= [1,2,3,4,5];
+//var a2 = [0,2,3,6];
+//console.log('RESULTS');
+//console.log(a1.diff(a2));
+//console.log(a1.intersection(a2));
+//console.log(a2.diff(a1));
+//console.log(a2.intersection(a1));
+
 function send_loop_func(){
   socketList.forEach(function (client) {
-    var cells = calculateCellsToSend(client.userid);
+    if (typeof client.cells == "undefined") {
+      client.cells = []; // B
+    }
+
+    var cells = calculateCellsToSend(client.userid); // A
+    var old_cells = cells.intersection(client.cells);// A2
+    var new_cells = cells.diff(old_cells);        // A1
+    client.cells = cells;
 
     //  Respond with current server state, instead broadcast regularly?
     var allBufferedUpdates = [];
-    for (var i = 0; i < cells.length; i++){
-      var x = cells[i].x;
-      var y = cells[i].y;
-      var bufferedUpdates = sim.grid[x][y].bufferedUpdates;
+    for (var i = 0; i < old_cells.length; i++){
+      var tuple = sim.cellNumberToTuple(old_cells[i]);
+      var bufferedUpdates = sim.grid[tuple.x][tuple.y].bufferedUpdates;
       if (bufferedUpdates.length > 0){
-        allBufferedUpdates.push({x:x, y:y, updates:
+        allBufferedUpdates.push({x:tuple.x, y:tuple.y, updates:
           bufferedUpdates});
       }
     }
-    var data = {players: Game.getPlayers(), cells: allCells, updates: {}}; //cells: cells, updates: {}};
-    //allBufferedUpdates};
+
+    console.log('cells ' + cells);
+    console.log('client.cells ' + client.cells);
+    console.log('old_cells ' + old_cells);
+    console.log('new_cells ' + new_cells);
+    var data = {players: Game.getPlayers(), cells: client.cells, updates: allBufferedUpdates};
     client.emit('server_update', data);
   });
 
   //  Clear update buffer
   //  ASSUME NO DROPPED PACKETS
   for (var i = 0; i < allCells.length; i++){
-    sim.grid[allCells[i].x][allCells[i].y].bufferedUpdates = [];
+    var tuple = sim.cellNumberToTuple(allCells[i]);
+    sim.grid[tuple.x][tuple.y].bufferedUpdates = [];
   }
 
 }
@@ -170,16 +213,16 @@ function calculateCellsToSend(uid){
   if (base != null) {
     const bufferConst = 4;
     if (base.x + 1 < gridNumber && s.state.x % cellWidth > cellWidth/bufferConst){
-      list.push({x:base.x+1, y:base.y})
+      list.push(sim.cellTupleToNumber({x:base.x+1, y:base.y}))
     }
     if (base.y + 1 < gridNumber && s.state.y % cellHeight > cellHeight/bufferConst){
-      list.push({x:base.x, y:base.y+1})
+      list.push(sim.cellTupleToNumber({x:base.x, y:base.y+1}))
     }
     if (base.x - 1 > 0 && s.state.x % cellWidth < cellWidth/bufferConst){
-      list.push({x:base.x-1, y:base.y})
+      list.push(sim.cellTupleToNumber({x:base.x-1, y:base.y}))
     }
     if (base.y - 1 > 0 && s.state.y % cellHeight < cellHeight/bufferConst){
-      list.push({x:base.x, y:base.y-1})
+      list.push(sim.cellTupleToNumber({x:base.x, y:base.y-1}))
     }
     list.push(base);
   }
@@ -187,7 +230,6 @@ function calculateCellsToSend(uid){
 }
 
 var sim_loop_func = function(dt){
-  //console.log(sim.activeCells);
   sim.tick(dt);
 }
 
@@ -216,10 +258,8 @@ const gridNumber = 5;
 const cellWidth  = 1500;
 const cellHeight = 1500;
 var allCells = [];
-for (var y = 0; y < gridNumber; y++){
-  for (var x = 0; x < gridNumber; x++){
-    allCells.push({x:x, y:y});
-  }
+for (var i = 0; i < gridNumber * gridNumber; i++) {
+    allCells.push(i);
 }
 
 var sim = new Game.Sim(gridNumber, cellWidth, cellHeight, allCells);
