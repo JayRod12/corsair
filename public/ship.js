@@ -70,7 +70,6 @@ function Ship(sim, state, uid, inputFunction, onDraw, onDrawCannon){
   		it's a cannonball I've collided with?*/
    //this.colour = "red";
    this.collided_timer = this.collided_basetime;
-   other_object.collided_timer = other_object.collided_basetime;
    //decrement health & handle physics;
   }
 

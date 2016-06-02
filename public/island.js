@@ -29,7 +29,6 @@ function Island(x, y, height, width, angle, colour, onDraw) {
   this.collisionHandler = function(other_object) {
     //expect instanceoffing
     this.collided_timer = this.collided_basetime;
-    other_object.collided_timer = other_object.collided_basetime;
   }
 
   this.onDraw = function(ctx){
