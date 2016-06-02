@@ -1,3 +1,6 @@
+
+//  TODO extract functions and add to prototypes
+
 if (typeof exports === 'undefined'){
   //  Browser
 }
@@ -45,6 +48,19 @@ function Cell(x, y, gridNumber) {
   this.checkCollisions = function() {
     for (var i = 0; i < this.gameObjects.length; i++) {
       for (var j = i + 1; j <= this.gameObjects.length; j++) {
+        if (!this.gameObjects[i]){
+          //  TODO what is going on here?
+          //console.log("undefined gameObject");
+          //this.gameObjects.splice(i, 1);
+          continue;
+        }
+        if (!this.gameObjects[j]){
+          //  TODO what is going on here?
+          //console.log("undefined gameObject");
+          //this.gameObjects.splice(i, 1);
+          continue;
+        }
+
         if(checkCollision(this.gameObjects[i], this.gameObjects[j])) {
           this.gameObjects[i].collisionHandler(this.gameObjects[j]);
           this.gameObjects[j].collisionHandler(this.gameObjects[i]);
@@ -232,68 +248,70 @@ function Treasure(xTreasure, yTreasure, onDraw) {
 //  Probably factor out
 
 function checkCollision(object_1, object_2) {
-	if(object_1 instanceof Ship.Class && object_2 instanceof Ship.Class) {
-	  var rectangle_1 = {x: object_1.state.x, 
-                         y: object_1.state.y, 
-					     height: Ship.shipBaseHeight*object_1.scale, 
-						 width: Ship.shipBaseWidth*object_1.scale,
-					     angle: object_1.state.angle};
-		var rectangle_2 = {x: object_2.state.x, 
-                           y: object_2.state.y, 
-					       height: Ship.shipBaseHeight*object_2.scale, 
-						   width: Ship.shipBaseWidth*object_2.scale,
-						   angle: object_2.state.angle};
-			var res = Col.RectRect(rectangle_1, rectangle_2, true);
-			console.log(res);
-      return res;
-    }
-    var rect_s, rect_i;
-    var ship_island_collision = false;
-    if(object_1 instanceof Ship.Class && object_2 instanceof Island.Class){
-      rect_s = {
-        x: object_1.state.x,
-        y: object_1.state.y,
-        width: Ship.shipBaseWidth * object_1.scale,
-        height: Ship.shipBaseHeight * object_1.scale,
-        angle: object_1.state.angle
-      };
-      rect_i = {
-        x: object_2.x,
-        y: object_2.y,
-        width: object_2.width,
-        height: object_2.height,
-        angle: object_2.angle
-      };
-      ship_island_collision = true;
-    }
-    if(object_1 instanceof Island.Class && object_2 instanceof Ship.Class) {
-      rect_s = {
-        x: object_2.state.x,
-        y: object_2.state.y,
-        width: Ship.shipBaseWidth * object_2.scale,
-        height: Ship.shipBaseHeight * object_2.scale,
-        angle: object_2.state.angle
-      };
-      rect_i = {
-        x: object_1.x,
-        y: object_1.y,
-        width: object_1.width,
-        height: object_1.height,
-        angle: object_1.angle
-      };
-      ship_island_collision = true;
-    }
-    if (ship_island_collision) {
-      var point_s = {x: rect_s.x, y:rect_s.y};
-      //var ret = queryPointRectangleCollision(point_s,
-                  //rect_i, true);
-      var ret = Col.RectRect(rect_s, rect_i, true);
-      return ret;
-    }
+  //  If either object has no collision type return
+  if (typeof object_1.getColType === "undefined" || 
+      typeof object_2.getColType === "undefined" ) return false;
 
-	return false;
-    //I'm sorry for my sins. TODO: CannonBall (point) cases
-}	
+  var col_type_1 = object_1.getColType();
+  var col_type_2 = object_2.getColType();
+
+
+  var col_obj_1 = object_1.getColObj();
+  var col_obj_2 = object_2.getColObj();
+
+  return parseColObjects(col_type_1, col_type_2, col_obj_1, col_obj_2, true);
+}
+
+function parseColObjects(col_type_1, col_type_2, col_obj_1, col_obj_2, first){
+  switch(col_type_1){
+    case "rectangle":
+      switch(col_type_2){
+        case "rectangle":
+          return Col.RectRect(col_obj_1, col_obj_2);
+        case "circle":
+          console.log("ERROR Currently Unsupported");
+          parseColObjectsFailure(col_type_1, col_type_2, col_obj_1, col_obj_2);
+          return false;
+        case "point":
+          return Col.PointRect(col_obj_2, col_obj_1);
+        default:
+        parseColObjectsFailure(col_type_1, col_type_2, col_obj_1, col_obj_2);
+        return false;
+      }
+    case "circle":
+      switch(col_type_2){
+        case "circle":
+          return Col.CircleCircle(col_obj_1, col_obj_2);
+        case "point":
+          console.log("ERROR Currently Unsupported");
+          parseColObjectsFailure(col_type_1, col_type_2, col_obj_1, col_obj_2);
+          return false;
+        default:
+        parseColObjectsFailure(col_type_1, col_type_2, col_obj_1, col_obj_2);
+        return false;
+      }
+    case "point":
+      switch(col_type_2){
+        case "point":
+          return Col.PointPoint(col_obj_1, col_obj_2);
+        default:
+        parseColObjectsFailure(col_type_1, col_type_2, col_obj_1, col_obj_2);
+        return false;
+      }
+    default:
+      if (first){
+        return parseColObjects(col_type_2, col_type_1, col_obj_2, col_obj_1,
+            false);
+      }
+      parseColObjectsFailure(col_type_1, col_type_2, col_obj_1, col_obj_2);
+      return false;
+  }
+}
+function parseColObjectsFailure(t1, t2, o1, o2){
+  console.log("Collision of unknown types " + t1 + " and " + t2);
+  console.log("Object 1: " + o1);
+  console.log("Object 2: " + o2);
+}
 
 exports.Class = Sim;
 exports.Cell = Cell;

@@ -75,6 +75,17 @@ function Ship(sim, state, uid, inputFunction, onDraw, onDrawCannon){
   }
 
   this.onDraw = onDraw;
+
+  this.getColType = function(){return "rectangle"};
+  this.getColObj = function(){
+    return {
+      x: this.state.x,
+      y: this.state.y,
+      width: shipBaseWidth * this.scale,
+      height: shipBaseHeight * this.scale,
+      angle: this.state.angle
+    }
+  };
 }
 
 var shipBaseWidth = 90;

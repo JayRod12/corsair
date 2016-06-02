@@ -53,6 +53,17 @@ function Island(x, y, height, width, angle, colour, onDraw) {
       ctx.translate(-this.x, -this.y);
   }
 
+  this.getColType = function(){return "rectangle"};
+  this.getColObj = function(){
+    return {
+      x: this.x,
+      y: this.y,
+      width: this.width,
+      height: this.height,
+      angle: this.angle
+    }
+  };
+
 
 }
 
