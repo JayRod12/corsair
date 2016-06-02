@@ -13,7 +13,31 @@ var io = require('socket.io')(http);
 var UUID = require('node-uuid');
 var Game = require('../public/shared_game.js');
 
+var socketList = [];
 
+// Game related data
+
+Game.initializeGame();
+
+const gridNumber = 5;
+const cellWidth  = 1500;
+const cellHeight = 1500;
+var allCells = [];
+for (var i = 0; i < gridNumber * gridNumber; i++) {
+    allCells.push(i);
+}
+
+var sim = new Game.Sim(gridNumber, cellWidth, cellHeight, allCells);
+var sim_t = 1000 / 30;
+var send_t = 1000 / 30;
+var test_t = 1000 / 100;
+var sim_loop;
+var send_loop;
+var test_loop;
+var playerCount = 0;
+var init = true;
+
+// SERVER
 app.use(express.static(path.resolve(__dirname + '/../public/')));
 
 app.get('/', function(req, res) {
@@ -28,8 +52,11 @@ http.listen(process.env.PORT || port, function() {
   console.log('Listening on 3000');
 });
 
+
+
+// SOCKETS
+
 //  On client connection
-var socketList = [];
 io.on('connection', function(client){
 
   //  Add to socketList
@@ -41,18 +68,15 @@ io.on('connection', function(client){
   //  TODO don't spawn on top of other people or in 'danger'
   //  TODO fix initial vars
   var initState = {
-    //x: Math.random()*Game.width,
-    //y: Math.random()*Game.height,
     x: 10,
     y: 10,
-    //angle: Math.random()*Math.PI/2,
     angle: +Math.PI/3,
     speed: 0
   };
 
   var ac = [];
   ac.push(sim.coordinateToCellNumber(initState.x, initState.y));
-  console.log(ac);
+  console.log('Initial active cells: ' + ac);
   var metadata = {
     gridNumber: gridNumber,
     cellWidth: cellWidth,
@@ -72,7 +96,7 @@ io.on('connection', function(client){
   client.on('on_connect_response', function (data){
 
     Game.newPlayer(client.userid, data.name, initState);
-    sim.addShip(initState, client.userid,
+    sim.addShip(client.userid, data.name, initState,
       Game.createServerShipInput(client.userid));
 
     //  Tell other users that a new player has joined
@@ -165,6 +189,7 @@ Array.prototype.intersection = function(a) {
 //console.log(a2.intersection(a1));
 
 function send_loop_func(){
+  console.log('SocketList of length ' + socketList.length);
   socketList.forEach(function (client) {
     if (typeof client.cells == "undefined") {
       client.cells = []; // B
@@ -181,24 +206,34 @@ function send_loop_func(){
       var tuple = sim.cellNumberToTuple(old_cells[i]);
       var bufferedUpdates = sim.grid[tuple.x][tuple.y].bufferedUpdates;
       if (bufferedUpdates.length > 0){
-        allBufferedUpdates.push({x:tuple.x, y:tuple.y, updates:
-          bufferedUpdates});
+        allBufferedUpdates.push({num: i, updates: bufferedUpdates});
       }
     }
+    // Send serialized objects
+    var new_cells_states = [];
+    for (var i = 0; i < new_cells.length; i++) {
+      var cell_game_objects = sim.numberToCell(new_cells[i]).gameObjects;
+      var cell_static_objects = sim.numberToCell(new_cells[i]).staticObjects;
+      var cell_state = { game_obj: Game.serializeArray(cell_game_objects)
+                       , static_obj: Game.serializeArray(cell_static_objects) };
 
-    console.log('cells ' + cells);
-    console.log('client.cells ' + client.cells);
-    console.log('old_cells ' + old_cells);
-    console.log('new_cells ' + new_cells);
-    var data = {players: Game.getPlayers(), cells: client.cells, updates: allBufferedUpdates};
+      new_cells_states.push({ num: new_cells[i]
+                            , state: cell_state });
+    }
+
+    debugger;
+    console.log(client.cells.length + ' active cells, ' + 
+                old_cells.length + ' old cells and ' + 
+                new_cells.length + ' new cells.');
+    var data = { players: Game.getPlayers(), cells: client.cells
+               , updates: allBufferedUpdates, new_cells: new_cells_states};
     client.emit('server_update', data);
   });
 
   //  Clear update buffer
   //  ASSUME NO DROPPED PACKETS
   for (var i = 0; i < allCells.length; i++){
-    var tuple = sim.cellNumberToTuple(allCells[i]);
-    sim.grid[tuple.x][tuple.y].bufferedUpdates = [];
+    sim.numberToCell(allCells[i]).bufferedUpdates = [];
   }
 
 }
@@ -206,25 +241,29 @@ function send_loop_func(){
 function calculateCellsToSend(uid){
   var s = Game.getPlayerShips()[uid];
   if (s == null) {
+    console.log('No cells to send');
     return [];
   }
   var list = [];
   var base = sim.coordinateToCellIndex(s.state.x,s.state.y);
   if (base != null) {
-    const bufferConst = 4;
+    const bufferConst = 2;
     if (base.x + 1 < gridNumber && s.state.x % cellWidth > cellWidth/bufferConst){
       list.push(sim.cellTupleToNumber({x:base.x+1, y:base.y}))
     }
     if (base.y + 1 < gridNumber && s.state.y % cellHeight > cellHeight/bufferConst){
       list.push(sim.cellTupleToNumber({x:base.x, y:base.y+1}))
     }
-    if (base.x - 1 > 0 && s.state.x % cellWidth < cellWidth/bufferConst){
+    if (base.x - 1 >= 0 && s.state.x % cellWidth < cellWidth/bufferConst){
       list.push(sim.cellTupleToNumber({x:base.x-1, y:base.y}))
     }
-    if (base.y - 1 > 0 && s.state.y % cellHeight < cellHeight/bufferConst){
+    if (base.y - 1 >= 0 && s.state.y % cellHeight < cellHeight/bufferConst){
       list.push(sim.cellTupleToNumber({x:base.x, y:base.y-1}))
     }
-    list.push(base);
+    list.push(sim.cellTupleToNumber(base));
+  }
+  if (list.length > 0) {
+    debugger;
   }
   return list;
 }
@@ -252,22 +291,3 @@ var test_loop_func = function(){
 }
 
 
-Game.initializeGame();
-
-const gridNumber = 5;
-const cellWidth  = 1500;
-const cellHeight = 1500;
-var allCells = [];
-for (var i = 0; i < gridNumber * gridNumber; i++) {
-    allCells.push(i);
-}
-
-var sim = new Game.Sim(gridNumber, cellWidth, cellHeight, allCells);
-var sim_t = 1000 / 30;
-var send_t = 1000 / 30;
-var test_t = 1000 / 100;
-var sim_loop;
-var send_loop;
-var test_loop;
-var playerCount = 0;
-var init = true;

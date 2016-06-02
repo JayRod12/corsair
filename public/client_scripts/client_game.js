@@ -226,6 +226,25 @@ var localShipInput = function(){
       -mouse_y,2)) / speed_norm;
 }
 
+// DATA SERIALIZATION
+
+function deserializeShip(sim, serial) {
+  debugger;
+  return new Ship(sim, serial.state, serial.uid, serial.name, 
+    createServerShipInput("brown", serial.name), drawCannonBalls);
+}
+
+function deserializeTestObj(sim, state) {
+  return new TestObj(sim, state);
+}
+
+
+
+
+
+
+
+
 // GAME LOOP
 
 
@@ -254,9 +273,9 @@ function clientTick(currentTime){
 function addServerShip(userid, name, state){
   console.log("adding new player");
   newPlayer(userid, name, state);
-  sim.addShip(state, userid,
-      createServerShipInput(userid),
-        createShipOnDraw("brown", name), drawCannonBalls);
+  //sim.addShip(state, userid,
+  //    createServerShipInput(userid),
+  //      createShipOnDraw("brown", name), drawCannonBalls);
 
 }
 
@@ -322,25 +341,34 @@ function startClient() {
       var update = players[uid];
       updatePlayer(uid, update);
     }
-    sim.activeCells = data.cells;
     var allBufferedUpdates = data.updates;
-    if (typeof allBufferedUpdates != "undefined") {
-      for (var i = 0; i < allBufferedUpdates.length; i++){
-        var x = allBufferedUpdates[i].x;
-        var y = allBufferedUpdates[i].y;
-        var updates = allBufferedUpdates[i].updates;
-        for (var j = 0; j < updates.length; j++){
-          var update = updates[j];
-          switch(update.name){
-          case 'create_testObj':
-            sim.grid[x][y].gameObjects.push(new TestObj(sim, update.data));
-            break;
-          default:
-            console.log("Unrecognised command from server " + update.name);
-          }
+    for (var i = 0; i < allBufferedUpdates.length; i++){
+      var num = allBufferedUpdates[i].num;
+      var updates = allBufferedUpdates[i].updates;
+      var cell = sim.numberToCell(num);
+      for (var j = 0; j < updates.length; j++){
+        var update = updates[j];
+        switch(update.name){
+        case 'create_testObj':
+          cell.gameObjects.push(new TestObj(sim, update.data));
+          break;
+        default:
+          console.log("Unrecognised command from server " + update.name);
         }
+      }
     }
+
+
+    var new_cells_states = data.new_cells;
+
+    for (var i = 0; i < new_cells_states.length; i++) {
+      var cell = sim.numberToCell(new_cells_states[i].num);
+      cell.static_objects = deserializeArray(new_cells_states[i].state.static_obj, sim);
+      cell.game_objects = deserializeArray(new_cells_states[i].state.game_obj, sim);
     }
+
+    // Sim will only draw the active cells
+    sim.activeCells = data.cells;
   });
 }
 
@@ -379,7 +407,7 @@ function playClientGame(data) {
 
   var our_name = (localStorage['nickname'] == "") ? "Corsair" : localStorage['nickname'];
   newPlayer(our_id, our_name, data.state);
-  player = sim.addShip(data.state, our_id, localShipInput,
+  player = sim.addShip(our_id, our_name, data.state, localShipInput,
     createShipOnDraw("black", our_name), drawCannonBalls);
   player.onDeath = onShipDeath;
 

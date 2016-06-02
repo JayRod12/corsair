@@ -1,4 +1,6 @@
 // IMPORTANT TODO: Move important decisions such as removing Objects from shared to client
+// TODO: Should cells really have both static and game objects? 
+//   
 
 var server;
 
@@ -13,15 +15,20 @@ const shipBaseHeight = 40;
 //  Inputfunction determines updates to the ship
 //  onDraw can be null
 
-function Ship(sim, state, uid, inputFunction, onDraw, onDrawCannon){
+function Ship(sim, state, uid, name, inputFunction, onDraw, onDrawCannon){
 
   // Simulation in which the ship is.
   this.sim = sim;
+  this.uid = uid;
+  this.name = name;
 
   //  Should contain:
   //  x, y, angle, speed
   this.state = state;
   this.cell = sim.coordinateToCell(this.state.x, this.state.y);
+  if (this.state == undefined) {
+    debugger;
+  }
 
   this.getRemoteState = function(){
     return remoteStates[uid];
@@ -53,6 +60,13 @@ function Ship(sim, state, uid, inputFunction, onDraw, onDrawCannon){
   }
 
   this.onDraw = onDraw;
+
+  this.serialize = function() {
+    return { type:"ship"
+           , o : { uid: this.uid
+                 , name: this.name
+                 , state: this.state }};
+  };
 }
 
 function Cannon(ship, onDraw) {
@@ -117,6 +131,7 @@ function Cannon(ship, onDraw) {
   };
 }
 
+
 function CannonBall(ship, offsetX, offsetY, side, speed, onDraw, level) {
 
   console.log(offsetX);
@@ -146,14 +161,65 @@ function CannonBall(ship, offsetX, offsetY, side, speed, onDraw, level) {
     updateCell(this.sim, this, this.state.x, this.state.y);
   };
   this.onDraw = onDraw;
+  this.serialize = function() {
+    return { type: "cannonball", o : this.state };
+  };
 
+}
+
+// TODO change cannon so it can be deserialized
+function deserializeCannonBall(state) {
+  console.log('deserializeCannonBall unimplemented');
+  return null;
 }
 
 function Treasure(xTreasure, yTreasure, onDraw) {
     this.xTreasure = xTreasure;
     this.yTreasure = yTreasure;
     this.onDraw = onDraw;
+    this.serialize = function() {
+      return { type: "treasure", o : this};
+    }
 }
+
+// Serialize objects before sending them through sockets.
+
+function serializeObject(o) {
+  if (typeof o.serialize != "undefined") {
+    return o.serialize();
+  } else {
+    console.log('Serializing non-serializable object of type ' + typeof o);
+  }
+}
+function serializeArray(array) {
+  return array.map(serializeObject);
+}
+
+function deserializeObject(serial, aux) {
+  if (serial == null) {
+    debugger;
+  }
+  switch (serial.type) {
+    case "treasure":
+      return serial.o;
+    case "cannonball":
+      return deserializeCannonBall(serial.o, aux);
+    case "ship":
+      return deserializeShip(serial.o, aux);
+    case "test_obj":
+      return deserializeTestObj(serial.o, aux);
+    default:
+      console.log('Deserializing unrecognized object');
+  }
+
+}
+
+function deserializeArray(array, aux) {
+  return array.map(function(o) {
+    deserializeObject(o, aux);
+  });
+}
+
 
 function Cell(x, y, gridNumber) {
   this.number = gridNumber * y + x;
@@ -173,8 +239,6 @@ function Cell(x, y, gridNumber) {
     for (var i = 0; i < this.gameObjects.length; i++){
       if (typeof this.gameObjects[i].onDraw != "undefined"){
         this.gameObjects[i].onDraw();
-      } else {
-        console.log('Undefined draw for cannon');
       }
     }
     for (var i = 0; i < this.staticObjects.length; i++){
@@ -296,7 +360,13 @@ function Sim(gridNumber, cellWidth, cellHeight, activeCells){
       return null;
     }
     return this.grid[tuple.x][tuple.y];
+
   };
+  this.numberToCell = function(n) {
+    var tuple = this.cellNumberToTuple(n);
+    return this.grid[tuple.x][tuple.y];
+
+  }
 
   this.populateMap = function(drawTreasure, drawCoins, drawRocks) {
     var xTreasure = Math.random() * gridNumber * cellWidth;
@@ -324,8 +394,6 @@ function Sim(gridNumber, cellWidth, cellHeight, activeCells){
   this.tick = function(dt){
     for (var i = 0; i < this.activeCells.length; i++){
       var tuple = this.cellNumberToTuple(this.activeCells[i]);
-      debugger;
-      console.log(this.activeCells[i]);
       this.grid[tuple.x][tuple.y].tick(dt);
     }
   };
@@ -348,9 +416,9 @@ function Sim(gridNumber, cellWidth, cellHeight, activeCells){
   };
 
 
-  this.addShip = function (state, uid, inputFunction, onDraw, onDrawCannon){
+  this.addShip = function (uid, name, state, inputFunction, onDraw, onDrawCannon){
     var cell = this.coordinateToCell(state.x, state.y);
-    var ship = new Ship(this, state, uid, inputFunction, onDraw, onDrawCannon);
+    var ship = new Ship(this, state, uid, name, inputFunction, onDraw, onDrawCannon);
     cell.gameObjects.push(ship);
     playerShips[uid] = ship;
     return ship;
@@ -390,8 +458,11 @@ function TestObj(sim, state){
     ctx.fillRect(0,0,this.state.w,this.state.h);
     ctx.translate(-this.state.x, -this.state.y);
   }
-  
+  this.serialize = function() {
+    return { type: "test_obj", o: this.state };
+  }
 }
+
 
 function createServerShipInput(id){
   return function(){
@@ -436,7 +507,7 @@ function updatePlayer(id, state){
 }
 
 function getPlayers() {
-  return remoteStates;
+  return remoteStatee;
 }
 
 function getPlayerNames() {
@@ -465,3 +536,4 @@ exports.getPlayerShips = getPlayerShips;
 exports.createServerShipInput = createServerShipInput;
 exports.Sim = Sim;
 exports.TestObj = TestObj;
+exports.serializeArray = serializeArray;
