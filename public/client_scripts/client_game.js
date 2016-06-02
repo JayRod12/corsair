@@ -9,6 +9,7 @@ var lastTime;
 var player;
 var meta;
 var our_id;
+var localHighScoreTable;
 
 // Game loops
 var server_loop;
@@ -16,7 +17,7 @@ var client_loop;
 
 
 // Constants for the game
-const speed_norm = 100 * 5 * 100;
+const speed_norm = 100 * 5;
 const backColor = "rgb(104, 104, 104)";
 const seaColor = "rgb(102, 204, 255)";
 const seaHighlightColor = "rgb(225, 102, 255)";
@@ -127,12 +128,14 @@ function drawTreasure() {
     ctx.closePath();
 }
 
-function drawHighScoresTable(UIDtoShip, UIDtoName) {
+function drawHighScoresTable(scoreTable) {
   var maxDisplay = 10;
-  var displayNumber = UIDtoShip.length < maxDisplay ? UIDtoShip.length : maxDisplay;
+  var currentPlayers = Object.keys(scoreTable).length;
   var i = 0;
 
-  for (var uid in UIDtoShip) {
+  var displayNumber = currentPlayers < maxDisplay ? currentPlayers : maxDisplay;
+    
+  for (var uid in scoreTable) {
     if (i <= displayNumber) {
       i++;
       ctx.beginPath();
@@ -140,9 +143,8 @@ function drawHighScoresTable(UIDtoShip, UIDtoName) {
       ctx.lineWidth = 1;
       ctx.strokeStyle = 'black';
       ctx.textAlign="left"; 
-      ctx.strokeText("#" + i + " " + UIDtoName[uid] + "\t" + UIDtoShip[uid].score + "\n", 
-        (9/10)*canvas.width, (1/10)*canvas.height);
-      console.log(UIDtoName[uid]);
+      ctx.strokeText("#" + i + "\t\t" + scoreTable[uid].shipName + "\t" + scoreTable[uid].score + "\n", 
+        (9/10)*canvas.width, (1/10)*canvas.height + i * 20);
       ctx.stroke();
       ctx.closePath();
     } else {
@@ -151,11 +153,10 @@ function drawHighScoresTable(UIDtoShip, UIDtoName) {
   }
 }
 
-
 function drawScore() {
   ctx.fillStyle = "black";
   ctx.font = "50px Josefin Sans";
-  ctx.fillText(player.score, (1/15)*canvas.width, (9.5/10)*canvas.height);
+  ctx.fillText(localHighScoreTable[player.uid].score, (1/15)*canvas.width, (9.5/10)*canvas.height);
 }
 
 function drawCompass() {
@@ -173,7 +174,7 @@ function draw(){
   viewport.draw(ctx, canvas.width, canvas.height);
   drawCompass();
   drawScore();
-  drawHighScoresTable(UIDtoShip, UIDtoName);
+  drawHighScoresTable(localHighScoreTable);
 }
 
 
@@ -273,12 +274,14 @@ function clientTick(currentTime){
 
   sim.tick(dt);
 
-
   draw();
 }
 
-//  Add a new ship to the local world from information from the server
+function updateHighScoresTable(global) {
+    localHighScoreTable = jQuery.extend({}, global);
+}
 
+//  Add a new ship to the local world from information from the server
 function addServerShip(userid, name, state){
   console.log("adding new player");
   newPlayer(userid, name, state);
@@ -306,8 +309,6 @@ function endClient() {
 }
 
 function startClient() {
-  // Initialize sockets
-  console.log('socket status' + socket);
   if (!socket || !socket.connected) {
     socket = io();
   }
@@ -345,6 +346,7 @@ function startClient() {
   
   //  On update from server
   socket.on('server_update', function (data){
+    updateHighScoresTable(data.scoresTable);
     var players = data.players;
     for (var uid in players){
       var update = players[uid];
@@ -398,6 +400,8 @@ function playClientGame(data) {
   sim = new Sim(meta.gridNumber, meta.cellWidth, meta.cellHeight,
     meta.activeCells);
   sim.populateMap(drawTreasure);
+
+  updateHighScoresTable(data.scoresTable);
 
   //  Using 16:9 aspect ratio
   viewport = new Viewport(sim, 0, 0, 1.6, 0.9, 1);
