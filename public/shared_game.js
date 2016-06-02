@@ -6,11 +6,8 @@ const height = 1000;
 const shipBaseWidth = 90;
 const shipBaseHeight = 40;
 
-var UIDtoShip = [];
-var UIDtoName = [];
-
 var remoteStates;
-
+var UIDtoScores = {};
 
 //  Inputfunction determines updates to the ship
 //  onDraw can be null
@@ -19,8 +16,7 @@ function Ship(sim, state, uid, inputFunction, onDraw, onDrawCannon){
 
   // Simulation in which the ship is.
   this.sim = sim;
-  this.score = 0;
-  this.scoreTick = 0;
+  this.uid = uid;
 
   //  Should contain:
   //  x, y, angle, speed
@@ -59,12 +55,6 @@ function Ship(sim, state, uid, inputFunction, onDraw, onDrawCannon){
     updateCell(this.sim, this, this.state.x, this.state.y);
 
     this.cannon.onTick(dt);
-
-    this.scoreTick += 1;
-    if (this.scoreTick % 100 == 0) {
-      this.score +=1;
-      this.scoreTick = 0;
-    }
 
   }
 
@@ -306,6 +296,7 @@ function Sim(gridNumber, cellWidth, cellHeight, activeCells){
     }
   };
 
+  var wait = 0;
 
   this.tick = function(dt){
     for (var i = 0; i < this.activeCells.length; i++){
@@ -313,6 +304,14 @@ function Sim(gridNumber, cellWidth, cellHeight, activeCells){
       var y = this.activeCells[i].y;
       this.grid[x][y].tick(dt);
     }
+
+    if (wait == 0) {
+      for (var uid in UIDtoScores) {
+        UIDtoScores[uid].score += 1;
+      }
+    }
+    wait = (wait + 1) % 50;
+
   };
 
   this.draw = function(ctx){
@@ -339,8 +338,7 @@ function Sim(gridNumber, cellWidth, cellHeight, activeCells){
     var cell = this.coordinateToCell(state.x, state.y);
     var ship = new Ship(this, state, uid, inputFunction, onDraw, onDrawCannon);
     cell.gameObjects.push(ship);
-    UIDtoShip[uid] = ship;
-    UIDtoName[uid] = getPlayerNames()[uid];
+    UIDtoScores[uid] = {shipName: getPlayerNames()[uid], score: 0};
     return ship;
   };
 
@@ -396,7 +394,7 @@ function createServerShipInput(id){
 }
 
 function initializeGame(){
-  console.log("game inited");
+  console.log("Game initiated.");
   remoteStates = {};
   playerNames = {};
 }
@@ -411,6 +409,9 @@ function removePlayer(id) {
   console.log('Removing player: ' + playerNames[id] + ' ' + id);
   delete remoteStates[id];
   delete playerNames[id];
+  debugger;
+  delete UIDtoScores[id];
+  debugger;
 }
 
 function updatePlayer(id, state){
@@ -447,6 +448,7 @@ exports.removePlayer = removePlayer;
 exports.updatePlayer = updatePlayer;
 exports.getPlayers = getPlayers;
 exports.getPlayerNames = getPlayerNames;
+exports.UIDtoScores = UIDtoScores;
 
 exports.createServerShipInput = createServerShipInput;
 exports.Sim = Sim;

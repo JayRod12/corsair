@@ -35,16 +35,13 @@ io.on('connection', function(client){
   //  Generate new client id associate with their connection
   client.userid = UUID();
 
-
-
-
   //  TODO don't spawn on top of other people or in 'danger'
   //  TODO fix initial vars
   var initState = {
     //x: Math.random()*Game.width,
     //y: Math.random()*Game.height,
-    x: 10,
-    y: 10,
+    x: 20,
+    y: 20,
     //angle: Math.random()*Math.PI/2,
     angle: +Math.PI/3,
     speed: 0
@@ -59,8 +56,7 @@ io.on('connection', function(client){
   }
 
   client.emit('on_connect', {id : client.userid, names : Game.getPlayerNames(),
-    players : Game.getPlayers(), state: initState, meta: metadata});
-
+    players : Game.getPlayers(), scoresTable: Game.UIDtoScores, state: initState, meta: metadata});
 
   //  Wait for response
 
@@ -97,6 +93,7 @@ io.on('connection', function(client){
   //  On tick
   client.on('client_update', function(data) {
     Game.updatePlayer(client.userid, data.state);
+
     //  Respond with current server state, instead broadcast regularly?
     var allBufferedUpdates = [];
     for (var y = 0; y < gridNumber; y++){
@@ -105,17 +102,16 @@ io.on('connection', function(client){
         if (bufferedUpdates.length > 0){
           allBufferedUpdates.push({x:x, y:y, updates:
             bufferedUpdates});
-          console.log("AN UPDATE");
         }
       }
     }
-    client.emit('server_update', {players: Game.getPlayers(), updates: allBufferedUpdates})
+    client.emit('server_update', {players: Game.getPlayers(), updates: allBufferedUpdates, scoresTable: Game.UIDtoScores})
   });
 
   //  On client disconnect
   client.on('disconnect', function () {
 
-    var finalScore = Game.getPlayers()[client.userid].score;
+    //var finalScore = Game.getPlayers()[client.userid].score;
 
     // Decrement count
     playerCount -= 1;
@@ -137,11 +133,11 @@ io.on('connection', function(client){
 
 var sim_loop_func = function(dt){
   //console.log(sim.activeCells);
-  sim.playerName(dt);
+  sim.tick(dt);
 }
 
 var test_loop_func = function(){
-  sim.addTestObject();
+  //sim.addTestObject();
 }
 
 
