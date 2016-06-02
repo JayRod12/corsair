@@ -228,13 +228,15 @@ var localShipInput = function(){
 
 // DATA SERIALIZATION
 
-function deserializeShip(sim, serial) {
-  debugger;
+function deserializeShip(serial, sim) {
+  if (serial.uid == our_id) {
+    return null;
+  }
   return new Ship(sim, serial.state, serial.uid, serial.name, 
     createServerShipInput("brown", serial.name), drawCannonBalls);
 }
 
-function deserializeTestObj(sim, state) {
+function deserializeTestObj(state, sim) {
   return new TestObj(sim, state);
 }
 
@@ -336,6 +338,12 @@ function startClient() {
   
   //  On update from server
   socket.on('server_update', function (data){
+
+    // check if you died
+    if (data.active_cells.length == 0) {
+      player.onDeath();
+    }
+
     var players = data.players;
     for (var uid in players){
       var update = players[uid];
@@ -363,12 +371,12 @@ function startClient() {
 
     for (var i = 0; i < new_cells_states.length; i++) {
       var cell = sim.numberToCell(new_cells_states[i].num);
-      cell.static_objects = deserializeArray(new_cells_states[i].state.static_obj, sim);
-      cell.game_objects = deserializeArray(new_cells_states[i].state.game_obj, sim);
+      cell.static_objects = deserializeArray(new_cells_states[i].state.static_obj, sim).filter( function(x) {x != null; });
+      cell.game_objects = deserializeArray(new_cells_states[i].state.game_obj, sim).filter( function(x) {x != null; });
     }
 
     // Sim will only draw the active cells
-    sim.activeCells = data.cells;
+    sim.activeCells = data.active_cells;
   });
 }
 

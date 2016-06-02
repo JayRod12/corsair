@@ -3,7 +3,6 @@ console.log("Starting...");
 const port = 3000;
 const server = true;
 
-var init = false;
 
 var express = require('express');
 var app = express();
@@ -31,11 +30,10 @@ var sim = new Game.Sim(gridNumber, cellWidth, cellHeight, allCells);
 var sim_t = 1000 / 30;
 var send_t = 1000 / 30;
 var test_t = 1000 / 100;
-var sim_loop;
-var send_loop;
-var test_loop;
+var sim_loop = 0;
+var send_loop = 0;
+var test_loop = 0;
 var playerCount = 0;
-var init = true;
 
 // SERVER
 app.use(express.static(path.resolve(__dirname + '/../public/')));
@@ -76,7 +74,6 @@ io.on('connection', function(client){
 
   var ac = [];
   ac.push(sim.coordinateToCellNumber(initState.x, initState.y));
-  console.log('Initial active cells: ' + ac);
   var metadata = {
     gridNumber: gridNumber,
     cellWidth: cellWidth,
@@ -107,20 +104,18 @@ io.on('connection', function(client){
 
     //  If we are not simulating we now have at least one player so we should
     //  begin simulating
-    if (typeof sim_loop == "undefined" && init){
-      console.log("starting simulation");
+    console.log("starting simulation");
 
-      if (!sim_loop) {
-        sim_loop = setInterval(sim_loop_func, sim_t, sim_t);
-      }
+    if (sim_loop == 0) {
+      sim_loop = setInterval(sim_loop_func, sim_t, sim_t);
+    }
 
-      if (!send_loop) {
-        send_loop = setInterval(send_loop_func, send_t);
-      }
+    if (send_loop == 0) {
+      send_loop = setInterval(send_loop_func, send_t);
+    }
 
-      if (!test_loop) {
-        test_loop = setInterval(test_loop_func, test_t);
-      }
+    if (test_loop == 0) {
+      test_loop = setInterval(test_loop_func, test_t);
     }
 
 
@@ -159,8 +154,18 @@ io.on('connection', function(client){
     //  Stop simulating if noone is connected
     if (playerCount < 1){
       console.log("stopping simulation");
-      clearInterval(sim_loop);
-      clearInterval(test_loop);
+      if (sim_loop != 0) { 
+        clearInterval(sim_loop);
+        sim_loop = 0;
+      }
+      if (test_loop != 0) { 
+        clearInterval(test_loop);
+        test_loop = 0;
+      }
+      if (send_loop) {
+        clearInterval(send_loop);
+        send_loop = 0;
+      }
     }
   });
 
@@ -189,7 +194,7 @@ Array.prototype.intersection = function(a) {
 //console.log(a2.intersection(a1));
 
 function send_loop_func(){
-  console.log('SocketList of length ' + socketList.length);
+  //console.log('SocketList of length ' + socketList.length);
   socketList.forEach(function (client) {
     if (typeof client.cells == "undefined") {
       client.cells = []; // B
@@ -221,11 +226,10 @@ function send_loop_func(){
                             , state: cell_state });
     }
 
-    debugger;
-    console.log(client.cells.length + ' active cells, ' + 
-                old_cells.length + ' old cells and ' + 
-                new_cells.length + ' new cells.');
-    var data = { players: Game.getPlayers(), cells: client.cells
+    //console.log(client.cells.length + ' active cells, ' + 
+    //            old_cells.length + ' old cells and ' + 
+    //            new_cells.length + ' new cells.');
+    var data = { players: Game.getPlayers(), active_cells: client.cells
                , updates: allBufferedUpdates, new_cells: new_cells_states};
     client.emit('server_update', data);
   });
@@ -241,7 +245,7 @@ function send_loop_func(){
 function calculateCellsToSend(uid){
   var s = Game.getPlayerShips()[uid];
   if (s == null) {
-    console.log('No cells to send');
+    //console.log('No cells to send');
     return [];
   }
   var list = [];
@@ -261,9 +265,6 @@ function calculateCellsToSend(uid){
       list.push(sim.cellTupleToNumber({x:base.x, y:base.y-1}))
     }
     list.push(sim.cellTupleToNumber(base));
-  }
-  if (list.length > 0) {
-    debugger;
   }
   return list;
 }

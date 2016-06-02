@@ -26,12 +26,9 @@ function Ship(sim, state, uid, name, inputFunction, onDraw, onDrawCannon){
   //  x, y, angle, speed
   this.state = state;
   this.cell = sim.coordinateToCell(this.state.x, this.state.y);
-  if (this.state == undefined) {
-    debugger;
-  }
 
   this.getRemoteState = function(){
-    return remoteStates[uid];
+    return remoteStates[this.uid];
   };
 
   // Scale of the ship ?
@@ -189,6 +186,7 @@ function serializeObject(o) {
     return o.serialize();
   } else {
     console.log('Serializing non-serializable object of type ' + typeof o);
+    return null;
   }
 }
 function serializeArray(array) {
@@ -197,7 +195,7 @@ function serializeArray(array) {
 
 function deserializeObject(serial, aux) {
   if (serial == null) {
-    debugger;
+    return null;
   }
   switch (serial.type) {
     case "treasure":
@@ -507,7 +505,7 @@ function updatePlayer(id, state){
 }
 
 function getPlayers() {
-  return remoteStatee;
+  return remoteStates;
 }
 
 function getPlayerNames() {
