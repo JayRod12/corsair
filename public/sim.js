@@ -189,6 +189,7 @@ function Sim(remote, gridNumber, cellWidth, cellHeight, activeCells){
     }
   };
 
+var wait = 0;
 
   this.tick = function(dt){
     for (var i = 0; i < this.activeCells.length; i++){
@@ -196,6 +197,13 @@ function Sim(remote, gridNumber, cellWidth, cellHeight, activeCells){
       var y = this.activeCells[i].y;
       this.grid[x][y].tick(dt);
     }
+
+    if (wait == 0) {
+      for (var uid in remote.getUIDtoScores()) {
+        remote.getUIDtoScores()[uid].score += 1;
+      }
+    }
+    wait = (wait + 1) % 50;
   };
 
   this.draw = function(ctx){
@@ -222,6 +230,7 @@ function Sim(remote, gridNumber, cellWidth, cellHeight, activeCells){
     var cell = this.coordinateToCell(state.x, state.y);
     var ship = new Ship.Class(this, state, uid, inputFunction, onDraw, onDrawCannon);
     cell.gameObjects.push(ship);
+    remote.getUIDtoScores()[uid] = {shipName: remote.getPlayerNames()[uid], score: 0};
     return ship;
   };
 

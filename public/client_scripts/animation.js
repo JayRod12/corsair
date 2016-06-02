@@ -34,9 +34,6 @@ function init() {
   HEIGHT = 884;
   WIDTH = 1880;
 
-  console.log(window.innerHeight);
-  console.log(window.innerWidth);
-
   camera = new THREE.PerspectiveCamera(75, WIDTH / HEIGHT, 1, 1000);
   camera.position.z = 600;
 
@@ -192,7 +189,6 @@ createWorld();
 animation();
 
 $(document).on('keydown', function(evt) {
-  console.log(evt.keyCode);
   if (evt.keyCode == 87) {
     w = true;
   }
@@ -206,7 +202,6 @@ $(document).on('keydown', function(evt) {
     d = true;
   }
   if (evt.keyCode == 32) {
-    console.log("Jump");
     if (boat_group.position.y == 185) {
     TweenMax.to(boat_group.position, 0.5, {
       y: 250,
@@ -222,7 +217,6 @@ $(document).on('keydown', function(evt) {
 }
 });
 $(document).on('keyup', function(evt) {
-  console.log(evt.keyCode);
 
   if (evt.keyCode == 87) {
     w = false;
