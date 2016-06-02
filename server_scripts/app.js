@@ -11,6 +11,7 @@ var path = require('path');
 var io = require('socket.io')(http);
 var UUID = require('node-uuid');
 var Game = require('../public/shared_game.js');
+var Sim = require('../public/sim.js');
 
 var remote = new Game.Remote();
 
@@ -26,8 +27,10 @@ for (var i = 0; i < gridNumber * gridNumber; i++) {
     allCells.push(i);
 }
 
-var sim = new Game.Sim(remote,gridNumber, cellWidth, cellHeight, allCells);
+var sim = new Sim.Class(remote,gridNumber, cellWidth, cellHeight, allCells);
 var sim_t = 1000 / 30;
+var serializer = new Game.Serializer(sim);
+
 var send_t = 1000 / 30;
 var test_t = 1000 / 100;
 var sim_loop = 0;
@@ -78,11 +81,11 @@ io.on('connection', function(client){
     gridNumber: gridNumber,
     cellWidth: cellWidth,
     cellHeight: cellHeight,
-    activeCells: ac
+    activeCells: allCells
   }
 
-  var data = {id : client.userid, names : Game.getPlayerNames(),
-        players : Game.getPlayers(), state: initState, meta: metadata};
+  var data = {id : client.userid, names : remote.getPlayerNames(),
+        players : remote.getPlayers(), state: initState, meta: metadata};
   client.emit('on_connect', data);
 
 
@@ -206,14 +209,14 @@ function send_loop_func(){
     for (var i = 0; i < new_cells.length; i++) {
       var cell_game_objects = sim.numberToCell(new_cells[i]).gameObjects;
       var cell_static_objects = sim.numberToCell(new_cells[i]).staticObjects;
-      var cell_state = { game_obj: Game.serializeArray(cell_game_objects)
-                       , static_obj: Game.serializeArray(cell_static_objects) };
+      var cell_state = { game_obj: serializer.serializeArray(cell_game_objects)
+                       , static_obj: serializer.serializeArray(cell_static_objects) };
 
       new_cells_states.push({ num: new_cells[i]
                             , state: cell_state });
     }
 
-    var data = { players: Game.getPlayers(), active_cells: client.cells
+    var data = { players: remote.getPlayers(), active_cells:allCells 
                , updates: allBufferedUpdates, new_cells: new_cells_states};
     client.emit('server_update', data);
   });
@@ -227,9 +230,9 @@ function send_loop_func(){
 }
 
 function calculateCellsToSend(uid){
-  var s = remote.getPlayerShips()[uid];
+  var s = sim.UIDtoShip[uid];
   if (s == null) {
-    //console.log('No cells to send');
+    console.log('No cells to send');
     return [];
   }
   var list = [];
@@ -250,6 +253,7 @@ function calculateCellsToSend(uid){
     }
     list.push(sim.cellTupleToNumber(base));
   }
+  console.log("active cells length: " + list.length);
   return list;
 }
 
@@ -257,18 +261,6 @@ var sim_loop_func = function(dt){
   sim.tick(dt);
 }
 
-Game.Sim.prototype.addTestObject = function() {
-  var w = 20 + 40 * Math.random();
-  var h = 20 + 40 * Math.random();
-  var x = (gridNumber * cellWidth - w) * Math.random();
-  var y = (gridNumber * cellHeight - h) * Math.random();
- 
-  var state = {x: x, y: y, w: w, h: h};
-  var obj = new Game.TestObj(this, state);
-  var cell = this.coordinateToCell(state.x, state.y);
-  cell.gameObjects.push(obj);
-  cell.bufferedUpdates.push({name: 'create_testObj', data: state});
-}
 
 var test_loop_func = function(){
   sim.addTestObject();

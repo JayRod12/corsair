@@ -121,6 +121,5 @@ function CannonBall(ship, offsetX, offsetY, side, speed, onDraw, level) {
 
 exports.Class = Cannon;
 exports.Ball = CannonBall;
-exports.deserializeCannonBass = deserializeCannonBall;
 
 })(typeof exports == 'undefined' ? this.Cannon = {} : exports);

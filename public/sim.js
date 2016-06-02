@@ -20,6 +20,7 @@ function Cell(x, y, gridNumber) {
   this.y = y;
   this.gameObjects = [];
   this.staticObjects = [];
+  this.bufferedUpdates = [];
 
   this.tick = function(dt){
     //Check collisions first, important so that collisionHandler can do 
@@ -117,6 +118,7 @@ function Sim(remote, gridNumber, cellWidth, cellHeight, activeCells){
   this.cellHeight = cellHeight;
   this.activeCells = activeCells;
   this.remote = remote;
+  this.UIDtoShip = {};
 
   this.grid = new Array(this.gridNumber)
   for (var i = 0; i < this.gridNumber; i++) {
@@ -127,7 +129,7 @@ function Sim(remote, gridNumber, cellWidth, cellHeight, activeCells){
   }
 
   this.activateCell = function (x,y){
-    this.activeCells.push({x:x, y:y});
+    this.activeCells.push(this.cellTupleToNumber({x:x, y:y}));
   };
 
   this.deactivateCell = function (x,y){
@@ -143,9 +145,7 @@ function Sim(remote, gridNumber, cellWidth, cellHeight, activeCells){
   var xTreasure = 300;
   var yTreasure = 300;
 
-  this.populateMap = function(drawTreasure, drawIsland, drawCoins, drawRocks) {
-    var treasure = new Treasure(xTreasure, yTreasure, drawTreasure);
-	var example_island = new Island.Class(500, 500, 100, 100, Math.PI/4, 
+  this.populateMap = function(drawTreasure, drawIsland, drawCoins, drawRocks) { var treasure = new Treasure(xTreasure, yTreasure, drawTreasure); var example_island = new Island.Class(500, 500, 100, 100, Math.PI/4, 
 													"white");  
     var cell = this.coordinateToCell(xTreasure, yTreasure);
     cell.staticObjects.push(treasure);
@@ -208,6 +208,7 @@ function Sim(remote, gridNumber, cellWidth, cellHeight, activeCells){
     if (tuple == null) {
       return null;
     }
+    if (!this.grid[tuple.x]) debugger;
     return this.grid[tuple.x][tuple.y];
 
   };
@@ -219,9 +220,7 @@ function Sim(remote, gridNumber, cellWidth, cellHeight, activeCells){
 
   this.tick = function(dt){
     for (var i = 0; i < this.activeCells.length; i++){
-      var x = this.activeCells[i].x;
-      var y = this.activeCells[i].y;
-      this.grid[x][y].tick(dt);
+      this.numberToCell(this.activeCells[i]).tick(dt);
     }
   };
 
@@ -233,24 +232,26 @@ function Sim(remote, gridNumber, cellWidth, cellHeight, activeCells){
     ctx.fillRect(110, 610, 20, 20);
     ctx.fillRect(810, 510, 20, 20);
     for (var i = 0; i < this.activeCells.length; i++){
-      var x = this.activeCells[i].x;
-      var y = this.activeCells[i].y;
-      drawCellBackground(x, y, ctx);
+      var tuple = this.cellNumberToTuple(this.activeCells[i]);
+      drawCellBackground(tuple.x, tuple.y, ctx);
     }
     for (var i = 0; i < this.activeCells.length; i++){
-      var x = this.activeCells[i].x;
-      var y = this.activeCells[i].y;
-      this.grid[x][y].draw(ctx);
+      this.numberToCell(this.activeCells[i]).draw(ctx);
     }
   };
 
 
-  this.addShip = function (state, uid, inputFunction, onDraw, onDrawCannon){
+  this.addShip = function (uid, name, state, inputFunction, onDraw, onDrawCannon){
     var cell = this.coordinateToCell(state.x, state.y);
-    var ship = new Ship.Class(this, state, uid, inputFunction, onDraw, onDrawCannon);
+    var ship = new Ship.Class(this, state, uid, name, inputFunction, onDraw, onDrawCannon);
     cell.gameObjects.push(ship);
+    this.UIDtoShip[uid] = ship;
     return ship;
   };
+
+  this.removeShip = function(ship){
+    delete this.UIDtoShip[ship.uid];
+  }
 
 
   this.removeObject = function(object) {
@@ -260,10 +261,28 @@ function Sim(remote, gridNumber, cellWidth, cellHeight, activeCells){
         cell.gameObjects.splice(i,1);
       }
     }
+
+    if (object instanceof Ship.Class){
+      this.removeShip(object);
+    }
+
     if (typeof object.onDeath != "undefined") {
       object.onDeath();
     }
   };
+
+  this.addTestObject = function() {
+    var w = 20 + 40 * Math.random();
+    var h = 20 + 40 * Math.random();
+    var x = (gridNumber * cellWidth - w) * Math.random();
+    var y = (gridNumber * cellHeight - h) * Math.random();
+   
+    var state = {x: x, y: y, w: w, h: h};
+    var obj = new TestObj(this, state);
+    var cell = this.coordinateToCell(state.x, state.y);
+    cell.gameObjects.push(obj);
+    cell.bufferedUpdates.push({name: 'create_testObj', data: state});
+  }
 }
 
 function Treasure(xTreasure, yTreasure, onDraw) {
@@ -340,9 +359,25 @@ function parseColObjectsFailure(t1, t2, o1, o2){
   console.log("Object 2: " + o2);
 }
 
+function TestObj(sim, state) {
+  this.sim = sim;
+  this.state = state;
+  this.onTick = function(){return true;};
+  this.onDraw = function(ctx) {
+    ctx.translate(this.state.x, this.state.y);
+    ctx.fillStyle = "white";
+    ctx.fillRect(0, 0, this.state.w, this.state.h);
+    ctx.translate(-this.state.x, -this.state.y);
+  };
+  this.serialize = function() {
+    return {type: "test_obj", o: this.state};
+  };
+}
+
 exports.Class = Sim;
 exports.Cell = Cell;
 exports.updateCell = updateCell;
 exports.checkCollision = checkCollision;
+exports.TestObj = TestObj;
 
 })(typeof exports == 'undefined' ? this.Sim = {} : exports);

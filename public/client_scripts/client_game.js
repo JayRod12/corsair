@@ -5,6 +5,7 @@ var canvas = $("#main_canvas")[0];
 var ctx = canvas.getContext("2d");
 var remote;
 var sim;
+var serializer;
 var viewport;
 var lastTime;
 var player;
@@ -192,8 +193,8 @@ $( "#main_canvas" ).mousedown(function(event){
       //  Right click
       player.cannon.onShoot(1);
       return false;
-
-    return true;
+    default:
+      return true;
   }
 });
 
@@ -216,26 +217,6 @@ var localShipInput = function(){
       Math.pow(this.state.y
       -mouse_y,2)) / speed_norm;
 }
-
-// DATA SERIALIZATION
-
-function deserializeShip(serial, sim) {
-  if (serial.uid == our_id) {
-    return null;
-  }
-  return new Ship(sim, serial.state, serial.uid, serial.name, 
-    createServerShipInput("brown", serial.name), drawCannonBalls);
-}
-
-function deserializeTestObj(state, sim) {
-  return new TestObj(sim, state);
-}
-
-
-
-
-
-
 
 
 // GAME LOOP
@@ -266,9 +247,9 @@ function clientTick(currentTime){
 function addServerShip(userid, name, state){
   console.log("adding new player");
   remote.newPlayer(userid, name, state);
-  sim.addShip(state, userid,
-      Game.createServerShipInput(userid),
-        createShipOnDraw("brown", name), drawCannonBalls);
+  //sim.addShip(userid, state, userid,
+  //    Game.createServerShipInput(userid),
+  //      createShipOnDraw("brown", name), drawCannonBalls);
 
 }
 
@@ -324,7 +305,7 @@ function startClient() {
   //  We delete the local ship
   socket.on('player_left', function (data){
     console.log('player left');
-    Game.removePlayer(data.id);
+    remote.removePlayer(data.id);
   });
   
   //  On update from server
@@ -349,7 +330,7 @@ function startClient() {
         var update = updates[j];
         switch(update.name){
         case 'create_testObj':
-          cell.gameObjects.push(new TestObj(sim, update.data));
+          cell.gameObjects.push(new Sim.TestObj(sim, update.data));
           break;
         default:
           console.log("Unrecognised command from server " + update.name);
@@ -362,8 +343,12 @@ function startClient() {
 
     for (var i = 0; i < new_cells_states.length; i++) {
       var cell = sim.numberToCell(new_cells_states[i].num);
-      cell.static_objects = deserializeArray(new_cells_states[i].state.static_obj, sim).filter( function(x) {x != null; });
-      cell.game_objects = deserializeArray(new_cells_states[i].state.game_obj, sim).filter( function(x) {x != null; });
+      cell.static_objects =
+        serializer.deserializeArray(new_cells_states[i].state.static_obj)
+                  .filter( function(x) {x != null; });
+      cell.game_objects =
+        serializer.deserializeArray(new_cells_states[i].state.game_obj)
+                  .filter( function(x) {x != null; });
     }
 
     // Sim will only draw the active cells
@@ -395,9 +380,10 @@ function playClientGame(data) {
 
   remote = new Game.Remote();
   meta = data.meta;
-  sim = new Game.Sim(remote, meta.gridNumber, meta.cellWidth, meta.cellHeight,
+  sim = new Sim.Class(remote, meta.gridNumber, meta.cellWidth, meta.cellHeight,
     meta.activeCells);
   sim.populateMap(drawTreasure);
+  serializer = new Serializer.Class(sim);
   //  Using 16:9 aspect ratio
   viewport = new Viewport(sim, 0, 0, 1.6, 0.9, 1/10);
 

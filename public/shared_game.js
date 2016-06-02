@@ -6,6 +6,7 @@ else{
   //  Server
   Ship = require('../public/ship.js');
   Sim = require('../public/sim.js');
+  Serializer = require('../public/serializer.js');
 }
 
 (function(exports){
@@ -29,7 +30,6 @@ function Remote(){
   console.log("game inited");
   this.remoteStates = {};
   this.playerNames = {};
-
   this.newPlayer = function(id, name, state) {
     this.remoteStates[id] = state;
     this.playerNames[id] = name;
@@ -40,6 +40,7 @@ function Remote(){
     console.log('Removing player: ' + this.playerNames[id] + ' ' + id);
     delete this.remoteStates[id];
     delete this.playerNames[id];
+    // MAYBE sim.removeShip TODO?
   }
 
   this.updatePlayer = function(id, state){
@@ -75,6 +76,7 @@ exports.Remote = Remote;
 
 exports.createServerShipInput = createServerShipInput;
 exports.updateCell = Sim.updateCell;
-exports.Sim = Sim.Class;
+exports.Sim = Sim;
+exports.Serializer = Serializer.Class;
 
 })(typeof exports == 'undefined' ? this.Game = {} : exports);

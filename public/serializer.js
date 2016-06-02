@@ -5,6 +5,8 @@ else{
   //  Server
   Cannon = require('../public/cannon.js');
   Game = require('../public/shared_game.js');
+  Sim = require('../public/sim.js');
+  Ship = require('../public/ship.js');
 }
 
 (function(exports){
@@ -25,10 +27,10 @@ Serializer.prototype.serializeObject = function (o) {
 }
 
 Serializer.prototype.serializeArray = function(array) {
-  return array.map(serializeObject);
+  return array.map(this.serializeObject);
 }
 
-Serializer.prototype.deserializeObject = function(serial, aux) {
+Serializer.prototype.deserializeObject = function(serial) {
   if (serial == null) {
     return null;
   }
@@ -36,20 +38,20 @@ Serializer.prototype.deserializeObject = function(serial, aux) {
     case "treasure":
       return serial.o;
     case "cannonball":
-      return deserializeCannonBall(serial.o, aux);
+      return this.deserializeCannonBall(serial.o);
     case "ship":
-      return deserializeShip(serial.o, aux);
+      return this.deserializeShip(serial.o);
     case "test_obj":
-      return deserializeTestObj(serial.o, aux);
+      return this.deserializeTestObj(serial.o);
     default:
       console.log('Deserializing unrecognized object');
   }
 
 }
 
-Serializer.prototype.deserializeArray = function(array, aux) {
+Serializer.prototype.deserializeArray = function(array) {
   return array.map(function(o) {
-    deserializeObject(o, aux);
+    Serializer.prototype.deserializeObject(o);
   });
 }
 
@@ -59,6 +61,18 @@ Serializer.prototype.deserializeCannonBall = function(state) {
   return null;
 }
 
+
+Serializer.prototype.deserializeShip = function(serial) {
+  if (serial.uid == our_id) {
+    return null;
+  }
+  return new Ship.Class(this.sim, serial.state, serial.uid, serial.name, 
+    Game.createServerShipInput("brown", serial.name), drawCannonBalls);
+}
+
+Serializer.prototype.deserializeTestObj = function(state) {
+  return new Sim.TestObj(this.sim, state);
+}
 exports.Class = Serializer;
 
 })(typeof exports == 'undefined' ? this.Serializer = {} : exports);
