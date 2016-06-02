@@ -11,22 +11,21 @@
 /*PRE: rectangle_1, rectangle_2 are objects with 
 fields: {x, y, width, height, angle}*/
 function queryRectangleRectangleCollision(rectangle_1, rectangle_2, first) {	
-  console.log("DOING HEURISTIC COLLISION DETECTION");
 //calculate where the corners would be if the rectangle was not rotated and 
 //the centre of the rectangle was the origin.
 
   /*HEURISTIC COLLSIION DETECTION TO SPEED UP THIS CASE*/
-  var squared_radial_difference_div_4 = rectangle_1.width*rectangle_1.width 
-                          + rectangle_2.width*rectangle_2.width
-                          + rectangle_1.height*rectangle_1.height
-                          + rectangle_2.height*rectangle_2.height; 
+  var squared_radial_difference_div_4 = 
+		(rectangle_1.width + rectangle_2.width)
+		*(rectangle_1.width + rectangle_2.width)
+		+ (rectangle_1.height + rectangle_2.height)
+		 *(rectangle_1.height + rectangle_2.height);
   var squared_origin_difference = 
         (rectangle_1.x - rectangle_2.x)*(rectangle_1.x - rectangle_2.x) 
       + (rectangle_1.y - rectangle_2.y)*(rectangle_1.y - rectangle_2.y);
   if (squared_radial_difference_div_4 <= 4*squared_origin_difference) {
     return false;
   } else {
-	console.log("DOING PROPER COLLISION DETECTION");
 	/*ELSE DO PROPER COLLISION DETECTION*/
 
 //Get the non-rotated corner values of rectangle_2
