@@ -4,6 +4,8 @@ if (typeof exports === 'undefined'){
 else{
   //  Server
   Ship = require('../public/ship.js');
+  Col = require('../public/collision_detection.js');
+  Island = require('../public/island.js');
 }
 
 
@@ -17,23 +19,37 @@ function Cell(x, y, gridNumber) {
   this.staticObjects = [];
 
   this.tick = function(dt){
+    //Check collisions first, important so that collisionHandler can do 
+    //its work!
+    this.checkCollisions();
     for (var i = 0; i < this.gameObjects.length; i++){
       this.gameObjects[i].onTick(dt);
     }
   }
 
-  this.draw = function(){
+  this.draw = function(ctx){
     for (var i = 0; i < this.gameObjects.length; i++){
       if (typeof this.gameObjects[i].onDraw != "undefined"){
-        this.gameObjects[i].onDraw();
-      } else {
+        this.gameObjects[i].onDraw(ctx);
+      } /*else {
         console.log('Undefined draw for cannon');
-      }
+      }*/
     }
     for (var i = 0; i < this.staticObjects.length; i++){
       if (typeof this.staticObjects[i].onDraw != "undefined"){
-        this.staticObjects[i].onDraw();
+        this.staticObjects[i].onDraw(ctx);
       } 
+    }
+  }
+
+  this.checkCollisions = function() {
+    for (var i = 0; i < this.gameObjects.length; i++) {
+      for (var j = i + 1; j <= this.gameObjects.length; j++) {
+        if(checkCollision(this.gameObjects[i], this.gameObjects[j])) {
+          this.gameObjects[i].collisionHandler(this.gameObjects[j]);
+          this.gameObjects[j].collisionHandler(this.gameObjects[i]);
+        };
+      }
     }
   }
 }
@@ -126,10 +142,21 @@ function Sim(remote, gridNumber, cellWidth, cellHeight, activeCells){
   var xTreasure = 300;
   var yTreasure = 300;
 
+  /*
   this.populateMap = function(drawTreasure, drawCoins, drawRocks) {
     var treasure = new Treasure(xTreasure, yTreasure, drawTreasure);
+	var example_island = new Island(500, 500, 100, 100, Math.PI/4, 
+													"white", drawIsland);  
     var cell = this.coordinateToCell(xTreasure, yTreasure);
     cell.staticObjects.push(treasure);
+    */
+  this.populateMap = function(drawTreasure, drawIsland, drawCoins, drawRocks) {
+    var treasure = new Treasure(xTreasure, yTreasure, drawTreasure);
+	var example_island = new Island.Class(500, 500, 100, 100, Math.PI/4, 
+													"white");  
+    var cell = this.coordinateToCell(xTreasure, yTreasure);
+    cell.staticObjects.push(treasure);
+		cell.gameObjects.push(example_island);
   };
 
   //  Given a function f of a cell and some auxilary data,
@@ -170,7 +197,7 @@ function Sim(remote, gridNumber, cellWidth, cellHeight, activeCells){
     for (var i = 0; i < this.activeCells.length; i++){
       var x = this.activeCells[i].x;
       var y = this.activeCells[i].y;
-      this.grid[x][y].draw();
+      this.grid[x][y].draw(ctx);
     }
   };
 
@@ -202,9 +229,75 @@ function Treasure(xTreasure, yTreasure, onDraw) {
     this.onDraw = onDraw;
 }
 
+//  Probably factor out
+
+function checkCollision(object_1, object_2) {
+	if(object_1 instanceof Ship.Class && object_2 instanceof Ship.Class) {
+	  var rectangle_1 = {x: object_1.state.x, 
+                         y: object_1.state.y, 
+					     height: Ship.shipBaseHeight*object_1.scale, 
+						 width: Ship.shipBaseWidth*object_1.scale,
+					     angle: object_1.state.angle};
+		var rectangle_2 = {x: object_2.state.x, 
+                           y: object_2.state.y, 
+					       height: Ship.shipBaseHeight*object_2.scale, 
+						   width: Ship.shipBaseWidth*object_2.scale,
+						   angle: object_2.state.angle};
+			var res = Col.RectRect(rectangle_1, rectangle_2, true);
+			console.log(res);
+      return res;
+    }
+    var rect_s, rect_i;
+    var ship_island_collision = false;
+    if(object_1 instanceof Ship.Class && object_2 instanceof Island.Class){
+      rect_s = {
+        x: object_1.state.x,
+        y: object_1.state.y,
+        width: Ship.shipBaseWidth * object_1.scale,
+        height: Ship.shipBaseHeight * object_1.scale,
+        angle: object_1.state.angle
+      };
+      rect_i = {
+        x: object_2.x,
+        y: object_2.y,
+        width: object_2.width,
+        height: object_2.height,
+        angle: object_2.angle
+      };
+      ship_island_collision = true;
+    }
+    if(object_1 instanceof Island.Class && object_2 instanceof Ship.Class) {
+      rect_s = {
+        x: object_2.state.x,
+        y: object_2.state.y,
+        width: Ship.shipBaseWidth * object_2.scale,
+        height: Ship.shipBaseHeight * object_2.scale,
+        angle: object_2.state.angle
+      };
+      rect_i = {
+        x: object_1.x,
+        y: object_1.y,
+        width: object_1.width,
+        height: object_1.height,
+        angle: object_1.angle
+      };
+      ship_island_collision = true;
+    }
+    if (ship_island_collision) {
+      var point_s = {x: rect_s.x, y:rect_s.y};
+      //var ret = queryPointRectangleCollision(point_s,
+                  //rect_i, true);
+      var ret = Col.RectRect(rect_s, rect_i, true);
+      return ret;
+    }
+
+	return false;
+    //I'm sorry for my sins. TODO: CannonBall (point) cases
+}	
+
 exports.Class = Sim;
 exports.Cell = Cell;
 exports.updateCell = updateCell;
-
+exports.checkCollision = checkCollision;
 
 })(typeof exports == 'undefined' ? this.Sim = {} : exports);

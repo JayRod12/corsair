@@ -131,9 +131,9 @@ var sim_loop_func = function(dt){
 
 
 
-const gridNumber = 5;
-const cellWidth  = 200;
-const cellHeight = 200;
+const gridNumber = 1;
+const cellWidth  = 1000;
+const cellHeight = 1000;
 var allCells = [];
 for (var y = 0; y < gridNumber; y++){
   for (var x = 0; x < gridNumber; x++){

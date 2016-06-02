@@ -69,7 +69,7 @@ function drawCellBackground(cx, cy, ctx){
 }
 
 
-function createShipOnDraw(colour, name){
+function createShipOnDraw(default_colour, name){
   return function(){
     var width = Ship.shipBaseWidth * this.scale;
     var height = Ship.shipBaseHeight * this.scale;
@@ -83,7 +83,11 @@ function createShipOnDraw(colour, name){
 
       //We draw the ship, ensuring that we start drawing from the correct location 
     //(the fillRect function draws from the topmost left corner of the rectangle 
-    ctx.fillStyle = colour;
+    if(this.collided_timer > 0) {
+        ctx.fillStyle = "red";
+    } else {
+      ctx.fillStyle = default_colour;
+    }
     ctx.fillRect(-width/2, -height/2, width, height);
     ctx.strokeStyle = "#ffc0cb";
     ctx.strokeRect(-width/2, -height/2, width, height);
@@ -139,6 +143,7 @@ function draw(){
 }
 
 
+
 ///////////// MOVEMENT METHODS /////////////
 
 //  Mouse position on screen
@@ -181,36 +186,20 @@ $( "#main_canvas" ).mousedown(function(event){
   }
 });
 
-
-
+var delta_angle_limit = Math.PI/90;
 var localShipInput = function(){
   var delta_angle = (Math.atan2(mouse_y - this.state.y, mouse_x - this.state.x) 
 						- this.state.angle); 
-
   //Ensure delta_angle stays within the range [-PI, PI]
-  if (delta_angle > Math.PI) {
-  delta_angle = delta_angle - 2*Math.PI ;
-  }
-
-  if(delta_angle < -Math.PI) {
-  delta_angle = 2*Math.PI + delta_angle;
-  }
-  var delta_angle_limit = Math.PI/90;
+  delta_angle = Col.trimBranch(delta_angle);
+ 
   if (delta_angle > delta_angle_limit) {
     delta_angle = delta_angle_limit;
   } else if (delta_angle < -delta_angle_limit) {
     delta_angle = -delta_angle_limit;
   }
 
-  this.state.angle += delta_angle;
-
-  if (this.state.angle > Math.PI) {
-	this.state.angle -= 2*Math.PI;
-  } 
-
-  if (this.state.angle < -Math.PI) {
-    this.state.angle += 2*Math.PI;
-  }
+  this.state.angle = Col.trimBranch(this.state.angle + delta_angle);
   this.state.speed = Math.sqrt(Math.pow(this.state.x - mouse_x,2) +
       Math.pow(this.state.y
       -mouse_y,2)) / speed_norm;

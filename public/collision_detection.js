@@ -1,9 +1,5 @@
-function collisionDetector(){
-	this.RectRect = queryRectangleRectangleCollision;
-	this.PointRect = queryPointRectangleCollision;
-	this.PointPoint = queryPointPointCollision;
-  this.CircleCircle = queryCircleCircleCollision;
-}
+(function (exports){
+
 /*Checks whether any vertex of rectangle_2 lies interior to or on rectangle_1, then calls itself with the rectangles reversed to 
    perform the reverse check*/
 /*
@@ -11,7 +7,6 @@ function collisionDetector(){
    |      | 
   C4 ----- C3
  */
-const epsilon = 0.00001;
 function queryRectangleRectangleCollision(rectangle_1, rectangle_2, first) {	
 //calculate where the corners would be if the rectangle was not rotated and the centre of the rectangle was the origin.
 	
@@ -45,7 +40,7 @@ function queryRectangleRectangleCollision(rectangle_1, rectangle_2, first) {
   if (queryPointRectangleCollision(c2, rectangle_1)) return true;
   if (queryPointRectangleCollision(c3, rectangle_1)) return true;
   if (queryPointRectangleCollision(c4, rectangle_1)) return true;
-  if (first) {return collisionDetection(rectangle_2, rectangle_1, false);}
+  if (first) {return queryRectangleRectangleCollision(rectangle_2, rectangle_1, false);}
   return false;
 }
 
@@ -56,7 +51,7 @@ function queryPointRectangleCollision(point, rectangle) {
 	var odv_p_theta = trimBranch(Math.atan2(odv_p.y, odv_p.x));
 	var odv_p_angle_to_rectangle = trimBranch(odv_p_theta - rectangle.angle);
 	var trav = getRectangleTravel(Math.abs(odv_p_angle_to_rectangle), rectangle);
-	return trav*trav + epsilon >= odv_p_square_length; 
+	return trav*trav >= odv_p_square_length; 
 }
 
 
@@ -64,7 +59,7 @@ function queryCircleCircleCollision(circle_1, circle_2) {
 	var odv = {x: circle_1.origin.x - circle_2.origin.x, 
 				     y: circle_1.origin.y - circle_2.origin.y};
 	var odv_square_length = odv.x*odv.x + odv.y*odv.y;
-	return circle_1.radius + circle_2.radius + epsilon >= odv_square_length;
+	return circle_1.radius + circle_2.radius >= odv_square_length;
 }
 
 
@@ -111,10 +106,9 @@ console.log(queryCircleCircleCollision({origin: {x: 70, y:70}, radius: 24}, {ori
 console.log(queryRectangleRectangleCollision({x: 357, y: 548, height: 22, width: 11.5, angle:(Math.PI/27.5)}, {x: 128, y: 275, height: 528, width: 817, angle: Math.PI}));
 */
 
-//  Dan is a pretentious twat
-exports.collisionDetection = function (r1, r2, inefficiencyGiveaway){
-  return collisionDetection(
-      {x : r1.x, y: r1.y, width: r1.w, height: r1.h, angle: r1.a},
-      {x : r2.x, y: r2.y, width: r2.w, height: r2.h, angle: r2.a},
-      inefficiencyGiveaway);
-}
+exports.RectRect = queryRectangleRectangleCollision;
+exports.PointRect = queryPointRectangleCollision;
+exports.PointPoint = queryPointPointCollision;
+exports.CircleCircle = queryCircleCircleCollision;
+exports.trimBranch = trimBranch;
+}(typeof exports === 'undefined' ? this.Col = {} : exports));

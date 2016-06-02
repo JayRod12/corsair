@@ -11,7 +11,6 @@ else{
 
 //  Inputfunction determines updates to the ship
 //  onDraw can be null
-
 function Ship(sim, state, uid, inputFunction, onDraw, onDrawCannon){
 
   // Simulation in which the ship is.
@@ -21,6 +20,10 @@ function Ship(sim, state, uid, inputFunction, onDraw, onDrawCannon){
   //  x, y, angle, speed
   this.state = state;
   this.cell = sim.coordinateToCell(this.state.x, this.state.y);
+
+  this.collided_basetime = 400;
+
+  this.collided_timer = 0;
 
   this.getRemoteState = function(){
     return sim.remote.getRemoteStates()[uid];
@@ -34,6 +37,11 @@ function Ship(sim, state, uid, inputFunction, onDraw, onDrawCannon){
 
   this.onTick = function(dt){
     var remoteState = this.getRemoteState();
+
+    //decrement collision_timer to notify other functionalities
+    if(this.collided_timer > 0) {
+      this.collided_timer -= dt;
+    }
 
     //  If player has left the server remove their ship from the sim
     if (typeof remoteState == "undefined"){
@@ -55,6 +63,15 @@ function Ship(sim, state, uid, inputFunction, onDraw, onDrawCannon){
 
     this.cannon.onTick(dt);
 
+  }
+
+  this.collisionHandler = function(other_object) {
+	  /*TODO: different cases (possibly) i.e. what if 
+  		it's a cannonball I've collided with?*/
+   //this.colour = "red";
+   this.collided_timer = this.collided_basetime;
+   other_object.collided_timer = other_object.collided_basetime;
+   //decrement health & handle physics;
   }
 
   this.onDraw = onDraw;
