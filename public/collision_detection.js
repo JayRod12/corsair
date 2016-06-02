@@ -65,6 +65,10 @@ with: {x, y, width, height, angle}*/
 function queryPointRectangleCollision(point, rectangle) {
 	var odv_p = {x: rectangle.x - point.x, y: rectangle.y - point.y};
 	var odv_p_square_length = odv_p.x*odv_p.x + odv_p.y*odv_p.y;
+	//HEURISTIC CHECK
+	if(4*odv_p_square_length >= rectangle.hypotenuse*rectangle.hypotenuse) {
+  return false;
+  }
 	var odv_p_theta = trimBranch(Math.atan2(odv_p.y, odv_p.x));
 	var odv_p_angle_to_rectangle = trimBranch(odv_p_theta - rectangle.angle);
 	var trav = getRectangleTravel(Math.abs(odv_p_angle_to_rectangle), rectangle);
