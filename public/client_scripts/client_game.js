@@ -17,7 +17,7 @@ var client_loop;
 
 
 // Constants for the game
-const speed_norm = 100 * 5;
+const speed_norm = 100 * 5 * 10;
 const backColor = "rgb(104, 104, 104)";
 const seaColor = "rgb(102, 204, 255)";
 const seaHighlightColor = "rgb(225, 102, 255)";
@@ -51,7 +51,7 @@ function Viewport(sim, x, y, baseWidth, baseHeight, scale){
     sim.draw(ctx);
 
     // Inverse scale
-    ctx.translate(this.x, this.y); 
+    ctx.translate(this.x, this.y);
     ctx.scale(1/scale, 1/scale);
 
   }
@@ -85,11 +85,11 @@ function createShipOnDraw(colour, name){
     //We translate to the origin of our ship
     ctx.translate(this.state.x, this.state.y);
 
-    //We rotate around this origin 
+    //We rotate around this origin
     ctx.rotate(this.state.angle);
 
-      //We draw the ship, ensuring that we start drawing from the correct location 
-    //(the fillRect function draws from the topmost left corner of the rectangle 
+      //We draw the ship, ensuring that we start drawing from the correct location
+    //(the fillRect function draws from the topmost left corner of the rectangle
     ctx.fillStyle = colour;
     ctx.fillRect(-width/2, -height/2, width, height);
     ctx.strokeStyle = "#ffc0cb";
@@ -102,7 +102,7 @@ function createShipOnDraw(colour, name){
     // Ship name
     ctx.fillStyle = "white";
     ctx.font = "15px Josefin Sans";
-    ctx.textAlign="left"; 
+    ctx.textAlign="left";
     var metrics = ctx.measureText(name);
     var textWidth = metrics.width;
     ctx.fillText(name, this.state.x - textWidth/2, this.state.y);
@@ -134,7 +134,7 @@ function drawHighScoresTable(scoreTable) {
   var i = 0;
 
   var displayNumber = currentPlayers < maxDisplay ? currentPlayers : maxDisplay;
-    
+
   for (var uid in scoreTable) {
     if (i <= displayNumber) {
       i++;
@@ -142,8 +142,8 @@ function drawHighScoresTable(scoreTable) {
       ctx.font = "20px Josefin Sans";
       ctx.lineWidth = 1;
       ctx.strokeStyle = 'black';
-      ctx.textAlign="left"; 
-      ctx.strokeText("#" + i + "\t\t" + scoreTable[uid].shipName + "\t" + scoreTable[uid].score + "\n", 
+      ctx.textAlign="left";
+      ctx.strokeText("#" + i + "\t\t" + scoreTable[uid].shipName + "\t" + scoreTable[uid].score + "\n",
         (9/10)*canvas.width, (1/10)*canvas.height + i * 20);
       ctx.stroke();
       ctx.closePath();
@@ -197,7 +197,7 @@ $( "#main_canvas" ).mousemove(function(event){
 
 
 //  Disable right click context menu
-$(document).ready(function(){ 
+$(document).ready(function(){
   $(document).bind("contextmenu", function(event){
       return false;
     });
@@ -223,8 +223,8 @@ $( "#main_canvas" ).mousedown(function(event){
 
 
 var localShipInput = function(){
-  var delta_angle = (Math.atan2(mouse_y - this.state.y, mouse_x - this.state.x) 
-						- this.state.angle); 
+  var delta_angle = (Math.atan2(mouse_y - this.state.y, mouse_x - this.state.x)
+						- this.state.angle);
 
   //Ensure delta_angle stays within the range [-PI, PI]
   if (delta_angle > Math.PI) {
@@ -245,7 +245,7 @@ var localShipInput = function(){
 
   if (this.state.angle > Math.PI) {
 	this.state.angle -= 2*Math.PI;
-  } 
+  }
 
   if (this.state.angle < -Math.PI) {
     this.state.angle += 2*Math.PI;
@@ -317,13 +317,13 @@ function startClient() {
     console.log('New connection');
     playClientGame(data);
   });
-  
+
   socket.on('start_game', function(data){
-  
+
     client_loop = window.requestAnimationFrame(clientTick);
-  
+
     //  Delay between updating the server
-  
+
     //  Send information about the local player to the server every s_delay
     if(server_loop) {
       clearInterval(server_loop);
@@ -336,14 +336,14 @@ function startClient() {
     console.log('player joined');
     addServerShip(data.id, data.name, data.state);
   });
-  
+
   //  Recieved when another player leaves the server
   //  We delete the local ship
   socket.on('player_left', function (data){
     console.log('player left');
     removePlayer(data.id);
   });
-  
+
   //  On update from server
   socket.on('server_update', function (data){
     updateHighScoresTable(data.scoresTable);

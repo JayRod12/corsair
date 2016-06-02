@@ -128,7 +128,7 @@ function CannonBall(ship, offsetX, offsetY, side, speed, onDraw, level) {
   console.log(offsetX);
 
   this.sim = ship.sim;
-  this.ship = ship; 
+  this.ship = ship;
   this.level = level;
 
   var angle = ((-ship.state.angle - side * Math.PI / 2 + 2 * Math.PI) % (2 * Math.PI));
@@ -186,7 +186,7 @@ function Cell(x, y, gridNumber) {
     for (var i = 0; i < this.staticObjects.length; i++){
       if (typeof this.staticObjects[i].onDraw != "undefined"){
         this.staticObjects[i].onDraw();
-      } 
+      }
     }
   }
 }
@@ -382,7 +382,7 @@ function TestObj(sim, state){
     ctx.fillRect(0,0,this.state.w,this.state.h);
     ctx.translate(-this.state.x, -this.state.y);
   }
-  
+
 }
 
 function createServerShipInput(id){
@@ -409,9 +409,7 @@ function removePlayer(id) {
   console.log('Removing player: ' + playerNames[id] + ' ' + id);
   delete remoteStates[id];
   delete playerNames[id];
-  debugger;
   delete UIDtoScores[id];
-  debugger;
 }
 
 function updatePlayer(id, state){
