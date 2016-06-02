@@ -1,4 +1,3 @@
-var Cannon;
 if (typeof exports === 'undefined'){
   //  Browser
 }

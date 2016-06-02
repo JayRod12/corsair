@@ -2,6 +2,7 @@ if (typeof exports === 'undefined'){
   //  Browser
 }
 else{
+  Game = require ('../public/shared_game.js');
   //  Server
 }
 
@@ -95,7 +96,7 @@ function CannonBall(ship, offsetX, offsetY, side, speed, onDraw, level) {
     this.state.x += dt * this.state.xvel;
     this.state.y -= dt * this.state.yvel;
     this.life -= 1;
-    updateCell(this.sim, this, this.state.x, this.state.y);
+    Game.updateCell(this.sim, this, this.state.x, this.state.y);
   };
   this.onDraw = onDraw;
 
