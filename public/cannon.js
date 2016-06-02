@@ -85,8 +85,8 @@ function CannonBall(ship, offsetX, offsetY, side, speed, onDraw, level) {
 
   this.state = { x : ship.state.x + offsetX
                , y : ship.state.y + offsetY
-               , xvel: ship.state.speed * Math.cos(-ship.state.angle) + speed * Math.cos(angle)
-               , yvel: ship.state.speed * Math.sin(-ship.state.angle) + speed * Math.sin(angle)
+               , xvel: ship.state.speed * Math.cos(-ship.state.angle) / 2 + speed * Math.cos(angle)
+               , yvel: ship.state.speed * Math.sin(-ship.state.angle) / 2 + speed * Math.sin(angle)
   };
 
   this.cell = this.sim.coordinateToCell(this.state.x, this.state.y);
