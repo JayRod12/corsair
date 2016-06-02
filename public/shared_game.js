@@ -25,9 +25,10 @@ function createServerShipInput(id){
 }
 
 function Remote(){
-  console.log("game inited");
+  console.log("Game initiated.");
   this.remoteStates = {};
   this.playerNames = {};
+  this.UIDtoScores = {};
 
   this.newPlayer = function(id, name, state) {
     this.remoteStates[id] = state;
@@ -39,6 +40,7 @@ function Remote(){
     console.log('Removing player: ' + this.playerNames[id] + ' ' + id);
     delete this.remoteStates[id];
     delete this.playerNames[id];
+    delete this.UIDtoScores[id];
   }
 
   this.updatePlayer = function(id, state){
@@ -64,6 +66,10 @@ function Remote(){
 
   this.getPlayerNames = function() {
     return this.playerNames;
+  }
+
+  this.getUIDtoScores = function() {
+    return this.UIDtoScores;
   }
 }
 

@@ -14,6 +14,7 @@ var our_id;
 // Game loops
 var server_loop;
 var client_loop;
+var localHighScoreTable = {};
 
 
 // Constants for the game
@@ -126,6 +127,38 @@ function drawTreasure() {
     ctx.closePath();
 }
 
+function drawHighScoresTable(scoreTable) {
+  var maxDisplay = 10;
+  var currentPlayers = Object.keys(scoreTable).length;
+  var i = 0;
+
+  var displayNumber = currentPlayers < maxDisplay ? currentPlayers : maxDisplay;
+    
+  for (var uid in scoreTable) {
+    if (i <= displayNumber) {
+      i++;
+      ctx.beginPath();
+      ctx.font = "20px Josefin Sans";
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = 'black';
+      ctx.textAlign="left"; 
+      ctx.strokeText("#" + i + "\t\t" + scoreTable[uid].shipName + "\t" + scoreTable[uid].score + "\n", 
+        (9/10)*canvas.width, (1/10)*canvas.height + i * 20);
+      ctx.stroke();
+      ctx.closePath();
+    } else {
+      break;
+    }
+  }
+}
+
+function drawScore() {
+  ctx.fillStyle = "black";
+  ctx.font = "50px Josefin Sans";
+  ctx.fillText(localHighScoreTable[player.uid].score, (1/15)*canvas.width, (9.5/10)*canvas.height);
+}
+
+
 function drawCompass() {
   drawCompassScaled(player.state.x, player.state.y, treasureX, treasureY, 50);
 }
@@ -140,6 +173,7 @@ function draw(){
   drawBehindGrid(ctx);
   viewport.draw(ctx, canvas.width, canvas.height);
   drawCompass();
+  drawHighScoresTable(localHighScoreTable);
 }
 
 
@@ -228,6 +262,10 @@ function clientTick(currentTime){
   draw();
 }
 
+function updateHighScoresTable(global) {
+    localHighScoreTable = jQuery.extend({}, global);
+}
+
 //  Add a new ship to the local world from information from the server
 
 function addServerShip(userid, name, state){
@@ -296,6 +334,7 @@ function startClient() {
   
   //  On update from server
   socket.on('server_update', function (data){
+    updateHighScoresTable(data.scoresTable);
     for (var uid in data){
       var update = data[uid];
       remote.updatePlayer(uid, update);
@@ -330,6 +369,9 @@ function playClientGame(data) {
   sim = new Game.Sim(remote, meta.gridNumber, meta.cellWidth, meta.cellHeight,
     meta.activeCells);
   sim.populateMap(drawTreasure);
+  
+  updateHighScoresTable(data.scoresTable);
+
   //  Using 16:9 aspect ratio
   viewport = new Viewport(sim, 0, 0, 1.6, 0.9, 1);
 
