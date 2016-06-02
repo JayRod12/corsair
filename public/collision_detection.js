@@ -9,25 +9,21 @@
  */
 
 /*PRE: rectangle_1, rectangle_2 are objects with 
-fields: {x, y, width, height, angle}*/
+fields: {x, y, width, height, hypotenuse, angle}*/
 function queryRectangleRectangleCollision(rectangle_1, rectangle_2, first) {	
-//calculate where the corners would be if the rectangle was not rotated and 
-//the centre of the rectangle was the origin.
-
   /*HEURISTIC COLLSIION DETECTION TO SPEED UP THIS CASE*/
-  var squared_radial_difference_div_4 = 
-		(rectangle_1.width + rectangle_2.width)
-		*(rectangle_1.width + rectangle_2.width)
-		+ (rectangle_1.height + rectangle_2.height)
-		 *(rectangle_1.height + rectangle_2.height);
-  var squared_origin_difference = 
-        (rectangle_1.x - rectangle_2.x)*(rectangle_1.x - rectangle_2.x) 
-      + (rectangle_1.y - rectangle_2.y)*(rectangle_1.y - rectangle_2.y);
-  if (squared_radial_difference_div_4 <= 4*squared_origin_difference) {
+  if(first) {
+    //only do this on first
+   var twice_radial_diff = rectangle_1.hypotenuse + rectangle_2.hypotenuse;
+   var radial_diff_sq = 0.25*twice_radial_diff*twice_radial_diff;
+   var squared_origin_diff = 
+         (rectangle_1.x - rectangle_2.x)*(rectangle_1.x - rectangle_2.x) 
+       + (rectangle_1.y - rectangle_2.y)*(rectangle_1.y - rectangle_2.y);
+   if (squared_origin_diff >= radial_diff_sq) {
     return false;
-  } else {
+    }
+  }
 	/*ELSE DO PROPER COLLISION DETECTION*/
-
 //Get the non-rotated corner values of rectangle_2
 	  var c1_nr = {x: -rectangle_2.width/2, y: rectangle_2.height/2};
 	  var c2_nr = {x: rectangle_2.width/2, y: rectangle_2.height/2};
@@ -60,8 +56,7 @@ function queryRectangleRectangleCollision(rectangle_1, rectangle_2, first) {
     if (queryPointRectangleCollision(c3, rectangle_1)) return true;
     if (queryPointRectangleCollision(c4, rectangle_1)) return true;
     if (first) {return queryRectangleRectangleCollision(rectangle_2, rectangle_1, false);}
-  }
-  return false;
+    return false;
 }
 
 
@@ -130,7 +125,7 @@ console.log(queryCircleCircleCollision({origin: {x: 70, y:70}, radius: 24}, {ori
 console.log(queryRectangleRectangleCollision({x: 357, y: 548, height: 22, width: 11.5, angle:(Math.PI/27.5)}, {x: 128, y: 275, height: 528, width: 817, angle: Math.PI}));
 */
 
-exports.RectRect = queryRectangleRectangleCollision;
+exports.RectRect = function(o1, o2){return queryRectangleRectangleCollision(o1, o2, true)};
 exports.PointRect = queryPointRectangleCollision;
 exports.PointPoint = queryPointPointCollision;
 exports.CircleCircle = queryCircleCircleCollision;

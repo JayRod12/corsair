@@ -16,6 +16,10 @@ function Ship(sim, state, uid, inputFunction, onDraw, onDrawCannon){
   // Simulation in which the ship is.
   this.sim = sim;
 
+  //UPDATE THIS WHEN SCALE IS UPDATED. FUCK YOU GUYS FOR NOT CARING ABOUT ME.
+  this.hypotenuse = Math.sqrt(shipBaseWidth*shipBaseWidth 
+                              + shipBaseHeight*shipBaseHeight);
+ 
   //  Should contain:
   //  x, y, angle, speed
   this.state = state;
@@ -82,6 +86,7 @@ function Ship(sim, state, uid, inputFunction, onDraw, onDrawCannon){
       y: this.state.y,
       width: shipBaseWidth * this.scale,
       height: shipBaseHeight * this.scale,
+      hypotenuse: this.hypotenuse,
       angle: this.state.angle
     }
   };
