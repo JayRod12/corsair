@@ -7,44 +7,67 @@
    |      | 
   C4 ----- C3
  */
+
+/*PRE: rectangle_1, rectangle_2 are objects with 
+fields: {x, y, width, height, angle}*/
 function queryRectangleRectangleCollision(rectangle_1, rectangle_2, first) {	
-//calculate where the corners would be if the rectangle was not rotated and the centre of the rectangle was the origin.
-	
+  console.log("DOING HEURISTIC COLLISION DETECTION");
+//calculate where the corners would be if the rectangle was not rotated and 
+//the centre of the rectangle was the origin.
+
+  /*HEURISTIC COLLSIION DETECTION TO SPEED UP THIS CASE*/
+  var squared_radial_difference_div_4 = rectangle_1.width*rectangle_1.width 
+                          + rectangle_2.width*rectangle_2.width
+                          + rectangle_1.height*rectangle_1.height
+                          + rectangle_2.height*rectangle_2.height; 
+  var squared_origin_difference = 
+        (rectangle_1.x - rectangle_2.x)*(rectangle_1.x - rectangle_2.x) 
+      + (rectangle_1.y - rectangle_2.y)*(rectangle_1.y - rectangle_2.y);
+  if (squared_radial_difference_div_4 <= 4*squared_origin_difference) {
+    return false;
+  } else {
+	console.log("DOING PROPER COLLISION DETECTION");
+	/*ELSE DO PROPER COLLISION DETECTION*/
+
 //Get the non-rotated corner values of rectangle_2
-	var c1_nr = {x: -rectangle_2.width/2, y: rectangle_2.height/2};
-	var c2_nr = {x: rectangle_2.width/2, y: rectangle_2.height/2};
-	var c3_nr = {x: rectangle_2.width/2, y: -rectangle_2.height/2};
-	var c4_nr = {x: -rectangle_2.width/2, y: -rectangle_2.height/2};
+	  var c1_nr = {x: -rectangle_2.width/2, y: rectangle_2.height/2};
+	  var c2_nr = {x: rectangle_2.width/2, y: rectangle_2.height/2};
+	  var c3_nr = {x: rectangle_2.width/2, y: -rectangle_2.height/2};
+	  var c4_nr = {x: -rectangle_2.width/2, y: -rectangle_2.height/2};
 	 
-  //rotate the points by the angle of the rectangle, i.e. [x, y] -> [x*cos(t) - y*sin(t), x*sin(t) + y*cos(t)] 
-	var cos_theta = Math.cos(rectangle_2.angle);
-	var sin_theta = Math.sin(rectangle_2.angle);
+    //rotate the points by the angle of the rectangle, 
+    //i.e. [x, y] -> [x*cos(t) - y*sin(t), x*sin(t) + y*cos(t)] 
+	  var cos_theta = Math.cos(rectangle_2.angle);
+	  var sin_theta = Math.sin(rectangle_2.angle);
 	
-	var c1_nt = {x: (c1_nr.x*cos_theta) - (c1_nr.y*sin_theta), 
+	  var c1_nt = {x: (c1_nr.x*cos_theta) - (c1_nr.y*sin_theta), 
 				 y: (c1_nr.x*sin_theta) + (c1_nr.y*cos_theta)};
-	var c2_nt = {x: (c2_nr.x*cos_theta) - (c2_nr.y*sin_theta), 
+	  var c2_nt = {x: (c2_nr.x*cos_theta) - (c2_nr.y*sin_theta), 
 				 y: (c2_nr.x*sin_theta) + (c2_nr.y*cos_theta)};
-	var c3_nt = {x: (c3_nr.x*cos_theta) - (c3_nr.y*sin_theta), 
+  	var c3_nt = {x: (c3_nr.x*cos_theta) - (c3_nr.y*sin_theta), 
 				 y: (c3_nr.x*sin_theta) + (c3_nr.y*cos_theta)};
-	var c4_nt = {x: (c4_nr.x*cos_theta) - (c4_nr.y*sin_theta), 
-				 y: (c4_nr.x*sin_theta) + (c4_nr.y*cos_theta)}; 
+  	var c4_nt = {x: (c4_nr.x*cos_theta) - (c4_nr.y*sin_theta), 
+	 			 y: (c4_nr.x*sin_theta) + (c4_nr.y*cos_theta)}; 
 	
-	//Get the corner co-ordinates by translating to the origin of rectangle_2
-	var c1 = {x: c1_nt.x + rectangle_2.x, y: c1_nt.y + rectangle_2.y};
-	var c2 = {x: c2_nt.x + rectangle_2.x, y: c2_nt.y + rectangle_2.y}; 
-	var c3 = {x: c3_nt.x + rectangle_2.x, y: c3_nt.y + rectangle_2.y};
-	var c4 = {x: c4_nt.x + rectangle_2.x, y: c4_nt.y + rectangle_2.y};
+	  //Get the corner co-ordinates by translating to the origin of rectangle_2
+	  var c1 = {x: c1_nt.x + rectangle_2.x, y: c1_nt.y + rectangle_2.y};
+	  var c2 = {x: c2_nt.x + rectangle_2.x, y: c2_nt.y + rectangle_2.y}; 
+	  var c3 = {x: c3_nt.x + rectangle_2.x, y: c3_nt.y + rectangle_2.y};
+	  var c4 = {x: c4_nt.x + rectangle_2.x, y: c4_nt.y + rectangle_2.y};
 	
-  //A rectangle only collides with another if vertices points are on or in it
-  if (queryPointRectangleCollision(c1, rectangle_1)) return true;
-  if (queryPointRectangleCollision(c2, rectangle_1)) return true;
-  if (queryPointRectangleCollision(c3, rectangle_1)) return true;
-  if (queryPointRectangleCollision(c4, rectangle_1)) return true;
-  if (first) {return queryRectangleRectangleCollision(rectangle_2, rectangle_1, false);}
+    //A rectangle only collides with another if vertices points are on or in it
+    if (queryPointRectangleCollision(c1, rectangle_1)) return true;
+    if (queryPointRectangleCollision(c2, rectangle_1)) return true;
+    if (queryPointRectangleCollision(c3, rectangle_1)) return true;
+    if (queryPointRectangleCollision(c4, rectangle_1)) return true;
+    if (first) {return queryRectangleRectangleCollision(rectangle_2, rectangle_1, false);}
+  }
   return false;
 }
 
 
+/*PRE: point is an object with: {x, y} rectangle is an object 
+with: {x, y, width, height, angle}*/
 function queryPointRectangleCollision(point, rectangle) {
 	var odv_p = {x: rectangle.x - point.x, y: rectangle.y - point.y};
 	var odv_p_square_length = odv_p.x*odv_p.x + odv_p.y*odv_p.y;
@@ -54,15 +77,16 @@ function queryPointRectangleCollision(point, rectangle) {
 	return trav*trav >= odv_p_square_length; 
 }
 
-
+/*PRE: circles are objects with: {x, y, radius}*/
 function queryCircleCircleCollision(circle_1, circle_2) {
 	var odv = {x: circle_1.origin.x - circle_2.origin.x, 
 				     y: circle_1.origin.y - circle_2.origin.y};
 	var odv_square_length = odv.x*odv.x + odv.y*odv.y;
-	return circle_1.radius + circle_2.radius >= odv_square_length;
+	return circle_1.radius*circle_1.radius + 2*circle_1.radius*circle_2.radius 
+            + circle_2.radius*circle_2.radius >= odv_square_length;
 }
 
-
+/*PRE: points are objects with: {x, y}*/
 function queryPointPointCollision(p1, p2) {
 	return queryCircleCircleCollision({origin: p1, radius: 0}, 
 									                  {origin: p2, radius: 0});
@@ -85,7 +109,8 @@ function getRectangleTravel(theta, rectangle) {
 	return trav;
 }
 
-//Ensure angles remain between [-Pi, Pi]
+/*Ensure angles remain between [-Pi, Pi], important to call this when
+    manipulating angles*/
 function trimBranch(angle) {
    if (angle > Math.PI) {
 	angle -= 2*Math.PI;
