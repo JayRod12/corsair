@@ -14,6 +14,7 @@ function Island(x, y, height, width, angle, colour, onDraw) {
 	this.y = y;
 	this.width = width;
 	this.height = height;
+	this.hypotenuse = Math.sqrt(this.width*this.width + this.height*this.height);
 	this.angle = angle;
 	this.colour = colour;
   this.collided_timer = 0;
@@ -59,6 +60,7 @@ function Island(x, y, height, width, angle, colour, onDraw) {
       y: this.y,
       width: this.width,
       height: this.height,
+	  hypotenuse: this.hypotenuse,
       angle: this.angle
     }
   };
