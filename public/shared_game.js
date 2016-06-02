@@ -1,157 +1,20 @@
+var Ship;
+if (typeof exports === 'undefined'){
+  //  Browser
+}
+else{
+  //  Server
+  Ship = require('../public/ship.js');
+}
+
+(function(exports){
+
+
 var server;
 
 const width = 1000;
 const height = 1000;
 
-const shipBaseWidth = 90;
-const shipBaseHeight = 40;
-
-var remoteStates;
-
-//  Inputfunction determines updates to the ship
-//  onDraw can be null
-
-function Ship(sim, state, uid, inputFunction, onDraw, onDrawCannon){
-
-  // Simulation in which the ship is.
-  this.sim = sim;
-
-  //  Should contain:
-  //  x, y, angle, speed
-  this.state = state;
-  this.cell = sim.coordinateToCell(this.state.x, this.state.y);
-
-  this.getRemoteState = function(){
-    return remoteStates[uid];
-  };
-
-  // Scale of the ship ?
-  this.scale = 1;
-
-  this.cannon = new Cannon(this, onDrawCannon);
-  this.inputFunction = inputFunction;
-
-  this.onTick = function(dt){
-    var remoteState = this.getRemoteState();
-
-    //  If player has left the server remove their ship from the sim
-    if (typeof remoteState == "undefined"){
-      sim.removeObject(this);
-      return;
-    }
-
-    //  Updates speed and angle
-    this.inputFunction();
-
-    this.state.x += this.state.speed * Math.cos(this.state.angle) * dt;
-    this.state.y += this.state.speed * Math.sin(this.state.angle) * dt;
-
-
-    //  TODO better interpolation
-    this.state.x = (this.state.x + remoteState.x) / 2
-    this.state.y = (this.state.y + remoteState.y) / 2
-    updateCell(this.sim, this, this.state.x, this.state.y);
-
-    this.cannon.onTick(dt);
-
-  }
-
-  this.onDraw = onDraw;
-}
-
-function Cannon(ship, onDraw) {
-
-  this.ballSpeed = 0.3;
-  this.cannons = 5;
-  this.spacing = 15;
-  this.delay = 30;
-  this.ship = ship;
-  this.level = 3;
-  this.onDraw = onDraw;
-
-  this.baseCooldown = 1200;
-  this.cooldown = 0;
-
-  this.futureShots = [];  //  List of future firing events
-
-  this.onShoot = function(side) {
-
-    if (this.cooldown > 0) return false;
-    this.cooldown = this.baseCooldown;
-
-    console.log('Ship direction: ' + this.ship.state.angle);
-
-
-
-    for (var i = 0; i < this.cannons; i++){
-
-      var ship = this.ship;
-      var level = this.level;
-      var onDraw = this.onDraw;
-      var ballSpeed = this.ballSpeed;
-      var spacing = this.spacing;
-      var cannons = this.cannons;
-
-      var shot = function(i){
-        var offsetX = spacing * (cannons / 2 - i) * Math.cos(ship.state.angle);
-        var offsetY = spacing * (cannons / 2 - i) * Math.sin(ship.state.angle);
-        var ball = new CannonBall(ship, offsetX, offsetY, side, ballSpeed, onDraw, level);
-        var cell = ship.sim.coordinateToCell(ship.state.x,ship.state.y);
-        cell.gameObjects.push(ball);
-      }
-
-      this.futureShots.push({time: i*this.delay, f : shot, i: i});
-    }
-
-  };
-
-  this.onTick = function(dt){
-    if (this.cooldown > 0) this.cooldown -= dt;
-    for (var i = 0; i < this.futureShots.length; i++){
-      //  Inefficient?
-      //this.futureShots[i] = {time: this.futureShots[i].time - dt, f:
-        //this.futureShots[i].f};
-      this.futureShots[i].time -= dt;
-      if (this.futureShots[i].time < 0){
-        this.futureShots[i].f(this.futureShots[i].i);
-        this.futureShots.splice(i,1);
-        i = i - 1;
-      }
-    }
-  };
-}
-
-function CannonBall(ship, offsetX, offsetY, side, speed, onDraw, level) {
-
-  console.log(offsetX);
-
-  this.sim = ship.sim;
-  this.ship = ship; 
-  this.level = level;
-
-  var angle = ((-ship.state.angle - side * Math.PI / 2 + 2 * Math.PI) % (2 * Math.PI));
-
-  this.state = { x : ship.state.x + offsetX
-               , y : ship.state.y + offsetY
-               , xvel: ship.state.speed * Math.cos(-ship.state.angle) + speed * Math.cos(angle)
-               , yvel: ship.state.speed * Math.sin(-ship.state.angle) + speed * Math.sin(angle)
-  };
-
-  this.cell = this.sim.coordinateToCell(this.state.x, this.state.y);
-
-  this.onTick = function(dt) {
-    if (this.state.life == 0) {
-      this.sim.removeObject(this);
-    }
-    // TODO interpolation with remote state
-    this.state.x += dt * this.state.xvel;
-    this.state.y -= dt * this.state.yvel;
-    this.life -= 1;
-    updateCell(this.sim, this, this.state.x, this.state.y);
-  };
-  this.onDraw = onDraw;
-
-}
 
 function Treasure(xTreasure, yTreasure, onDraw) {
     this.xTreasure = xTreasure;
@@ -226,7 +89,7 @@ function updateCell(sim, object, x, y) {
 //  gridNumber is the height and width of the world in cells
 //  cellWidth, cellHeight specify cell size
 //  ActiveCells list of cells to tick and render, modified by (de)activateCell()
-function Sim(gridNumber, cellWidth, cellHeight, activeCells){
+function Sim(remote, gridNumber, cellWidth, cellHeight, activeCells){
 
   console.log('Initialising sim...');
 
@@ -234,6 +97,7 @@ function Sim(gridNumber, cellWidth, cellHeight, activeCells){
   this.cellWidth  = cellWidth;
   this.cellHeight = cellHeight;
   this.activeCells = activeCells;
+  this.remote = remote;
 
   this.grid = new Array(this.gridNumber)
   for (var i = 0; i < this.gridNumber; i++) {
@@ -326,7 +190,7 @@ function Sim(gridNumber, cellWidth, cellHeight, activeCells){
 
   this.addShip = function (state, uid, inputFunction, onDraw, onDrawCannon){
     var cell = this.coordinateToCell(state.x, state.y);
-    var ship = new Ship(this, state, uid, inputFunction, onDraw, onDrawCannon);
+    var ship = new Ship.Class(this, state, uid, inputFunction, onDraw, onDrawCannon);
     cell.gameObjects.push(ship);
     return ship;
   };
@@ -355,10 +219,53 @@ function createServerShipInput(id){
   };
 }
 
-function initializeGame(){
+function Remote(){
   console.log("game inited");
-  remoteStates = {};
-  playerNames = {};
+  this.remoteStates = {};
+  this.playerNames = {};
+
+  this.newPlayer = function(id, name, state) {
+    this.remoteStates[id] = state;
+    this.playerNames[id] = name;
+    console.log('Adding player: ' + name);
+  }
+
+  this.removePlayer = function(id) {
+    console.log('Removing player: ' + this.playerNames[id] + ' ' + id);
+    delete this.remoteStates[id];
+    delete this.playerNames[id];
+  }
+
+  this.updatePlayer = function(id, state){
+    if (!this.remoteStates[id]) {
+      console.log('shared_game.js :: update of unknown userid ' + id);
+    }
+  //  remoteStates[id] = state;
+    this.remoteStates[id] = {
+      x: state.x,
+      y: state.y,
+      angle: state.angle,
+      speed: state.speed,
+    }
+  }
+
+  this.getPlayers = function() {
+    return this.remoteStates;
+  }
+
+  this.getRemoteStates = function() {
+    return this.remoteStates;
+  }
+
+  this.getPlayerNames = function() {
+    return this.playerNames;
+  }
+}
+
+/*
+var remote;
+function initializeGame(){
+  remote = new Remote();
 }
 
 function newPlayer(id, name, state) {
@@ -393,6 +300,7 @@ function getPlayers() {
 function getPlayerNames() {
   return playerNames;
 }
+*/
 
 
 //  Nodejs exports for use in server
@@ -401,12 +309,10 @@ function getPlayerNames() {
 exports.width = width;
 exports.height = height;
 
-exports.initializeGame = initializeGame;
-exports.newPlayer = newPlayer;
-exports.removePlayer = removePlayer;
-exports.updatePlayer = updatePlayer;
-exports.getPlayers = getPlayers;
-exports.getPlayerNames = getPlayerNames;
+exports.Remote = Remote;
 
 exports.createServerShipInput = createServerShipInput;
+exports.updateCell = updateCell;
 exports.Sim = Sim;
+
+})(typeof exports == 'undefined' ? this.Game = {} : exports);

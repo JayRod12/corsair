@@ -3,6 +3,7 @@ var canvas = $("#main_canvas")[0];
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 var ctx = canvas.getContext("2d");
+var remote;
 var sim;
 var viewport;
 var lastTime;
@@ -70,8 +71,8 @@ function drawCellBackground(cx, cy, ctx){
 
 function createShipOnDraw(colour, name){
   return function(){
-    var width = shipBaseWidth * this.scale;
-    var height = shipBaseHeight * this.scale;
+    var width = Ship.shipBaseWidth * this.scale;
+    var height = Ship.shipBaseHeight * this.scale;
 
 
     //We translate to the origin of our ship
@@ -242,9 +243,9 @@ function clientTick(currentTime){
 
 function addServerShip(userid, name, state){
   console.log("adding new player");
-  newPlayer(userid, name, state);
+  remote.newPlayer(userid, name, state);
   sim.addShip(state, userid,
-      createServerShipInput(userid),
+      Game.createServerShipInput(userid),
         createShipOnDraw("brown", name), drawCannonBalls);
 
 }
@@ -301,14 +302,14 @@ function startClient() {
   //  We delete the local ship
   socket.on('player_left', function (data){
     console.log('player left');
-    removePlayer(data.id);
+    Game.removePlayer(data.id);
   });
   
   //  On update from server
   socket.on('server_update', function (data){
     for (var uid in data){
       var update = data[uid];
-      updatePlayer(uid, update);
+      remote.updatePlayer(uid, update);
     }
   });
 }
@@ -335,9 +336,9 @@ function playClientGame(data) {
   meta = null;
   our_id = null;
 
-  initializeGame();
+  remote = new Game.Remote();
   meta = data.meta;
-  sim = new Sim(meta.gridNumber, meta.cellWidth, meta.cellHeight,
+  sim = new Game.Sim(remote, meta.gridNumber, meta.cellWidth, meta.cellHeight,
     meta.activeCells);
   sim.populateMap(drawTreasure);
   //  Using 16:9 aspect ratio
@@ -347,7 +348,7 @@ function playClientGame(data) {
   console.log("Our id is " + our_id);
 
   var our_name = (localStorage['nickname'] == "") ? "Corsair" : localStorage['nickname'];
-  newPlayer(our_id, our_name, data.state);
+  remote.newPlayer(our_id, our_name, data.state);
   player = sim.addShip(data.state, our_id, localShipInput,
     createShipOnDraw("black", our_name), drawCannonBalls);
   player.onDeath = onShipDeath;

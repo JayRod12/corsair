@@ -13,6 +13,8 @@ var io = require('socket.io')(http);
 var UUID = require('node-uuid');
 var Game = require('../public/shared_game.js');
 
+var remote = new Game.Remote();
+
 
 app.use(express.static(path.resolve(__dirname + '/../public/')));
 
@@ -58,15 +60,15 @@ io.on('connection', function(client){
     activeCells: allCells
   }
 
-  client.emit('on_connect', {id : client.userid, names : Game.getPlayerNames(),
-    players : Game.getPlayers(), state: initState, meta: metadata});
+  client.emit('on_connect', {id : client.userid, names : remote.getPlayerNames(),
+    players : remote.getPlayers(), state: initState, meta: metadata});
 
 
   //  Wait for response
 
   client.on('on_connect_response', function (data){
 
-    Game.newPlayer(client.userid, data.name, initState);
+    remote.newPlayer(client.userid, data.name, initState);
     sim.addShip(initState, client.userid,
       Game.createServerShipInput(client.userid));
 
@@ -97,9 +99,9 @@ io.on('connection', function(client){
 
   //  On tick
   client.on('client_update', function(data) {
-    Game.updatePlayer(client.userid, data.state);
+    remote.updatePlayer(client.userid, data.state);
     //  Respond with current server state, instead broadcast regularly?
-    client.emit('server_update', Game.getPlayers())
+    client.emit('server_update', remote.getPlayers())
   });
 
   //  On client disconnect
@@ -111,7 +113,7 @@ io.on('connection', function(client){
     console.log('\t socket.io:: client disconnected ' + client.userid + '  ' +
       playerCount + ' players');
     client.broadcast.emit('player_left',  {id : client.userid});
-    Game.removePlayer(client.userid);
+    remote.removePlayer(client.userid);
 
     //  Stop simulating if noone is connected
     if (playerCount < 1){
@@ -128,7 +130,6 @@ var sim_loop_func = function(dt){
 }
 
 
-Game.initializeGame();
 
 const gridNumber = 5;
 const cellWidth  = 200;
@@ -140,7 +141,7 @@ for (var y = 0; y < gridNumber; y++){
   }
 }
 
-var sim = new Game.Sim(gridNumber, cellWidth, cellHeight, allCells);
+var sim = new Game.Sim(remote,gridNumber, cellWidth, cellHeight, allCells);
 var sim_t = 1000 / 60;
 var sim_loop;
 var playerCount = 0;
