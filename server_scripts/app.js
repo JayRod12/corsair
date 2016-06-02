@@ -12,11 +12,11 @@ var io = require('socket.io')(http);
 var UUID = require('node-uuid');
 var Game = require('../public/shared_game.js');
 
+var remote = new Game.Remote();
+
 var socketList = [];
 
 // Game related data
-
-Game.initializeGame();
 
 const gridNumber = 5;
 const cellWidth  = 1500;
@@ -26,7 +26,7 @@ for (var i = 0; i < gridNumber * gridNumber; i++) {
     allCells.push(i);
 }
 
-var sim = new Game.Sim(gridNumber, cellWidth, cellHeight, allCells);
+var sim = new Game.Sim(remote,gridNumber, cellWidth, cellHeight, allCells);
 var sim_t = 1000 / 30;
 var send_t = 1000 / 30;
 var test_t = 1000 / 100;
@@ -78,8 +78,6 @@ io.on('connection', function(client){
     gridNumber: gridNumber,
     cellWidth: cellWidth,
     cellHeight: cellHeight,
-    //  Temp
-    //activeCells: allCells
     activeCells: ac
   }
 
@@ -92,7 +90,7 @@ io.on('connection', function(client){
 
   client.on('on_connect_response', function (data){
 
-    Game.newPlayer(client.userid, data.name, initState);
+    remote.newPlayer(client.userid, data.name, initState);
     sim.addShip(client.userid, data.name, initState,
       Game.createServerShipInput(client.userid));
 
@@ -130,7 +128,7 @@ io.on('connection', function(client){
 
   //  On tick
   client.on('client_update', function(data) {
-    Game.updatePlayer(client.userid, data.state);
+    remote.updatePlayer(client.userid, data.state);
   });
 
   //  On client disconnect
@@ -149,7 +147,7 @@ io.on('connection', function(client){
     console.log('\t socket.io:: client disconnected ' + client.userid + '  ' +
       playerCount + ' players');
     client.broadcast.emit('player_left',  {id : client.userid});
-    Game.removePlayer(client.userid);
+    remote.removePlayer(client.userid);
 
     //  Stop simulating if noone is connected
     if (playerCount < 1){
@@ -182,27 +180,16 @@ Array.prototype.intersection = function(a) {
   });
 };
 
-//var a1 = new Array({x:1, y:2},{x:1, y:1},{x:1, y:0},{x:-1, y:2},{x:11, y:31});
-//var a2 = new Array({x:1, y:2},{x:1, y:1},{x:1, y:1},{x:1, y:-2},{x:111, y:13});
-//console.log('thing ' + a1.indexOf({x:1, y:2}));
-//var a1= [1,2,3,4,5];
-//var a2 = [0,2,3,6];
-//console.log('RESULTS');
-//console.log(a1.diff(a2));
-//console.log(a1.intersection(a2));
-//console.log(a2.diff(a1));
-//console.log(a2.intersection(a1));
-
 function send_loop_func(){
   //console.log('SocketList of length ' + socketList.length);
   socketList.forEach(function (client) {
     if (typeof client.cells == "undefined") {
-      client.cells = []; // B
+      client.cells = [];
     }
 
-    var cells = calculateCellsToSend(client.userid); // A
-    var old_cells = cells.intersection(client.cells);// A2
-    var new_cells = cells.diff(old_cells);        // A1
+    var cells = calculateCellsToSend(client.userid);
+    var old_cells = cells.intersection(client.cells);
+    var new_cells = cells.diff(old_cells);
     client.cells = cells;
 
     //  Respond with current server state, instead broadcast regularly?
@@ -226,9 +213,6 @@ function send_loop_func(){
                             , state: cell_state });
     }
 
-    //console.log(client.cells.length + ' active cells, ' + 
-    //            old_cells.length + ' old cells and ' + 
-    //            new_cells.length + ' new cells.');
     var data = { players: Game.getPlayers(), active_cells: client.cells
                , updates: allBufferedUpdates, new_cells: new_cells_states};
     client.emit('server_update', data);
@@ -243,7 +227,7 @@ function send_loop_func(){
 }
 
 function calculateCellsToSend(uid){
-  var s = Game.getPlayerShips()[uid];
+  var s = remote.getPlayerShips()[uid];
   if (s == null) {
     //console.log('No cells to send');
     return [];
@@ -274,7 +258,6 @@ var sim_loop_func = function(dt){
 }
 
 Game.Sim.prototype.addTestObject = function() {
-
   var w = 20 + 40 * Math.random();
   var h = 20 + 40 * Math.random();
   var x = (gridNumber * cellWidth - w) * Math.random();

@@ -3,6 +3,7 @@ var canvas = $("#main_canvas")[0];
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 var ctx = canvas.getContext("2d");
+var remote;
 var sim;
 var viewport;
 var lastTime;
@@ -81,10 +82,10 @@ function drawCellBackground(cx, cy, ctx){
 }
 
 
-function createShipOnDraw(colour, name){
+function createShipOnDraw(default_colour, name){
   return function(){
-    var width = shipBaseWidth * this.scale;
-    var height = shipBaseHeight * this.scale;
+    var width = Ship.shipBaseWidth * this.scale;
+    var height = Ship.shipBaseHeight * this.scale;
 
 
     //We translate to the origin of our ship
@@ -95,7 +96,11 @@ function createShipOnDraw(colour, name){
 
       //We draw the ship, ensuring that we start drawing from the correct location 
     //(the fillRect function draws from the topmost left corner of the rectangle 
-    ctx.fillStyle = colour;
+    if(this.collided_timer > 0) {
+        ctx.fillStyle = "red";
+    } else {
+      ctx.fillStyle = default_colour;
+    }
     ctx.fillRect(-width/2, -height/2, width, height);
     ctx.strokeStyle = "#ffc0cb";
     ctx.strokeRect(-width/2, -height/2, width, height);
@@ -149,6 +154,7 @@ function draw(){
 }
 
 
+
 ///////////// MOVEMENT METHODS /////////////
 
 //  Mouse position on screen
@@ -191,36 +197,21 @@ $( "#main_canvas" ).mousedown(function(event){
   }
 });
 
-
-
+var delta_angle_limit = Math.PI/90;
 var localShipInput = function(){
   var delta_angle = (Math.atan2(mouse_y - this.state.y, mouse_x - this.state.x) 
 						- this.state.angle); 
 
   //Ensure delta_angle stays within the range [-PI, PI]
-  if (delta_angle > Math.PI) {
-  delta_angle = delta_angle - 2*Math.PI ;
-  }
-
-  if(delta_angle < -Math.PI) {
-  delta_angle = 2*Math.PI + delta_angle;
-  }
-  var delta_angle_limit = Math.PI/90;
+  delta_angle = Col.trimBranch(delta_angle);
+ 
   if (delta_angle > delta_angle_limit) {
     delta_angle = delta_angle_limit;
   } else if (delta_angle < -delta_angle_limit) {
     delta_angle = -delta_angle_limit;
   }
 
-  this.state.angle += delta_angle;
-
-  if (this.state.angle > Math.PI) {
-	this.state.angle -= 2*Math.PI;
-  } 
-
-  if (this.state.angle < -Math.PI) {
-    this.state.angle += 2*Math.PI;
-  }
+  this.state.angle = Col.trimBranch(this.state.angle + delta_angle);
   this.state.speed = Math.sqrt(Math.pow(this.state.x - mouse_x,2) +
       Math.pow(this.state.y
       -mouse_y,2)) / speed_norm;
@@ -274,10 +265,10 @@ function clientTick(currentTime){
 
 function addServerShip(userid, name, state){
   console.log("adding new player");
-  newPlayer(userid, name, state);
-  //sim.addShip(state, userid,
-  //    createServerShipInput(userid),
-  //      createShipOnDraw("brown", name), drawCannonBalls);
+  remote.newPlayer(userid, name, state);
+  sim.addShip(state, userid,
+      Game.createServerShipInput(userid),
+        createShipOnDraw("brown", name), drawCannonBalls);
 
 }
 
@@ -333,7 +324,7 @@ function startClient() {
   //  We delete the local ship
   socket.on('player_left', function (data){
     console.log('player left');
-    removePlayer(data.id);
+    Game.removePlayer(data.id);
   });
   
   //  On update from server
@@ -347,7 +338,7 @@ function startClient() {
     var players = data.players;
     for (var uid in players){
       var update = players[uid];
-      updatePlayer(uid, update);
+      remote.updatePlayer(uid, update);
     }
     var allBufferedUpdates = data.updates;
     for (var i = 0; i < allBufferedUpdates.length; i++){
@@ -402,9 +393,9 @@ function playClientGame(data) {
   meta = null;
   our_id = null;
 
-  initializeGame();
+  remote = new Game.Remote();
   meta = data.meta;
-  sim = new Sim(meta.gridNumber, meta.cellWidth, meta.cellHeight,
+  sim = new Game.Sim(remote, meta.gridNumber, meta.cellWidth, meta.cellHeight,
     meta.activeCells);
   sim.populateMap(drawTreasure);
   //  Using 16:9 aspect ratio
@@ -414,7 +405,7 @@ function playClientGame(data) {
   console.log("Our id is " + our_id);
 
   var our_name = (localStorage['nickname'] == "") ? "Corsair" : localStorage['nickname'];
-  newPlayer(our_id, our_name, data.state);
+  remote.newPlayer(our_id, our_name, data.state);
   player = sim.addShip(our_id, our_name, data.state, localShipInput,
     createShipOnDraw("black", our_name), drawCannonBalls);
   player.onDeath = onShipDeath;
