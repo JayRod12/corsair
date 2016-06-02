@@ -103,6 +103,20 @@ function CannonBall(ship, offsetX, offsetY, side, speed, onDraw, level) {
   };
   this.onDraw = onDraw;
 
+  this.getColType = function(){return "point"};
+  this.getColObj = function(){
+    return {x: this.state.x, y: this.state.y};
+  }
+  this.collisionHandler = function(other_object){
+    if (other_object !== this.ship){
+      this.destroy();
+    }
+  }
+
+  this.destroy = function(){
+    this.sim.removeObject(this);
+  }
+
 }
 
 exports.Class = Cannon;
