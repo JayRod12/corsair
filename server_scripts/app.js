@@ -13,6 +13,7 @@ var io = require('socket.io')(http);
 var UUID = require('node-uuid');
 var Game = require('../public/shared_game.js');
 
+var Database = require('./db.js');
 
 app.use(express.static(path.resolve(__dirname + '/../public/')));
 
@@ -31,7 +32,7 @@ http.listen(process.env.PORT || port, function() {
 //  On client connection
 io.on('connection', function(client){
 
-  
+
   //  Generate new client id associate with their connection
   client.userid = UUID();
 
@@ -116,6 +117,7 @@ io.on('connection', function(client){
   client.on('disconnect', function () {
 
     var finalScore = Game.getPlayers()[client.userid].score;
+    Database.saveFinalScore(Game.getPlayerNames()[client.userid],finalScore);
 
     // Decrement count
     playerCount -= 1;
@@ -137,7 +139,7 @@ io.on('connection', function(client){
 
 var sim_loop_func = function(dt){
   //console.log(sim.activeCells);
-  sim.playerName(dt);
+  sim.tick(dt);
 }
 
 var test_loop_func = function(){
