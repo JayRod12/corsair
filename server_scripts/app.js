@@ -252,28 +252,34 @@ function calculateCellsToSend(uid){
   var y_neg = false;
   if (base != null) {
     const bufferConst = 2;
-    if (base.x + 1 < gridNumber && s.state.x % cellWidth > cellWidth/bufferConst){
+   
+    x_pos = base.x + 1 < gridNumber && s.state.x % cellWidth > cellWidth/bufferConst;
+    y_pos = base.y + 1 < gridNumber && s.state.y % cellHeight > cellHeight/bufferConst;
+    x_neg = base.x - 1 >= 0 && s.state.x % cellWidth < cellWidth/bufferConst;
+    y_neg = base.y - 1 >= 0 && s.state.y % cellHeight < cellHeight/bufferConst;
+
+    if (x_pos){
       list.push(sim.cellTupleToNumber({x:base.x+1, y:base.y}));
-      x_pos = true;
-    }
-    if (base.y + 1 < gridNumber && s.state.y % cellHeight > cellHeight/bufferConst){
-      list.push(sim.cellTupleToNumber({x:base.x, y:base.y+1}));
-      y_pos = true;
-    }
-    if (base.x - 1 >= 0 && s.state.x % cellWidth < cellWidth/bufferConst){
+      if (y_pos) {
+        list.push(sim.cellTupleToNumber({x:base.x+1, y:base.y+1}));
+      } else if (y_neg) {
+        list.push(sim.cellTupleToNumber({x:base.x+1, y:base.y-1}));
+      }
+    } else if (x_neg) {
       list.push(sim.cellTupleToNumber({x:base.x-1, y:base.y}));
-      x_neg = true;
+      if (y_pos) {
+        list.push(sim.cellTupleToNumber({x:base.x-1, y:base.y+1}));
+      } else if(y_neg) {
+        list.push(sim.cellTupleToNumber({x:base.x-1, y:base.y-1}));
+      }
     }
-    if (base.y - 1 >= 0 && s.state.y % cellHeight < cellHeight/bufferConst){
+
+    if (y_pos) {
+      list.push(sim.cellTupleToNumber({x:base.x, y:base.y+1}));
+    } else if(y_neg) {
       list.push(sim.cellTupleToNumber({x:base.x, y:base.y-1}));
-      y_neg = true;
     }
-    if (x_pos && y_pos) {
-      list.push(sim.cellTupleToNumber({x:base.x+1, y:base.y+1}));
-    }
-    if (x_neg && y_neg) {
-      list.push(sim.cellTupleToNumber({x:base.x-1, y:base.y-1}));
-    }
+    
     list.push(sim.cellTupleToNumber(base));
   }
   return list;

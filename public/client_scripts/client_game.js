@@ -16,6 +16,7 @@ var our_id;
 var server_loop;
 var client_loop;
 var localHighScoreTable = {};
+const MAXIMUM_SPEED = 4;
 
 
 // Constants for the game
@@ -247,9 +248,9 @@ var localShipInput = function(){
   }
 
   this.state.angle = Col.trimBranch(this.state.angle + delta_angle);
-  this.state.speed = Math.sqrt(Math.pow(this.state.x - mouse_x,2) +
-      Math.pow(this.state.y
-      -mouse_y,2)) / speed_norm;
+  this.state.speed = Math.min(MAXIMUM_SPEED,
+                              Math.sqrt(Math.pow(this.state.x - mouse_x,2) +
+                                        Math.pow(this.state.y - mouse_y,2)) / speed_norm);
 }
 
 
