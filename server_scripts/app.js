@@ -202,7 +202,7 @@ function send_loop_func(){
       var tuple = sim.cellNumberToTuple(old_cells[i]);
       var bufferedUpdates = sim.grid[tuple.x][tuple.y].bufferedUpdates;
       if (bufferedUpdates.length > 0){
-        allBufferedUpdates.push({num: i, updates: bufferedUpdates});
+        allBufferedUpdates.push({num: old_cells[i], updates: bufferedUpdates});
       }
     }
     // Send serialized objects
@@ -254,7 +254,6 @@ function calculateCellsToSend(uid){
     }
     list.push(sim.cellTupleToNumber(base));
   }
-  console.log("active cells length: " + list.length);
   return list;
 }
 

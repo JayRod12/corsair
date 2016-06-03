@@ -330,6 +330,7 @@ function startClient() {
         var update = updates[j];
         switch(update.name){
         case 'create_testObj':
+          console.log("Creating testobj in cell: " + num);
           cell.gameObjects.push(new Sim.TestObj(sim, update.data));
           break;
         default:
