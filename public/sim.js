@@ -35,9 +35,7 @@ function Cell(x, y, gridNumber) {
     for (var i = 0; i < this.gameObjects.length; i++){
       if (typeof this.gameObjects[i].onDraw != "undefined"){
         this.gameObjects[i].onDraw(ctx);
-      } /*else {
-        console.log('Undefined draw for cannon');
-      }*/
+      } 
     }
     for (var i = 0; i < this.staticObjects.length; i++){
       if (typeof this.staticObjects[i].onDraw != "undefined"){

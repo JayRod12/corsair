@@ -7,7 +7,13 @@ var remote;
 var sim;
 var serializer;
 var viewport;
+// Client tick
+var fps;
 var lastTime;
+var currentTime;
+var delta;
+var interval;
+
 var player;
 var meta;
 var our_id;
@@ -20,7 +26,7 @@ const MAXIMUM_SPEED = 4;
 
 
 // Constants for the game
-const speed_norm = 100 * 5;
+const speed_norm = 100 * 5*2;
 const backColor = "rgb(104, 104, 104)";
 const seaColor = "rgb(102, 204, 255)";
 const seaHighlightColor = "rgb(225, 102, 255)";
@@ -233,7 +239,7 @@ $( "#main_canvas" ).mousedown(function(event){
   }
 });
 
-var delta_angle_limit = Math.PI/90;
+var delta_angle_limit = Math.PI/45;
 var localShipInput = function(){
   var delta_angle = (Math.atan2(mouse_y - this.state.y, mouse_x - this.state.x) 
 						- this.state.angle); 
@@ -259,22 +265,22 @@ var localShipInput = function(){
 
 //  Called repeatedly, holds game loop
 //  TODO maybe skip frames if at more than 60fps?
-function clientTick(currentTime){
 
+function clientTick(){
+       
   client_loop = window.requestAnimationFrame(clientTick);
+  currentTime = Date.now();
+  delta = currentTime - lastTime;
+  console.log('Ticking, delta: ' + delta);
 
-  if (!lastTime) lastTime = currentTime-1;//  Subtract one to avoid any divide
-                                          //  by zero
-  var dt = currentTime - lastTime;
-  lastTime = currentTime;
+  if (delta > interval) {
+    lastTime = currentTime - (delta % interval);
+    mouse_x = (mouse_screen_x/viewport.scale + viewport.x);
+    mouse_y = (mouse_screen_y/viewport.scale + viewport.y);
 
-  mouse_x = (mouse_screen_x/viewport.scale + viewport.x);
-  mouse_y = (mouse_screen_y/viewport.scale + viewport.y);
-
-  sim.tick(dt);
-
-
-  draw();
+    sim.tick(delta);
+    draw();
+  }
 }
 
 function updateHighScoresTable(global) {
@@ -307,6 +313,9 @@ function endClient() {
   if (client_loop) {
     window.cancelAnimationFrame(client_loop);
   }
+  if (server_loop) {
+    clearInterval(server_loop);
+  }
 }
 
 function startClient() {
@@ -323,21 +332,26 @@ function startClient() {
   
   socket.on('start_game', function(data){
   
-    client_loop = window.requestAnimationFrame(clientTick);
+    lastTime = Date.now();
+    if (!client_loop) {
+      client_loop = window.requestAnimationFrame(clientTick);
+    }
+
   
     //  Delay between updating the server
   
     //  Send information about the local player to the server every s_delay
-    if(server_loop) {
-      clearInterval(server_loop);
+    if(!server_loop) {
+      server_loop = setInterval(client_update, s_delay, player);
     }
-    server_loop = setInterval(client_update, s_delay, player);
   });
 
   //  Recieved when another player joins the server
   socket.on('player_joined', function (data){
     console.log('player joined');
-    addServerShip(data.id, data.name, data.state);
+    if (data.id != our_id) {
+      addServerShip(data.id, data.name, data.state);
+    }
   });
   
   //  Recieved when another player leaves the server
@@ -412,6 +426,9 @@ function playClientGame(data) {
   sim = null;
   viewport = null;
   lastTime = null;
+  fps = 60;
+  interval = 1000/fps;
+  delta = 0;
   player = null;
   meta = null;
   our_id = null;
@@ -440,7 +457,9 @@ function playClientGame(data) {
 
   //  Set our world up in the config described by the server
   for (var userid in data.players){
-    addServerShip(userid, data.names[userid], data.players[userid]);
+    if (userid != our_id) {
+      addServerShip(userid, data.names[userid], data.players[userid]);
+    }
   }
 
   if (typeof socket != "undefined") {

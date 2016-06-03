@@ -2,7 +2,8 @@ if (typeof exports === 'undefined'){
   //  Browser
 }
 else{
-  Game = require ('../public/shared_game.js');
+  Game = require ('./shared_game.js');
+  Col = require('./collision_detection.js');
   //  Server
 }
 
@@ -81,12 +82,12 @@ function CannonBall(ship, offsetX, offsetY, side, speed, onDraw, level) {
   this.ship = ship; 
   this.level = level;
 
-  var angle = ((-ship.state.angle - side * Math.PI / 2 + 2 * Math.PI) % (2 * Math.PI));
+  var angle = Col.trimBranch(ship.state.angle - side * Math.PI / 2);
 
   this.state = { x : ship.state.x + offsetX
                , y : ship.state.y + offsetY
-               , xvel: ship.state.speed * Math.cos(-ship.state.angle) / 2 + speed * Math.cos(angle)
-               , yvel: ship.state.speed * Math.sin(-ship.state.angle) / 2 + speed * Math.sin(angle)
+               , xvel: ship.state.speed * Math.cos(ship.state.angle)/2 + speed * Math.cos(angle)
+               , yvel: ship.state.speed * Math.sin(ship.state.angle)/2 + speed * Math.sin(angle)
   };
 
   this.cell = this.sim.coordinateToCell(this.state.x, this.state.y);
@@ -97,7 +98,7 @@ function CannonBall(ship, offsetX, offsetY, side, speed, onDraw, level) {
     }
     // TODO interpolation with remote state
     this.state.x += dt * this.state.xvel;
-    this.state.y -= dt * this.state.yvel;
+    this.state.y += dt * this.state.yvel;
     this.life -= 1;
     Game.updateCell(this.sim, this, this.state.x, this.state.y);
   };
