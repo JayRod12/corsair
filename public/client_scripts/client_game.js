@@ -271,7 +271,6 @@ function clientTick(){
   client_loop = window.requestAnimationFrame(clientTick);
   currentTime = Date.now();
   delta = currentTime - lastTime;
-  console.log('Ticking, delta: ' + delta);
 
   if (delta > interval) {
     lastTime = currentTime - (delta % interval);
@@ -321,7 +320,7 @@ function endClient() {
 function startClient() {
   // Initialize sockets
   console.log('socket status' + socket);
-  if (!socket || !socket.connected) {
+  if (typeof socket == "undefined" || !socket.connected) {
     socket = io();
   }
 
@@ -464,6 +463,7 @@ function playClientGame(data) {
 
   if (typeof socket != "undefined") {
     socket.emit('on_connect_response', {name : our_name});
+    console.log('ON CONNECT RESPONSE');
   }
 }
 
