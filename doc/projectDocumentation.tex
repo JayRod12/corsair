@@ -8,7 +8,7 @@
 \usepackage{listings} % Required for insertion of code
 \usepackage{courier} % Required for the courier font
 \usepackage{caption}
-\usepackage{multirow}
+\usepackage{multirow, float}
 \usepackage{subcaption}
 \renewcommand{\_}{\char`_}
 \renewcommand{\tt}{\lstinline}
@@ -64,6 +64,31 @@
 \section{System Architecture}
 
 \section{Copyright}
+
+\subsection{Acknowledgement of Third Party Software or Media}
+
+\begin{table}[H]
+\centering
+\caption{Use of Software}
+\label{my-label}
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Library}         & \textbf{Purpose}                                        \\ \hline
+jQuery                    & General purpose library used to make our game dynamic. \\ \hline
+Three.js                  & 3D JS library for welcome page animation.              \\ \hline
+Tween.js                  & Support for animation.                                 \\ \hline
+GoogleFonts: Josefin Sans & Font used throughout our game                          \\ \hline
+Socket.io                 & Communicating server and the client                    \\ \hline
+Node.js                   & Server backend                                         \\ \hline
+Express.js                & Extend Node.js server                                  \\ \hline
+Mocha                     & Testing                                                \\ \hline
+"Search of Land"          & Boat animation by Jamie Brook                               \\ \hline
+\end{tabular}
+\end{table}
+
+\subsection{Legal issues}
+If we were to officially release this game, the problem would be the software in the table above,
+as these are not original work by the team. However, note the graphics and the idea of the game are all original. Focusing on the table, we would have to simply read the license to fulfill the requirements of using them.
 
 \section{Project Management}
 
