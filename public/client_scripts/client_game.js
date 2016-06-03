@@ -19,8 +19,8 @@ var meta;
 var our_id;
 
 // Game loops
-var server_loop;
-var client_loop;
+var server_loop = 0;
+var client_loop = 0;
 var localHighScoreTable = {};
 const MAXIMUM_SPEED = 4;
 
@@ -311,9 +311,11 @@ function endClient() {
 
   if (client_loop) {
     window.cancelAnimationFrame(client_loop);
+    client_loop = 0;
   }
   if (server_loop) {
     clearInterval(server_loop);
+    server_loop = 0;
   }
 }
 
@@ -332,7 +334,7 @@ function startClient() {
   socket.on('start_game', function(data){
   
     lastTime = Date.now();
-    if (!client_loop) {
+    if (client_loop == 0) {
       client_loop = window.requestAnimationFrame(clientTick);
     }
 
@@ -340,7 +342,7 @@ function startClient() {
     //  Delay between updating the server
   
     //  Send information about the local player to the server every s_delay
-    if(!server_loop) {
+    if(server_loop == 0) {
       server_loop = setInterval(client_update, s_delay, player);
     }
   });
