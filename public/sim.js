@@ -1,14 +1,17 @@
 
 //  TODO extract functions and add to prototypes
 
+var server;
 if (typeof exports === 'undefined'){
   //  Browser
+  server = false;
 }
 else{
   //  Server
   Ship = require('../public/ship.js');
   Col = require('../public/collision_detection.js');
   Island = require('../public/island.js');
+  server = true;
 }
 
 
@@ -94,6 +97,10 @@ function updateCell(sim, object, x, y) {
         // Object has gone out of the grid, delete it
         sim.removeObject(object);
       } else {
+        if (server) {
+          realCell.bufferedUpdates.push({name:'object_enter_cell', 
+                                         data: object.serialize()});
+        }
         realCell.gameObjects.push(object);
         object.cell = realCell;
       }

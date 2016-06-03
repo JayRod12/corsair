@@ -337,11 +337,20 @@ function startClient() {
       for (var j = 0; j < updates.length; j++){
         var update = updates[j];
         switch(update.name){
-        case 'create_testObj':
-          cell.gameObjects.push(new Sim.TestObj(sim, update.data));
-          break;
-        default:
-          console.log("Unrecognised command from server " + update.name);
+          case 'create_testObj':
+            cell.gameObjects.push(new Sim.TestObj(sim, update.data));
+            break;
+          case 'object_enter_cell':
+            if (update.data.type == "ship") {
+              if (update.data.o.uid != our_id) {
+                var obj = serializer.deserializeObject(update.data);
+                console.log(obj);
+                cell.gameObjects.push(obj);
+              }
+            }
+            break;
+          default:
+            console.log("Unrecognised command from server " + update.name);
         }
       }
     }
