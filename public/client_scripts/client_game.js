@@ -112,7 +112,7 @@ function createShipOnDraw(default_colour, name){
 
     // Ship name
     ctx.fillStyle = "white";
-    ctx.font = "5px Courier";
+    ctx.font = "15px Courier";
     ctx.textAlign="left"; 
     var metrics = ctx.measureText(name);
     var textWidth = metrics.width;
@@ -400,7 +400,7 @@ function playClientGame(data) {
 
   var other_ship = sim.addShip({x: 500, y:350,speed: 0, angle: 0}, 500,
       function(){this.state.angle+= Math.PI/200; this.state.speed = 0.1;return true;},
-    createShipOnDraw("brown", our_name), drawCannonBalls);
+    createShipOnDraw("brown", "Tom"), drawCannonBalls);
 
   player.onDeath = onShipDeath;
 
