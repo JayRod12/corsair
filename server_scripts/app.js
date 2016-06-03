@@ -246,19 +246,33 @@ function calculateCellsToSend(uid){
   }
   var list = [];
   var base = sim.coordinateToCellIndex(s.state.x,s.state.y);
+  var x_pos = false;
+  var x_neg = false;
+  var y_pos = false;
+  var y_neg = false;
   if (base != null) {
     const bufferConst = 2;
     if (base.x + 1 < gridNumber && s.state.x % cellWidth > cellWidth/bufferConst){
-      list.push(sim.cellTupleToNumber({x:base.x+1, y:base.y}))
+      list.push(sim.cellTupleToNumber({x:base.x+1, y:base.y}));
+      x_pos = true;
     }
     if (base.y + 1 < gridNumber && s.state.y % cellHeight > cellHeight/bufferConst){
-      list.push(sim.cellTupleToNumber({x:base.x, y:base.y+1}))
+      list.push(sim.cellTupleToNumber({x:base.x, y:base.y+1}));
+      y_pos = true;
     }
     if (base.x - 1 >= 0 && s.state.x % cellWidth < cellWidth/bufferConst){
-      list.push(sim.cellTupleToNumber({x:base.x-1, y:base.y}))
+      list.push(sim.cellTupleToNumber({x:base.x-1, y:base.y}));
+      x_neg = true;
     }
     if (base.y - 1 >= 0 && s.state.y % cellHeight < cellHeight/bufferConst){
-      list.push(sim.cellTupleToNumber({x:base.x, y:base.y-1}))
+      list.push(sim.cellTupleToNumber({x:base.x, y:base.y-1}));
+      y_neg = true;
+    }
+    if (x_pos && y_pos) {
+      list.push(sim.cellTupleToNumber({x:base.x+1, y:base.y+1}));
+    }
+    if (x_neg && y_neg) {
+      list.push(sim.cellTupleToNumber({x:base.x-1, y:base.y-1}));
     }
     list.push(sim.cellTupleToNumber(base));
   }
