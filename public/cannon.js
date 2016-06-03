@@ -4,6 +4,7 @@ if (typeof exports === 'undefined'){
 else{
   Game = require ('../public/shared_game.js');
   //  Server
+  Ship = require ('../public/ship.js');
 }
 
 (function(exports){
@@ -109,7 +110,11 @@ function CannonBall(ship, offsetX, offsetY, side, speed, onDraw, level) {
   }
   this.collisionHandler = function(other_object){
     if (other_object !== this.ship){
+      if (typeof other_object.hp !== "undefined"){
+          other_object.hp -= 10;
+      }
       this.destroy();
+      return;
     }
   }
 

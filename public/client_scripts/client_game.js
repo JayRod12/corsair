@@ -95,7 +95,19 @@ function createShipOnDraw(default_colour, name){
 
     //We undo our transformations for the next draw/calculations
     ctx.rotate(-this.state.angle);
-    ctx.translate(-this.state.x, -this.state.y);
+
+    if (this.hp < 100){
+      console.log(this.hp);
+      var hp_len = 80;
+      var hp_height = 8;
+      ctx.translate(-hp_len/2, -hp_height/2-50);
+      ctx.fillStyle = "red";
+      ctx.fillRect(0, 0, hp_len, hp_height); 
+      ctx.fillStyle = "green";
+      ctx.fillRect(0, 0, hp_len * this.hp/100, hp_height); 
+      ctx.translate(hp_len/2, hp_height/2+50);
+      ctx.translate(-this.state.x, -this.state.y);
+    }
 
     // Ship name
     ctx.fillStyle = "white";
@@ -382,6 +394,11 @@ function playClientGame(data) {
   remote.newPlayer(our_id, our_name, data.state);
   player = sim.addShip(data.state, our_id, localShipInput,
     createShipOnDraw("black", our_name), drawCannonBalls);
+
+  var other_ship = sim.addShip({x: 200, y:400,speed: 0, angle: 0}, 500,
+      function(){return true;},
+    createShipOnDraw("brown", our_name), drawCannonBalls);
+
   player.onDeath = onShipDeath;
 
   //  Set our world up in the config described by the server

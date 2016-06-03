@@ -15,6 +15,7 @@ function Ship(sim, state, uid, inputFunction, onDraw, onDrawCannon){
 
   // Simulation in which the ship is.
   this.sim = sim;
+  this.hp = 90;
 
   //UPDATE THIS WHEN SCALE IS UPDATED. FUCK YOU GUYS FOR NOT CARING ABOUT ME.
   this.hypotenuse = Math.sqrt(shipBaseWidth*shipBaseWidth 
@@ -48,7 +49,8 @@ function Ship(sim, state, uid, inputFunction, onDraw, onDrawCannon){
     }
 
     //  If player has left the server remove their ship from the sim
-    if (typeof remoteState == "undefined"){
+    //if (typeof remoteState == "undefined" || this.hp < 0){
+    if (this.hp < 0){
       sim.removeObject(this);
       return;
     }
@@ -61,8 +63,10 @@ function Ship(sim, state, uid, inputFunction, onDraw, onDrawCannon){
 
 
     //  TODO better interpolation
+    if (remoteState){
     this.state.x = (this.state.x + remoteState.x) / 2
     this.state.y = (this.state.y + remoteState.y) / 2
+    }
     Game.updateCell(this.sim, this, this.state.x, this.state.y);
 
     this.cannon.onTick(dt);
@@ -73,6 +77,9 @@ function Ship(sim, state, uid, inputFunction, onDraw, onDrawCannon){
 	  /*TODO: different cases (possibly) i.e. what if 
   		it's a cannonball I've collided with?*/
    //this.colour = "red";
+    if (other_object.ship !== "undefined"){
+      if (other_object.ship === this) return;
+    }
    this.collided_timer = this.collided_basetime;
    //decrement health & handle physics;
   }
