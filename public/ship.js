@@ -75,6 +75,19 @@ function Ship(sim, state, uid, name, inputFunction, onDraw, onDrawCannon){
 	  /*TODO: different cases (possibly) i.e. what if 
   		it's a cannonball I've collided with?*/
    //this.colour = "red";
+	 	var intersect_angle = Math.atan2(this.y - other_object.y, this.x - other_object.x);
+		var x_speed_update = (other_object.speed
+																		*Math.cos(trimBranch(other_object.angle - contact_angle))
+																		*Math.cos(contact_angle))
+																		+ (this.speed*Math.sin(trimBranch(this.angle - contact_angle))
+																				*Math.cos(trimBranch(contact_angle + Math.PI/2)))
+		var y_speed_update = (other_object.speed
+																		*Math.cos(trimBranch(other_object.angle - contact_angle))
+																		*Math.sin(contact_angle))
+																		+ (this.speed*Math.sin(trimBranch(this.angle - contact_angle))
+																			*Math.sin(trimBranch(contact_angle + Math.PI/2)));
+		this.speed = Math.sqrt(x_speed_update*x_speed_update + y_speed_update*y_speed_update);
+		this.angle = Math.atan2(y_speed_update, x_speed_update);
    this.collided_timer = this.collided_basetime;
    //decrement health & handle physics;
   }
