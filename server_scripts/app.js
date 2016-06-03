@@ -60,8 +60,6 @@ http.listen(process.env.PORT || port, function() {
 //  On client connection
 io.on('connection', function(client){
 
-  //  Add to socketList
-  socketList.push(client);
   
   //  Generate new client id associate with their connection
   client.userid = UUID();
@@ -81,7 +79,7 @@ io.on('connection', function(client){
     gridNumber: gridNumber,
     cellWidth: cellWidth,
     cellHeight: cellHeight,
-    activeCells: allCells
+    activeCells: ac
   }
 
   var data = {id : client.userid, names : remote.getPlayerNames(),
@@ -96,6 +94,9 @@ io.on('connection', function(client){
     remote.newPlayer(client.userid, data.name, initState);
     sim.addShip(client.userid, data.name, initState,
       Game.createServerShipInput(client.userid));
+
+    //  Add to socketList, ie. start sending client updates
+    socketList.push(client);
 
     //  Tell other users that a new player has joined
     client.broadcast.emit('player_joined', {id : client.userid, name :
@@ -216,7 +217,7 @@ function send_loop_func(){
                             , state: cell_state });
     }
 
-    var data = { players: remote.getPlayers(), active_cells:allCells 
+    var data = { players: remote.getPlayers(), active_cells:client.cells 
                , updates: allBufferedUpdates, new_cells: new_cells_states};
     client.emit('server_update', data);
   });
