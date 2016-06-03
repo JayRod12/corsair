@@ -11,10 +11,12 @@ else{
 
 //  Inputfunction determines updates to the ship
 //  onDraw can be null
-function Ship(sim, state, uid, inputFunction, onDraw, onDrawCannon){
+function Ship(sim, state, uid, name, inputFunction, onDraw, onDrawCannon){
 
   // Simulation in which the ship is.
   this.sim = sim;
+  this.uid = uid;
+  this.name = name;
 
   //UPDATE THIS WHEN SCALE IS UPDATED. FUCK YOU GUYS FOR NOT CARING ABOUT ME.
   this.hypotenuse = Math.sqrt(shipBaseWidth*shipBaseWidth 
@@ -23,14 +25,14 @@ function Ship(sim, state, uid, inputFunction, onDraw, onDrawCannon){
   //  Should contain:
   //  x, y, angle, speed
   this.state = state;
-  this.cell = sim.coordinateToCell(this.state.x, this.state.y);
+  this.cell = this.sim.coordinateToCell(this.state.x, this.state.y);
 
   this.collided_basetime = 400;
 
   this.collided_timer = 0;
 
   this.getRemoteState = function(){
-    return sim.remote.getRemoteStates()[uid];
+    return sim.remote.getRemoteStates()[this.uid];
   };
 
   // Scale of the ship ?
@@ -90,6 +92,14 @@ function Ship(sim, state, uid, inputFunction, onDraw, onDrawCannon){
       angle: this.state.angle
     }
   };
+
+  this.serialize = function() {
+    return { type:"ship"
+           , o : { uid: this.uid
+                 , name: this.name
+                 , state: this.state }};
+  };
+
 }
 
 var shipBaseWidth = 90;

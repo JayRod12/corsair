@@ -5,6 +5,7 @@ var canvas = $("#main_canvas")[0];
 var ctx = canvas.getContext("2d");
 var remote;
 var sim;
+var serializer;
 var viewport;
 var lastTime;
 var player;
@@ -21,6 +22,7 @@ var localHighScoreTable = {};
 const speed_norm = 100 * 5;
 const backColor = "rgb(104, 104, 104)";
 const seaColor = "rgb(102, 204, 255)";
+const seaHighlightColor = "rgb(225, 102, 255)";
 const s_delay = 1000/40;
 
 ///////////////// DRAW METHODS ////////////////////////////
@@ -64,7 +66,19 @@ function drawBehindGrid(ctx){
 }
 
 function drawCellBackground(cx, cy, ctx){
-  ctx.fillStyle = seaColor;
+  //  If this cell is in activeCells
+  var playerCell = sim.coordinateToCellIndex(player.state.x, player.state.y);
+  if (playerCell == null) {
+    return;
+  }
+
+  if (cx == playerCell.x && cy == playerCell.y){
+    ctx.fillStyle = seaHighlightColor;
+  }
+  else{
+    ctx.fillStyle = seaColor;
+  }
+
   ctx.fillRect(cx*meta.cellWidth, cy*meta.cellHeight, meta.cellWidth+2,
       meta.cellHeight+2);
 }
@@ -168,8 +182,6 @@ function draw(){
   viewport.x = player.state.x - canvas.width / (2 * viewport.scale);
   viewport.y = player.state.y - canvas.height / (2 * viewport.scale);
 
-  //  Fastest way to clear entire canvas
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
   drawBehindGrid(ctx);
   viewport.draw(ctx, canvas.width, canvas.height);
   drawCompass();
@@ -215,8 +227,8 @@ $( "#main_canvas" ).mousedown(function(event){
       //  Right click
       player.cannon.onShoot(1);
       return false;
-
-    return true;
+    default:
+      return true;
   }
 });
 
@@ -224,6 +236,7 @@ var delta_angle_limit = Math.PI/90;
 var localShipInput = function(){
   var delta_angle = (Math.atan2(mouse_y - this.state.y, mouse_x - this.state.x) 
 						- this.state.angle); 
+
   //Ensure delta_angle stays within the range [-PI, PI]
   delta_angle = Col.trimBranch(delta_angle);
  
@@ -238,6 +251,7 @@ var localShipInput = function(){
       Math.pow(this.state.y
       -mouse_y,2)) / speed_norm;
 }
+
 
 // GAME LOOP
 
@@ -271,9 +285,9 @@ function updateHighScoresTable(global) {
 function addServerShip(userid, name, state){
   console.log("adding new player");
   remote.newPlayer(userid, name, state);
-  sim.addShip(state, userid,
-      Game.createServerShipInput(userid),
-        createShipOnDraw("brown", name), drawCannonBalls);
+  //sim.addShip(userid, state, userid,
+  //    Game.createServerShipInput(userid),
+  //      createShipOnDraw("brown", name), drawCannonBalls);
 
 }
 
@@ -329,16 +343,53 @@ function startClient() {
   //  We delete the local ship
   socket.on('player_left', function (data){
     console.log('player left');
-    Game.removePlayer(data.id);
+    remote.removePlayer(data.id);
   });
   
   //  On update from server
   socket.on('server_update', function (data){
     updateHighScoresTable(data.scoresTable);
-    for (var uid in data){
-      var update = data[uid];
+
+    // check if you died
+    if (data.active_cells.length == 0) {
+      player.onDeath();
+    }
+
+    var players = data.players;
+    for (var uid in players){
+      var update = players[uid];
       remote.updatePlayer(uid, update);
     }
+    var allBufferedUpdates = data.updates;
+    for (var i = 0; i < allBufferedUpdates.length; i++){
+      var num = allBufferedUpdates[i].num;
+      var updates = allBufferedUpdates[i].updates;
+      var cell = sim.numberToCell(num);
+      for (var j = 0; j < updates.length; j++){
+        var update = updates[j];
+        switch(update.name){
+        case 'create_testObj':
+          cell.gameObjects.push(new Sim.TestObj(sim, update.data));
+          break;
+        default:
+          console.log("Unrecognised command from server " + update.name);
+        }
+      }
+    }
+
+
+    var new_cells_states = data.new_cells;
+
+    for (var i = 0; i < new_cells_states.length; i++) {
+      var cell = sim.numberToCell(new_cells_states[i].num);
+      cell.staticObjects =
+        serializer.deserializeArray(new_cells_states[i].state.static_obj);
+      cell.gameObjects = 
+        serializer.deserializeArray(new_cells_states[i].state.game_obj);
+    }
+
+    // Sim will only draw the active cells
+    sim.activeCells = data.active_cells;
   });
 }
 
@@ -366,11 +417,13 @@ function playClientGame(data) {
 
   remote = new Game.Remote();
   meta = data.meta;
-  sim = new Game.Sim(remote, meta.gridNumber, meta.cellWidth, meta.cellHeight,
+  sim = new Sim.Class(remote, meta.gridNumber, meta.cellWidth, meta.cellHeight,
     meta.activeCells);
   sim.populateMap(drawTreasure);
   
   updateHighScoresTable(data.scoresTable);
+
+  serializer = new Serializer.Class(sim);
 
   //  Using 16:9 aspect ratio
   viewport = new Viewport(sim, 0, 0, 1.6, 0.9, 1);
@@ -380,7 +433,7 @@ function playClientGame(data) {
 
   var our_name = (localStorage['nickname'] == "") ? "Corsair" : localStorage['nickname'];
   remote.newPlayer(our_id, our_name, data.state);
-  player = sim.addShip(data.state, our_id, localShipInput,
+  player = sim.addShip(our_id, our_name, data.state, localShipInput,
     createShipOnDraw("black", our_name), drawCannonBalls);
   player.onDeath = onShipDeath;
 
