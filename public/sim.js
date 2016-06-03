@@ -168,7 +168,7 @@ function Sim(remote, gridNumber, cellWidth, cellHeight, activeCells){
     */
   this.populateMap = function(drawTreasure, drawIsland, drawCoins, drawRocks) {
     var treasure = new Treasure(xTreasure, yTreasure, drawTreasure);
-	var example_island = new Island.Class(500, 500, 800, 40, Math.PI/4, 
+	var example_island = new Island.Class(500, 500, 64, 40, Math.PI/4, 
 													"white");  
     var cell = this.coordinateToCell(xTreasure, yTreasure);
     cell.staticObjects.push(treasure);

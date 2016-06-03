@@ -167,7 +167,8 @@ function drawHighScoresTable(scoreTable) {
 function drawScore() {
   ctx.fillStyle = "black";
   ctx.font = "50px Josefin Sans";
-  ctx.fillText(localHighScoreTable[player.uid].score, (1/15)*canvas.width, (9.5/10)*canvas.height);
+  //ctx.fillText(localHighScoreTable[player.uid].score, (1/15)*canvas.width, (9.5/10)*canvas.height);
+  //ctx.fillText(remote.getUIDtoScores()[our_uid].score, (1/15)*canvas.width, (9.5/10)*canvas.height);
 }
 
 
@@ -184,6 +185,7 @@ function draw(){
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   drawBehindGrid(ctx);
   viewport.draw(ctx, canvas.width, canvas.height);
+  //drawScore();
   drawCompass();
   drawHighScoresTable(localHighScoreTable);
 }
@@ -395,8 +397,8 @@ function playClientGame(data) {
   player = sim.addShip(data.state, our_id, localShipInput,
     createShipOnDraw("black", our_name), drawCannonBalls);
 
-  var other_ship = sim.addShip({x: 200, y:400,speed: 0, angle: 0}, 500,
-      function(){return true;},
+  var other_ship = sim.addShip({x: 500, y:350,speed: 0, angle: 0}, 500,
+      function(){this.state.angle+= Math.PI/200; this.state.speed = 0.1;return true;},
     createShipOnDraw("brown", our_name), drawCannonBalls);
 
   player.onDeath = onShipDeath;
