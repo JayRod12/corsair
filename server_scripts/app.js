@@ -226,7 +226,7 @@ function send_loop_func(){
     }
 
     var data = { players: remote.getPlayers(), active_cells:client.cells 
-               , updates: allBufferedUpdates, new_cells: new_cells_states};
+               , updates: allBufferedUpdates, scoresTable: remote.getUIDtoScores(), new_cells: new_cells_states};
     client.emit('server_update', data);
   });
 
