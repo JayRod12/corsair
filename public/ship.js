@@ -99,8 +99,8 @@ function Ship(sim, state, uid, inputFunction, onDraw, onDrawCannon){
   };
 }
 
-var shipBaseWidth = 90;
-var shipBaseHeight = 40;
+var shipBaseWidth = 144;
+var shipBaseHeight = 80;
 
 exports.Class = Ship;
 exports.shipBaseWidth = shipBaseWidth;

@@ -69,12 +69,16 @@ function drawCellBackground(cx, cy, ctx){
       meta.cellHeight+2);
 }
 
+var ship_image1 = new Image();
+ship_image1.src = "../media/ship1.png";
+var ship_image2 = new Image();
+ship_image2.src = "../media/ship2.png";
+var wait = 0;
 
 function createShipOnDraw(default_colour, name){
   return function(){
     var width = Ship.shipBaseWidth * this.scale;
     var height = Ship.shipBaseHeight * this.scale;
-
 
     //We translate to the origin of our ship
     ctx.translate(this.state.x, this.state.y);
@@ -89,9 +93,18 @@ function createShipOnDraw(default_colour, name){
     } else {
       ctx.fillStyle = default_colour;
     }
-    ctx.fillRect(-width/2, -height/2, width, height);
-    ctx.strokeStyle = "#ffc0cb";
-    ctx.strokeRect(-width/2, -height/2, width, height);
+    // ctx.fillRect(-width/2, -height/2, width, height);
+    // ctx.strokeStyle = "#ffc0cb";
+    // ctx.strokeRect(-width/2, -height/2, width, height);
+
+    
+    if (wait < 50) {
+      ctx.drawImage(ship_image1, -width/2, -height/2, width, height);
+    } else {
+      ctx.drawImage(ship_image2, -width/2, -height/2, width, height);
+    }
+
+    wait = (wait + 1) % 100;
 
     //We undo our transformations for the next draw/calculations
     ctx.rotate(-this.state.angle);
@@ -112,7 +125,7 @@ function createShipOnDraw(default_colour, name){
 
     // Ship name
     ctx.fillStyle = "white";
-    ctx.font = "15px Courier";
+    ctx.font = "15px Josefin Sans";
     ctx.textAlign="left"; 
     var metrics = ctx.measureText(name);
     var textWidth = metrics.width;
