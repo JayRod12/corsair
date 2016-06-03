@@ -145,7 +145,7 @@ function Sim(remote, gridNumber, cellWidth, cellHeight, activeCells){
 
   this.populateMap = function(drawTreasure, drawIsland, drawCoins, drawRocks) {
     var treasure = new Treasure(xTreasure, yTreasure, drawTreasure);
-	var example_island = new Island.Class(500, 500, 800, 40, Math.PI/4, 
+	  var example_island = new Island.Class(500, 500, 800, 40, Math.PI/4,
 													"white");  
     var cell = this.coordinateToCell(xTreasure, yTreasure);
     cell.staticObjects.push(treasure);
@@ -249,9 +249,9 @@ var wait = 0;
   };
 
 
-  this.addShip = function (uid, name, state, inputFunction, onDraw, onDrawCannon){
+  this.addShip = function (uid, name, state, inputFunction){
     var cell = this.coordinateToCell(state.x, state.y);
-    var ship = new Ship.Class(this, state, uid, name, inputFunction, onDraw, onDrawCannon);
+    var ship = new Ship.Class(this, state, uid, name, inputFunction);
     cell.gameObjects.push(ship);
     remote.getUIDtoScores()[uid] = {shipName: remote.getPlayerNames()[uid], score: 0};
     this.UIDtoShip[uid] = ship;

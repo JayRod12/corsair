@@ -9,7 +9,7 @@ else{
 
 (function(exports){
 
-function Cannon(ship, onDraw) {
+function Cannon(ship) {
 
   this.ballSpeed = 0.3;
   this.cannons = 5;
@@ -17,7 +17,6 @@ function Cannon(ship, onDraw) {
   this.delay = 30;
   this.ship = ship;
   this.level = 3;
-  this.onDraw = onDraw;
 
   this.baseCooldown = 1200;
   this.cooldowns = [10, 10];
@@ -48,7 +47,7 @@ function Cannon(ship, onDraw) {
       var shot = function(i){
         var offsetX = spacing * (cannons / 2 - i) * Math.cos(ship.state.angle);
         var offsetY = spacing * (cannons / 2 - i) * Math.sin(ship.state.angle);
-        var ball = new CannonBall(ship, offsetX, offsetY, side, ballSpeed, onDraw, level);
+        var ball = new CannonBall(ship, offsetX, offsetY, side, ballSpeed, level);
         var cell = ship.sim.coordinateToCell(ship.state.x,ship.state.y);
         cell.gameObjects.push(ball);
       }
@@ -76,13 +75,13 @@ function Cannon(ship, onDraw) {
   };
 }
 
-function CannonBall(ship, offsetX, offsetY, side, speed, onDraw, level) {
+function CannonBall(ship, offsetX, offsetY, side, speed, level) {
 
   this.sim = ship.sim;
   this.ship = ship; 
   this.level = level;
 
-  var angle = Col.trimBranch(ship.state.angle - side * Math.PI / 2);
+  var angle = Col.trimBranch(ship.state.angle + side * Math.PI / 2);
 
   this.state = { x : ship.state.x + offsetX
                , y : ship.state.y + offsetY
@@ -102,7 +101,6 @@ function CannonBall(ship, offsetX, offsetY, side, speed, onDraw, level) {
     this.life -= 1;
     Game.updateCell(this.sim, this, this.state.x, this.state.y);
   };
-  this.onDraw = onDraw;
 
   this.getColType = function(){return "point"};
   this.getColObj = function(){
@@ -118,6 +116,13 @@ function CannonBall(ship, offsetX, offsetY, side, speed, onDraw, level) {
     this.sim.removeObject(this);
   }
 
+  this.onDraw = function(ctx) {
+    var radius = this.level;
+    ctx.beginPath();
+    ctx.arc(this.state.x, this.state.y, radius, 2 * Math.PI, false);
+    ctx.fillStyle = "black";
+    ctx.fill();
+  }
 }
 
 exports.Class = Cannon;

@@ -37,6 +37,8 @@ function Serializer(sim) {
         return this.deserializeShip(serial.o);
       case "test_obj":
         return this.deserializeTestObj(serial.o);
+      case "island":
+        return this.deserializeIsland(serial.o);
       default:
         console.log('Deserializing unrecognized object');
     }
@@ -54,27 +56,41 @@ function Serializer(sim) {
     if (serial.uid == our_id) {
       return null;
     }
-    return new Ship.Class(this.sim, serial.state, serial.uid, serial.name, 
-      Game.createServerShipInput("brown", serial.name), drawCannonBalls);
+    console.log('Deserializing ship');
+     
+    var ship = new Ship.Class(this.sim, serial.state, serial.uid, serial.name,
+                              Game.createServerShipInput(serial.uid));
+    this.sim.UIDtoShip[serial.uid] = ship;
+    return ship;
   }
-
   this.deserializeTestObj = function(state) {
     return new Sim.TestObj(this.sim, state);
+  };
+  this.serializeObject = function (o) {
+    if (typeof o.serialize != "undefined") {
+      return o.serialize();
+    } else {
+      console.log('Serializing non-serializable object of type ' + typeof o);
+      return null;
+    }
+  };
+  this.deserializeIsland = function(o) {
+    return new Island.Class(o.x, o.y, o.h, o.w, o.angle, o.colour); 
+  };
+
+  this.serializeObject = function (o) {
+    if (typeof o.serialize != "undefined") {
+      return o.serialize();
+    } else {
+      console.log('Serializing non-serializable object of type ' + typeof o); return null;
+    }
+  }
+  this.serializeArray = function(array) {
+    return array.map(this.serializeObject);
   }
 }
 
-Serializer.prototype.serializeObject = function (o) {
-  if (typeof o.serialize != "undefined") {
-    return o.serialize();
-  } else {
-    console.log('Serializing non-serializable object of type ' + typeof o);
-    return null;
-  }
-}
 
-Serializer.prototype.serializeArray = function(array) {
-  return array.map(this.serializeObject);
-}
 
 exports.Class = Serializer;
 

@@ -9,7 +9,7 @@ else{
 
 (function(exports){
 
-function Island(x, y, height, width, angle, colour, onDraw) {
+function Island(x, y, height, width, angle, colour) {
 	this.x = x;
 	this.y = y;
 	this.width = width;
@@ -18,7 +18,6 @@ function Island(x, y, height, width, angle, colour, onDraw) {
 	this.angle = angle;
 	this.colour = colour;
   this.collided_timer = 0;
-	this.onDraw = onDraw;
   this.collided_basetime = 400;
 
   this.onTick = function(dt) {
@@ -64,6 +63,15 @@ function Island(x, y, height, width, angle, colour, onDraw) {
       angle: this.angle
     }
   };
+  this.serialize = function() {
+    return {type: "island",
+            o: { x: this.x
+               , y: this.y
+               , w: this.width
+               , h: this.height
+               , angle: this.angle
+               , colour: this.colour } };
+  }
 
 
 }

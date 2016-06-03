@@ -28,6 +28,9 @@ for (var i = 0; i < gridNumber * gridNumber; i++) {
 }
 
 var sim = new Sim.Class(remote,gridNumber, cellWidth, cellHeight, allCells);
+sim.populateMap();
+//var island = new Island(100, 100, 100, 100, Math.PI/4, "black");
+
 var sim_t = 1000 / 30;
 var serializer = new Game.Serializer(sim);
 
@@ -87,8 +90,9 @@ io.on('connection', function(client){
     activeCells: ac
   };
 
+  var new_cells_states = serializeNewCells(ac);
   var data = {id : client.userid, names : remote.getPlayerNames(),
-        players : remote.getPlayers(), state: initState, meta: metadata};
+        players : remote.getPlayers(), state: initState, meta: metadata, new_cells_states: new_cells_states };
   client.emit('on_connect', data);
 
 
@@ -214,16 +218,7 @@ function send_loop_func(){
       }
     }
     // Send serialized objects
-    var new_cells_states = [];
-    for (var i = 0; i < new_cells.length; i++) {
-      var cell_game_objects = sim.numberToCell(new_cells[i]).gameObjects;
-      var cell_static_objects = sim.numberToCell(new_cells[i]).staticObjects;
-      var cell_state = { game_obj: serializer.serializeArray(cell_game_objects)
-                       , static_obj: serializer.serializeArray(cell_static_objects) };
-
-      new_cells_states.push({ num: new_cells[i]
-                            , state: cell_state });
-    }
+    var new_cells_states = serializeNewCells(new_cells);
 
     var data = { players: remote.getPlayers(), active_cells:client.cells 
                , updates: allBufferedUpdates, scoresTable: remote.getUIDtoScores(), new_cells: new_cells_states};
@@ -236,6 +231,20 @@ function send_loop_func(){
     sim.numberToCell(allCells[i]).bufferedUpdates = [];
   }
 
+}
+
+function serializeNewCells(new_cells) {
+  var new_cells_states = [];
+  for (var i = 0; i < new_cells.length; i++) {
+    var cell_game_objects = sim.numberToCell(new_cells[i]).gameObjects;
+    var cell_static_objects = sim.numberToCell(new_cells[i]).staticObjects;
+    var cell_state = { game_obj: serializer.serializeArray(cell_game_objects)
+                     , static_obj: serializer.serializeArray(cell_static_objects) };
+
+    new_cells_states.push({ num: new_cells[i]
+                          , state: cell_state });
+  }
+  return new_cells_states;
 }
 
 function calculateCellsToSend(uid){

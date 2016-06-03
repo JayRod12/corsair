@@ -11,7 +11,7 @@ else{
 
 //  Inputfunction determines updates to the ship
 //  onDraw can be null
-function Ship(sim, state, uid, name, inputFunction, onDraw, onDrawCannon){
+function Ship(sim, state, uid, name, inputFunction){
 
   // Simulation in which the ship is.
   this.sim = sim;
@@ -38,7 +38,7 @@ function Ship(sim, state, uid, name, inputFunction, onDraw, onDrawCannon){
   // Scale of the ship ?
   this.scale = 1;
 
-  this.cannon = new Cannon.Class(this, onDrawCannon);
+  this.cannon = new Cannon.Class(this);
   this.inputFunction = inputFunction;
 
   this.onTick = function(dt){
@@ -79,7 +79,41 @@ function Ship(sim, state, uid, name, inputFunction, onDraw, onDrawCannon){
    //decrement health & handle physics;
   }
 
-  this.onDraw = onDraw;
+  this.default_colour = "black";
+  this.onDraw = function(ctx){
+    var width = shipBaseWidth * this.scale;
+    var height = shipBaseHeight * this.scale;
+  
+  
+    //We translate to the origin of our ship
+    ctx.translate(this.state.x, this.state.y);
+  
+    //We rotate around this origin 
+    ctx.rotate(this.state.angle);
+  
+      //We draw the ship, ensuring that we start drawing from the correct location 
+    //(the fillRect function draws from the topmost left corner of the rectangle 
+    if(this.collided_timer > 0) {
+        ctx.fillStyle = "red";
+    } else {
+      ctx.fillStyle = this.default_colour;
+    }
+    ctx.fillRect(-width/2, -height/2, width, height);
+    ctx.strokeStyle = "#ffc0cb";
+    ctx.strokeRect(-width/2, -height/2, width, height);
+  
+    //We undo our transformations for the next draw/calculations
+    ctx.rotate(-this.state.angle);
+    ctx.translate(-this.state.x, -this.state.y);
+  
+    // Ship name
+    ctx.fillStyle = "white";
+    ctx.font = "5px Courier";
+    ctx.textAlign="left"; 
+    var metrics = ctx.measureText(this.name);
+    var textWidth = metrics.width;
+    ctx.fillText(this.name, this.state.x - textWidth/2, this.state.y);
+  }
 
   this.getColType = function(){return "rectangle"};
   this.getColObj = function(){

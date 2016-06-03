@@ -91,52 +91,6 @@ function drawCellBackground(cx, cy, ctx){
 }
 
 
-function createShipOnDraw(default_colour, name){
-  return function(){
-    var width = Ship.shipBaseWidth * this.scale;
-    var height = Ship.shipBaseHeight * this.scale;
-
-
-    //We translate to the origin of our ship
-    ctx.translate(this.state.x, this.state.y);
-
-    //We rotate around this origin 
-    ctx.rotate(this.state.angle);
-
-      //We draw the ship, ensuring that we start drawing from the correct location 
-    //(the fillRect function draws from the topmost left corner of the rectangle 
-    if(this.collided_timer > 0) {
-        ctx.fillStyle = "red";
-    } else {
-      ctx.fillStyle = default_colour;
-    }
-    ctx.fillRect(-width/2, -height/2, width, height);
-    ctx.strokeStyle = "#ffc0cb";
-    ctx.strokeRect(-width/2, -height/2, width, height);
-
-    //We undo our transformations for the next draw/calculations
-    ctx.rotate(-this.state.angle);
-    ctx.translate(-this.state.x, -this.state.y);
-
-    // Ship name
-    ctx.fillStyle = "white";
-    ctx.font = "5px Courier";
-    ctx.textAlign="left"; 
-    var metrics = ctx.measureText(name);
-    var textWidth = metrics.width;
-    ctx.fillText(name, this.state.x - textWidth/2, this.state.y);
-  }
-}
-
-function drawCannonBalls() {
-
-  var radius = this.level;
-  ctx.beginPath();
-  ctx.arc(this.state.x, this.state.y, radius, 2 * Math.PI, false);
-  ctx.fillStyle = "black";
-  ctx.fill();
-}
-
 var treasureX = 300;
 var treasureY = 300;
 
@@ -292,8 +246,7 @@ function addServerShip(userid, name, state){
   console.log("adding new player");
   remote.newPlayer(userid, name, state);
   //sim.addShip(userid, state, userid,
-  //    Game.createServerShipInput(userid),
-  //      createShipOnDraw("brown", name), drawCannonBalls);
+  //    Game.createServerShipInput(userid));
 
 }
 
@@ -394,19 +347,22 @@ function startClient() {
     }
 
 
-    var new_cells_states = data.new_cells;
-
-    for (var i = 0; i < new_cells_states.length; i++) {
-      var cell = sim.numberToCell(new_cells_states[i].num);
-      cell.staticObjects =
-        serializer.deserializeArray(new_cells_states[i].state.static_obj);
-      cell.gameObjects = 
-        serializer.deserializeArray(new_cells_states[i].state.game_obj);
-    }
-
+    deserializeNewStates(data.new_cells);
     // Sim will only draw the active cells
     sim.activeCells = data.active_cells;
   });
+}
+
+function deserializeNewStates(new_cells_states) {
+  for (var i = 0; i < new_cells_states.length; i++) {
+    var cell = sim.numberToCell(new_cells_states[i].num);
+    cell.staticObjects =
+      serializer.deserializeArray(new_cells_states[i].state.static_obj)
+                .filter(function(x) { return x != null; });
+    cell.gameObjects = 
+      serializer.deserializeArray(new_cells_states[i].state.game_obj)
+                .filter(function(x) { return x != null; });
+  }
 }
 
 // Terminate the game when the ship dies
@@ -438,22 +394,22 @@ function playClientGame(data) {
   meta = data.meta;
   sim = new Sim.Class(remote, meta.gridNumber, meta.cellWidth, meta.cellHeight,
     meta.activeCells);
-  sim.populateMap(drawTreasure);
+  serializer = new Serializer.Class(sim);
+  deserializeNewStates(data.new_cells_states);
+  //sim.populateMap(drawTreasure);
   
   updateHighScoresTable(data.scoresTable);
 
-  serializer = new Serializer.Class(sim);
 
   //  Using 16:9 aspect ratio
-  viewport = new Viewport(sim, 0, 0, 1.6, 0.9, 1);
+  viewport = new Viewport(sim, 0, 0, 1.6, 0.9, 1/5);
 
   our_id = data.id;
   console.log("Our id is " + our_id);
 
   var our_name = (localStorage['nickname'] == "") ? "Corsair" : localStorage['nickname'];
   remote.newPlayer(our_id, our_name, data.state);
-  player = sim.addShip(our_id, our_name, data.state, localShipInput,
-    createShipOnDraw("black", our_name), drawCannonBalls);
+  player = sim.addShip(our_id, our_name, data.state, localShipInput);
   player.onDeath = onShipDeath;
 
   //  Set our world up in the config described by the server
