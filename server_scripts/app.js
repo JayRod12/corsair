@@ -75,12 +75,14 @@ io.on('connection', function(client){
 
   var ac = [];
   ac.push(sim.coordinateToCellNumber(initState.x, initState.y));
+  client.cells = ac;
+
   var metadata = {
     gridNumber: gridNumber,
     cellWidth: cellWidth,
     cellHeight: cellHeight,
     activeCells: ac
-  }
+  };
 
   var data = {id : client.userid, names : remote.getPlayerNames(),
         players : remote.getPlayers(), state: initState, meta: metadata};

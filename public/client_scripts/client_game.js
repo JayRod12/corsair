@@ -330,7 +330,6 @@ function startClient() {
         var update = updates[j];
         switch(update.name){
         case 'create_testObj':
-          console.log("Creating testobj in cell: " + num);
           cell.gameObjects.push(new Sim.TestObj(sim, update.data));
           break;
         default:
@@ -344,12 +343,10 @@ function startClient() {
 
     for (var i = 0; i < new_cells_states.length; i++) {
       var cell = sim.numberToCell(new_cells_states[i].num);
-      cell.static_objects =
-        serializer.deserializeArray(new_cells_states[i].state.static_obj)
-                  .filter( function(x) {x != null; });
-      cell.game_objects =
-        serializer.deserializeArray(new_cells_states[i].state.game_obj)
-                  .filter( function(x) {x != null; });
+      cell.staticObjects =
+        serializer.deserializeArray(new_cells_states[i].state.static_obj);
+      cell.gameObjects = 
+        serializer.deserializeArray(new_cells_states[i].state.game_obj);
     }
 
     // Sim will only draw the active cells
