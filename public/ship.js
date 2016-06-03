@@ -15,7 +15,7 @@ function Ship(sim, state, uid, inputFunction, onDraw, onDrawCannon){
 
   // Simulation in which the ship is.
   this.sim = sim;
-  this.hp = 100;
+  this.hp = 99;
 
   //UPDATE THIS WHEN SCALE IS UPDATED. FUCK YOU GUYS FOR NOT CARING ABOUT ME.
   this.hypotenuse = Math.sqrt(shipBaseWidth*shipBaseWidth 

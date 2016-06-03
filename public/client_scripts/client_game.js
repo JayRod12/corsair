@@ -96,7 +96,7 @@ function createShipOnDraw(default_colour, name){
     //We undo our transformations for the next draw/calculations
     ctx.rotate(-this.state.angle);
 
-    if (this.hp < 100){
+    if (this.hp < 99){
       console.log(this.hp);
       var hp_len = 80;
       var hp_height = 8;
@@ -106,8 +106,9 @@ function createShipOnDraw(default_colour, name){
       ctx.fillStyle = "green";
       ctx.fillRect(0, 0, hp_len * this.hp/100, hp_height); 
       ctx.translate(hp_len/2, hp_height/2+50);
-      ctx.translate(-this.state.x, -this.state.y);
     }
+
+      ctx.translate(-this.state.x, -this.state.y);
 
     // Ship name
     ctx.fillStyle = "white";
