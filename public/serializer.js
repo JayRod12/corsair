@@ -28,46 +28,11 @@ function Serializer(sim) {
     if (serial == null) {
       return null;
     }
-    switch (serial.type) {
-      case "treasure":
-        return serial.o;
-      case "cannonball":
-        return this.deserializeCannonBall(serial.o);
-      case "ship":
-        return this.deserializeShip(serial.o);
-      case "test_obj":
-        return this.deserializeTestObj(serial.o);
-      case "island":
-        return this.deserializeIsland(serial.o);
-      case "cosmetic_island":
-        return this.deserializeCosmeticIsland(serial.o);
-      default:
-        console.log('Deserializing unrecognized object');
-    }
+
+    return this.deserializeObjFunctions[serial.type](serial.o);
 
   }
 
-  // TODO change cannon so it can be deserialized
-  this.deserializeCannonBall = function(state) {
-    console.log('deserializeCannonBall unimplemented');
-    return null;
-  }
-
-
-  this.deserializeShip = function(serial) {
-    if (serial.uid == our_id) {
-      return null;
-    }
-    console.log('Deserializing ship');
-     
-    var ship = new Ship.Class(this.sim, serial.state, serial.uid, serial.name,
-                              Game.createServerShipInput(serial.uid));
-    this.sim.UIDtoShip[serial.uid] = ship;
-    return ship;
-  }
-  this.deserializeTestObj = function(state) {
-    return new Sim.TestObj(this.sim, state);
-  };
   this.serializeObject = function (o) {
     if (typeof o.serialize != "undefined") {
       return o.serialize();
@@ -77,20 +42,49 @@ function Serializer(sim) {
     }
   };
 
-  this.deserializeIsland = function(o) {
-    return new Island.Class(sim, o.x, o.y, o.h, o.w, o.angle, o.color); 
-  };
-
-  //  NOTE in the server these are in static objects but when we deserialize we
-  //  place in gameObjects
-  this.deserializeCosmeticIsland = function(o) {
-    return new Island.Cosmetic(sim, o.x, o.y, o.h, o.w, o.angle, o.color); 
-  };
-
-
   this.serializeArray = function(array) {
     return array.map(this.serializeObject);
   };
+
+  this.deserializeObjFunctions = {
+
+    //  Identity function
+    treasure : function(o) {return o},
+
+    island : function(o) {
+      return new Island.Class(sim, o.x, o.y, o.h, o.w, o.angle, o.color); 
+    },
+
+
+    //  NOTE in the server these are in static objects but when we deserialize we
+    //  place in gameObjects
+    cosmetic_island : function(o) {
+      return new Island.Cosmetic(sim, o.x, o.y, o.h, o.w, o.angle, o.color); 
+    },
+
+    // TODO change cannon so it can be deserialized
+    cannonball : function(state) {
+      console.log('deserializeCannonBall unimplemented');
+      return null;
+    },
+
+
+    ship : function(serial) {
+      if (serial.uid == our_id) {
+        return null;
+      }
+       
+      var ship = new Ship.Class(this.sim, serial.state, serial.uid, serial.name,
+                                Game.createServerShipInput(serial.uid));
+      this.sim.UIDtoShip[serial.uid] = ship;
+      return ship;
+    },
+
+    deserializeTestObj : function(state) {
+      return new Sim.TestObj(this.sim, state);
+    }
+
+  }
 }
 
 

@@ -125,6 +125,14 @@ function CannonBall(ship, offsetX, offsetY, side, speed, level) {
     ctx.fillStyle = "black";
     ctx.fill();
   }
+  this.serialize = function() {
+    return {type: "cannonball",
+            o: { x: this.x
+               , y: this.y
+               , xvel: this.xvel
+               , yvel: this.yvel
+               , owner: this.ship.uid }};
+  }
 }
 
 exports.Class = Cannon;
