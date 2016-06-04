@@ -114,6 +114,7 @@ function CannonBall(sim, owner, state, level) {
     this.state.x += dt * this.state.xvel;
     this.state.y += dt * this.state.yvel;
     this.life -= 1;
+    console.log("cannonballontick");
     Game.updateCell(this.sim, this, this.state.x, this.state.y);
   };
 
@@ -133,6 +134,7 @@ function CannonBall(sim, owner, state, level) {
   }
 
   this.onDraw = function(ctx) {
+    console.log("cannonballondraw");
     var radius = this.level;
     ctx.beginPath();
     ctx.arc(this.state.x, this.state.y, radius, 2 * Math.PI, false);
@@ -145,7 +147,8 @@ function CannonBall(sim, owner, state, level) {
                , y: this.state.y
                , xvel: this.state.xvel
                , yvel: this.state.yvel
-               , owner_uid: this.owner.uid}};
+               , owner_uid: this.owner.uid
+               , level: this.level}};
   }
 }
 

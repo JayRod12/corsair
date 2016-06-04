@@ -157,11 +157,10 @@ io.on('connection', function(client){
       //  Only allow deserialization of certain objects
       var serial = data.updates[i];
       if (serial.type === "cannonball"){
-        console.log("got cannonball");
         var cannonball = serializer.deserializeObject(serial);
         var cell = cannonball.cell;
-        console.log(typeof cannonball.collisionHandler);
         cell.gameObjects.push(cannonball);
+        cell.addUpdate('create_cannonball', cannonball);
       }
     }
   });
@@ -183,7 +182,9 @@ io.on('connection', function(client){
       playerCount + ' players');
     client.broadcast.emit('player_left',  {id : client.userid});
     remote.removePlayer(client.userid);
-    sim.removeObject(sim.UIDtoPlayer[client.userid]);
+    if (sim.UIDtoShip[client.userid]){
+      sim.removeObject(sim.UIDtoShip[client.userid]);
+    }
 
     //  Stop simulating if noone is connected
     if (playerCount < 1){

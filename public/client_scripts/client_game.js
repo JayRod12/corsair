@@ -364,6 +364,12 @@ function startClient() {
               }
             }
             break;
+          case 'create_cannonball':
+            //  CHECK IF OWN CANNONBALL
+              var obj = serializer.deserializeObject(update.data);
+              console.log(obj);
+              obj.cell.gameObjects.push(obj);
+            break;
           default:
             console.log("Unrecognised command from server " + update.name);
         }
@@ -419,9 +425,10 @@ function playClientGame(data) {
   our_id = data.id;
   sim = new Sim.Class(remote, meta.gridNumber, meta.cellWidth, meta.cellHeight,
     meta.activeCells);
+  console.log(sim);
+  //sim.populateMap(drawTreasure);
   serializer = new Serializer.Class(sim);
   deserializeNewStates(data.new_cells_states);
-  //sim.populateMap(drawTreasure);
   
   updateHighScoresTable(data.scoresTable);
 
@@ -442,6 +449,7 @@ function playClientGame(data) {
       addServerShip(userid, data.names[userid], data.players[userid]);
     }
   }
+
 
   if (typeof socket != "undefined") {
     socket.emit('on_connect_response', {name : our_name});

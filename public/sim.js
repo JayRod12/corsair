@@ -64,7 +64,6 @@ function Cell(x, y, gridNumber) {
         }
 
         if(checkCollision(this.gameObjects[i], this.gameObjects[j])) {
-          debugger;
           this.gameObjects[i].collisionHandler(this.gameObjects[j]);
           //  Avoid the case where object j is deleted
           if (this.gameObjects[j]) this.gameObjects[j].collisionHandler(this.gameObjects[i]);

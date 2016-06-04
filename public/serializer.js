@@ -14,7 +14,9 @@ else{
 // Serializer objects before sending them through sockets.
 
 function Serializer(sim) {
-  this.sim = sim;
+
+  //  It feels wrong for the below to be commented but it is correct
+  //this.sim = sim;
 
   this.deserializeArray = function(array) {
     var ret = [];
@@ -76,6 +78,9 @@ function Serializer(sim) {
         yvel: serial.yvel,
       }
 
+      //  TODO
+      //  UIDtoShip may return false if ship is not in a loaded cell
+      //  what do we do in this case?
       return new Cannon.CannonBall(sim, sim.UIDtoShip[serial.owner_uid], state,
           serial.level);
     },
@@ -86,14 +91,14 @@ function Serializer(sim) {
         return null;
       }
        
-      var ship = new Ship.Class(this.sim, serial.state, serial.uid, serial.name,
+      var ship = new Ship.Class(sim, serial.state, serial.uid, serial.name,
                                 Game.createServerShipInput(serial.uid));
-      this.sim.UIDtoShip[serial.uid] = ship;
+      sim.UIDtoShip[serial.uid] = ship;
       return ship;
     },
 
     deserializeTestObj : function(state) {
-      return new Sim.TestObj(this.sim, state);
+      return new Sim.TestObj(sim, state);
     }
 
   }
