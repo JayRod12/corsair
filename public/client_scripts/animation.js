@@ -1,3 +1,16 @@
+/*
+Copyright (c) 2016 by Jamie Brook
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this 
+software and associated documentation files (the "Software"), to deal in the Software without restriction, 
+including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, 
+and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, 
+subject to the following conditions: The above copyright notice and this permission notice shall be 
+included in all copies or substantial portions of the Software.
+
+*/
+
+
 var camera, scene, renderer, light;
 var geometry,
   material,
@@ -19,10 +32,7 @@ var d = false;
 
 function init() {
   HEIGHT = 884;
-  WIDTH = 1780;
-
-  console.log(window.innerHeight);
-  console.log(window.innerWidth);
+  WIDTH = 1880;
 
   camera = new THREE.PerspectiveCamera(75, WIDTH / HEIGHT, 1, 1000);
   camera.position.z = 600;
@@ -179,7 +189,6 @@ createWorld();
 animation();
 
 $(document).on('keydown', function(evt) {
-  console.log(evt.keyCode);
   if (evt.keyCode == 87) {
     w = true;
   }
@@ -193,7 +202,6 @@ $(document).on('keydown', function(evt) {
     d = true;
   }
   if (evt.keyCode == 32) {
-    console.log("Jump");
     if (boat_group.position.y == 185) {
     TweenMax.to(boat_group.position, 0.5, {
       y: 250,
@@ -209,7 +217,6 @@ $(document).on('keydown', function(evt) {
 }
 });
 $(document).on('keyup', function(evt) {
-  console.log(evt.keyCode);
 
   if (evt.keyCode == 87) {
     w = false;

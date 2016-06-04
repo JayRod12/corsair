@@ -1,25 +1,43 @@
-//const server = false;
-server = false;
-var gameInit = false;
-
-//  Set up sockets
-var socket = io();
+var socket;
 var canvas = $("#main_canvas")[0];
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 var ctx = canvas.getContext("2d");
+var remote;
 var sim;
+var serializer;
 var viewport;
+// Client tick
+var fps;
 var lastTime;
+var currentTime;
+var delta;
+var interval;
+
 var player;
 var meta;
+var our_id;
 
+// Game loops
+var server_loop = 0;
+var client_loop = 0;
+var localHighScoreTable = {};
+const MAXIMUM_SPEED = 4;
+
+
+// Constants for the game
+const speed_norm = 100 * 5*2;
+const backColor = "rgb(104, 104, 104)";
+const seaColor = "rgb(102, 204, 255)";
+const seaHighlightColor = "rgb(225, 102, 255)";
+const s_delay = 1000/40;
+
+///////////////// DRAW METHODS ////////////////////////////
 
 //  Viewport maps world area to canvas for printing
 function Viewport(sim, x, y, baseWidth, baseHeight, scale){
 
   this.sim = sim;
-
   this.x = x;
   this.y = y;
   this.baseHeight = baseHeight / baseWidth;
@@ -35,8 +53,6 @@ function Viewport(sim, x, y, baseWidth, baseHeight, scale){
   }
 
   this.draw = function(ctx, canvaswidth, canvasheight){
-
-
     // Scale
     ctx.scale(scale, scale);
     ctx.translate(-this.x, -this.y);
@@ -50,34 +66,76 @@ function Viewport(sim, x, y, baseWidth, baseHeight, scale){
   }
 }
 
-//  Called repeatedly, holds game loop
-//  TODO maybe skip frames if at more than 60fps?
-function clientTick(currentTime){
-
-  window.requestAnimationFrame(clientTick);
-
-  if (!lastTime) lastTime = currentTime-1;//  Subtract one to avoid any divide
-                                          //  by zero
-  var dt = currentTime - lastTime;
-  lastTime = currentTime;
-
-  sim.tick(dt);
-
-
-  draw();
-}
-
-const backColor = "rgb(104, 104, 104)";
-const seaColor = "rgb(102, 204, 255)";
 
 function drawBehindGrid(ctx){
   ctx.fillStyle = backColor;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 }
+
 function drawCellBackground(cx, cy, ctx){
-  ctx.fillStyle = seaColor;
+  //  If this cell is in activeCells
+  var playerCell = sim.coordinateToCellIndex(player.state.x, player.state.y);
+  if (playerCell == null) {
+    return;
+  }
+
+  if (cx == playerCell.x && cy == playerCell.y){
+    ctx.fillStyle = seaHighlightColor;
+  }
+  else{
+    ctx.fillStyle = seaColor;
+  }
+
   ctx.fillRect(cx*meta.cellWidth, cy*meta.cellHeight, meta.cellWidth+2,
       meta.cellHeight+2);
+}
+
+
+var treasureX = 300;
+var treasureY = 300;
+
+function drawTreasure() {
+    ctx.beginPath();
+    ctx.arc(treasureX, treasureY, 10, 2 * Math.PI, false);
+    ctx.fillStyle = "yellow";
+    ctx.fill();
+    ctx.closePath();
+}
+
+function drawHighScoresTable(scoreTable) {
+  var maxDisplay = 10;
+  var currentPlayers = Object.keys(scoreTable).length;
+  var i = 0;
+
+  var displayNumber = currentPlayers < maxDisplay ? currentPlayers : maxDisplay;
+    
+  for (var uid in scoreTable) {
+    if (i <= displayNumber) {
+      i++;
+      ctx.beginPath();
+      ctx.font = "20px Josefin Sans";
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = 'black';
+      ctx.textAlign="left"; 
+      ctx.strokeText("#" + i + "\t\t" + scoreTable[uid].shipName + "\t" + scoreTable[uid].score + "\n", 
+        (9/10)*canvas.width, (1/10)*canvas.height + i * 20);
+      ctx.stroke();
+      ctx.closePath();
+    } else {
+      break;
+    }
+  }
+}
+
+function drawScore() {
+  ctx.fillStyle = "black";
+  ctx.font = "50px Josefin Sans";
+  ctx.fillText(localHighScoreTable[player.uid].score, (1/15)*canvas.width, (9.5/10)*canvas.height);
+}
+
+
+function drawCompass() {
+  drawCompassScaled(player.state.x, player.state.y, treasureX, treasureY, 50);
 }
 
 //  Draws all objects
@@ -85,71 +143,43 @@ function draw(){
   viewport.x = player.state.x - canvas.width / (2 * viewport.scale);
   viewport.y = player.state.y - canvas.height / (2 * viewport.scale);
 
-  //  Fastest way to clear entire canvas
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
   drawBehindGrid(ctx);
-
   viewport.draw(ctx, canvas.width, canvas.height);
-
+  drawCompass();
+  drawHighScoresTable(localHighScoreTable);
 }
 
-function createShipOnDraw(colour, name){
-  return function(){
-    var width = shipBaseWidth * this.scale;
-    var height = shipBaseHeight * this.scale;
 
 
-    //We translate to the origin of our ship
-    ctx.translate(this.state.x, this.state.y);
+///////////// MOVEMENT METHODS /////////////
 
-    //We rotate around this origin 
-    ctx.rotate(this.state.angle);
+//  Mouse position on screen
+var mouse_screen_x = 0;
+var mouse_screen_y = 0;
 
-      //We draw the ship, ensuring that we start drawing from the correct location 
-    //(the fillRect function draws from the topmost left corner of the rectangle 
-    ctx.fillStyle = colour;
-    ctx.fillRect(-width/2, -height/2, width, height);
-
-    //We undo our transformations for the next draw/calculations
-    ctx.rotate(-this.state.angle);
-    ctx.translate(-this.state.x, -this.state.y);
-
-    // Ship name
-    ctx.fillStyle = "white";
-    ctx.font = "5px Courier";
-    var metrics = ctx.measureText(name);
-    var textWidth = metrics.width;
-    ctx.fillText(name, this.state.x - textWidth/2, this.state.y);
-  }
-}
-
-//  Store current mouse position
+//  Mouse position in world
 var mouse_x = 0;
 var mouse_y = 0;
 
 //  Update mouse position on movement
 $( "#main_canvas" ).mousemove(function(event){
-  //  TEMP
-  var scale = viewport.scale;
-  mouse_x = (event.offsetX/scale + viewport.x);
-  mouse_y = (event.offsetY/scale + viewport.y);
+  mouse_screen_x = event.offsetX;
+  mouse_screen_y = event.offsetY;
+
 });
 
 
 //  Disable right click context menu
-
 $(document).ready(function(){ 
   $(document).bind("contextmenu", function(event){
       return false;
     });
 });
 
-//  Detect mouseclicks
+//  Detect mouseclicks for shooting cannon balls
 $( "#main_canvas" ).mousedown(function(event){
 
   switch(event.which){
-
     case 1:
       //  Left click
       player.cannon.onShoot(-1);
@@ -158,175 +188,255 @@ $( "#main_canvas" ).mousedown(function(event){
       //  Right click
       player.cannon.onShoot(1);
       return false;
-
-    return true;
-
+    default:
+      return true;
   }
 });
 
-/*
-$( "#target" ).click(function() {
-  alert( "Handler for .click() called." );
-});
-
-$(document).ready(function(){ 
-  document.oncontextmenu = function() {return false;};
-
-  $(document).mousedown(function(e){ 
-    if( e.button == 1 ) {
-      player.cannon.onShoot(1);
-      return false;
-    }
-    if( e.button == 2 ) { 
-      player.cannon.onShoot(1);
-      return false; 
-    } 
-    return true; 
-  }); 
-});
-*/
-
-
-$("body").keyup(function(event) {
-  // Press space bar == 32
-  if (event.keyCode == 32) {
-    player.cannon.onShoot();
-  }
-});
-
-const speed_norm = 100 * 5;
-
+var delta_angle_limit = Math.PI/45;
 var localShipInput = function(){
   var delta_angle = (Math.atan2(mouse_y - this.state.y, mouse_x - this.state.x) 
 						- this.state.angle); 
 
   //Ensure delta_angle stays within the range [-PI, PI]
-  if (delta_angle > Math.PI) {
-  delta_angle = delta_angle - 2*Math.PI ;
-  }
-
-  if(delta_angle < -Math.PI) {
-  delta_angle = 2*Math.PI + delta_angle;
-  }
-  var delta_angle_limit = Math.PI/90;
+  delta_angle = Col.trimBranch(delta_angle);
+ 
   if (delta_angle > delta_angle_limit) {
     delta_angle = delta_angle_limit;
   } else if (delta_angle < -delta_angle_limit) {
     delta_angle = -delta_angle_limit;
   }
 
-  this.state.angle += delta_angle;
-
-  if (this.state.angle > Math.PI) {
-	this.state.angle -= 2*Math.PI;
-  } 
-
-  if (this.state.angle < -Math.PI) {
-    this.state.angle += 2*Math.PI;
-  }
-  this.state.speed = Math.sqrt(Math.pow(this.state.x - mouse_x,2) +
-      Math.pow(this.state.y
-      -mouse_y,2)) / speed_norm;
+  this.state.angle = Col.trimBranch(this.state.angle + delta_angle);
+  this.state.speed = Math.min(MAXIMUM_SPEED,
+                              Math.sqrt(Math.pow(this.state.x - mouse_x,2) +
+                                        Math.pow(this.state.y - mouse_y,2)) / speed_norm);
 }
 
-function drawCannonBalls() {
-  var radius = 5; // 5 pixels
-  ctx.beginPath();
-  ctx.arc(this.state.x, this.state.y, radius, 2 * Math.PI, false);
-  ctx.fillStyle = "black";
-  ctx.fill();
+
+// GAME LOOP
+
+
+//  Called repeatedly, holds game loop
+//  TODO maybe skip frames if at more than 60fps?
+
+function clientTick(){
+       
+  client_loop = window.requestAnimationFrame(clientTick);
+  currentTime = Date.now();
+  delta = currentTime - lastTime;
+
+  if (delta > interval) {
+    lastTime = currentTime - (delta % interval);
+    mouse_x = (mouse_screen_x/viewport.scale + viewport.x);
+    mouse_y = (mouse_screen_y/viewport.scale + viewport.y);
+
+    sim.tick(delta);
+    draw();
+  }
 }
 
-//  Our id assigned to us by the server
-var our_id;
-
-//  On connecting to the server
-
-socket.on('on_connect', function (data){
-
-  initializeGame();
-  meta = data.meta;
-  sim = new Sim(meta.gridNumber, meta.cellWidth, meta.cellHeight,
-    meta.activeCells);
-
-  //  Using 16:9 aspect ratio
-  viewport = new Viewport(sim, 0, 0, 1.6, 0.9, 2);
-
-  our_id = data.id;
-  console.log("Our id is " + our_id);
-
-
-  var our_name = (localStorage['nickname'] == "") ? "Corsair" : localStorage['nickname'];
-  newPlayer(our_id, our_name, data.state);
-  player = sim.addShip(data.state, our_id, localShipInput,
-    createShipOnDraw("black", our_name), drawCannonBalls);
-
-  //  Set our world up in the config described by the server
-
-  for (var userid in data.players){
-    addServerShip(userid, data.names[userid], data.players[userid]);
-  }
-
-  socket.emit('on_connect_response', {name : our_name});
-
-
-});
-
-socket.on('start_game', function(data){
-
-  window.requestAnimationFrame(clientTick);
-
-  //  Delay between updating the server
-  const s_delay = 1000/40;
-
-  //  Send information about the local player to the server every s_delay
-  if(typeof server_loop != "undefined") clearInterval(server_loop);
-  var server_loop = setInterval(client_update, s_delay, player);
-
-});
-
-$('document').unload(function() {
-  socket.emit('disconnect');
-});
-
-//  Update the server about the player's position
-
-function client_update(player){
-  socket.emit('client_update', {state: player.state});
+function updateHighScoresTable(global) {
+    localHighScoreTable = jQuery.extend({}, global);
 }
 
 //  Add a new ship to the local world from information from the server
 
 function addServerShip(userid, name, state){
   console.log("adding new player");
-  newPlayer(userid, name, state);
-  sim.addShip(state, userid, 
-      createServerShipInput(userid),
-        createShipOnDraw("brown", name), drawCannonBalls);
+  remote.newPlayer(userid, name, state);
+  //sim.addShip(userid, state, userid,
+  //    Game.createServerShipInput(userid));
 
 }
 
+//  Update the server about the player's position
 
-//  Recieved when another player joins the server
+function client_update(player){
 
-socket.on('player_joined', function (data){
-  console.log('player joined');
-  addServerShip(data.id, data.name, data.state);
-});
+  if ((typeof socket != "undefined") && socket.connected) {
+    socket.emit('client_update', {state: player.state});
+  }
+}
 
-//  Recieved when another player leaves the server
-//  We delete the local ship
+function endClient() {
+  socket.disconnect();
 
-socket.on('player_left', function (data){
-  console.log('player left');
-  removePlayer(data.id);
-});
+  if (client_loop) {
+    window.cancelAnimationFrame(client_loop);
+    client_loop = 0;
+  }
+  if (server_loop) {
+    clearInterval(server_loop);
+    server_loop = 0;
+  }
+}
 
-//  On update from server
+function startClient() {
+  // Initialize sockets
+  console.log('socket status' + socket);
+  if (typeof socket == "undefined" || !socket.connected) {
+    socket = io();
+  }
 
-socket.on('server_update', function (data){
-  for (var uid in data){
-    var update = data[uid];
-    updatePlayer(uid, update);
+  socket.on('on_connect', function (data){
+    console.log('New connection');
+    playClientGame(data);
+  });
+  
+  socket.on('start_game', function(data){
+  
+    lastTime = Date.now();
+    if (client_loop == 0) {
+      client_loop = window.requestAnimationFrame(clientTick);
+    }
+
+  
+    //  Delay between updating the server
+  
+    //  Send information about the local player to the server every s_delay
+    if(server_loop == 0) {
+      server_loop = setInterval(client_update, s_delay, player);
+    }
+  });
+
+  //  Recieved when another player joins the server
+  socket.on('player_joined', function (data){
+    console.log('player joined');
+    if (data.id != our_id) {
+      addServerShip(data.id, data.name, data.state);
+    }
+  });
+  
+  //  Recieved when another player leaves the server
+  //  We delete the local ship
+  socket.on('player_left', function (data){
+    console.log('player left');
+    remote.removePlayer(data.id);
+  });
+  
+  //  On update from server
+  socket.on('server_update', function (data){
+    updateHighScoresTable(data.scoresTable);
+
+    // check if you died
+    if (data.active_cells.length == 0) {
+      player.onDeath();
+    }
+
+    var players = data.players;
+    for (var uid in players){
+      var update = players[uid];
+      remote.updatePlayer(uid, update);
+    }
+    var allBufferedUpdates = data.updates;
+    for (var i = 0; i < allBufferedUpdates.length; i++){
+      var num = allBufferedUpdates[i].num;
+      var updates = allBufferedUpdates[i].updates;
+      var cell = sim.numberToCell(num);
+      for (var j = 0; j < updates.length; j++){
+        var update = updates[j];
+        switch(update.name){
+          case 'create_testObj':
+            cell.gameObjects.push(new Sim.TestObj(sim, update.data));
+            break;
+          case 'object_enter_cell':
+            if (update.data.type == "ship") {
+              if (update.data.o.uid != our_id) {
+                var obj = serializer.deserializeObject(update.data);
+                console.log(obj);
+                cell.gameObjects.push(obj);
+              }
+            }
+            break;
+          default:
+            console.log("Unrecognised command from server " + update.name);
+        }
+      }
+    }
+
+
+    deserializeNewStates(data.new_cells);
+    // Sim will only draw the active cells
+    sim.activeCells = data.active_cells;
+  });
+}
+
+function deserializeNewStates(new_cells_states) {
+  for (var i = 0; i < new_cells_states.length; i++) {
+    var cell = sim.numberToCell(new_cells_states[i].num);
+    cell.staticObjects =
+      serializer.deserializeArray(new_cells_states[i].state.static_obj)
+                .filter(function(x) { return x != null; });
+    cell.gameObjects = 
+      serializer.deserializeArray(new_cells_states[i].state.game_obj)
+                .filter(function(x) { return x != null; });
+  }
+}
+
+// Terminate the game when the ship dies
+function onShipDeath() {
+  $('#game_canvas').hide();
+  $('body').css({'background':'black'});
+  $('#welcomeScreen').fadeIn('slow');
+  console.log('Ship death' + mouse_x + ', ' + mouse_y);
+  endClient();
+}
+
+function playClientGame(data) {
+  mouse_x = 0;
+  mouse_y = 0;
+  mouse_screen_x = 0;
+  mouse_screen_y = 0;
+
+  sim = null;
+  viewport = null;
+  lastTime = null;
+  fps = 60;
+  interval = 1000/fps;
+  delta = 0;
+  player = null;
+  meta = null;
+  our_id = null;
+
+  remote = new Game.Remote();
+  meta = data.meta;
+  sim = new Sim.Class(remote, meta.gridNumber, meta.cellWidth, meta.cellHeight,
+    meta.activeCells);
+  serializer = new Serializer.Class(sim);
+  deserializeNewStates(data.new_cells_states);
+  //sim.populateMap(drawTreasure);
+  
+  updateHighScoresTable(data.scoresTable);
+
+
+  //  Using 16:9 aspect ratio
+  viewport = new Viewport(sim, 0, 0, 1.6, 0.9, 1/5);
+
+  our_id = data.id;
+  console.log("Our id is " + our_id);
+
+  var our_name = (localStorage['nickname'] == "") ? "Corsair" : localStorage['nickname'];
+  remote.newPlayer(our_id, our_name, data.state);
+  player = sim.addShip(our_id, our_name, data.state, localShipInput);
+  player.onDeath = onShipDeath;
+
+  //  Set our world up in the config described by the server
+  for (var userid in data.players){
+    if (userid != our_id) {
+      addServerShip(userid, data.names[userid], data.players[userid]);
+    }
+  }
+
+  if (typeof socket != "undefined") {
+    socket.emit('on_connect_response', {name : our_name});
+    console.log('ON CONNECT RESPONSE');
+  }
+}
+
+
+$('document').unload(function() {
+  if ((typeof socket != "undefined") && socket.connected) {
+    socket.emit('disconnect');
   }
 });
