@@ -70,6 +70,19 @@ function Cell(x, y, gridNumber) {
       }
     }
   }
+
+  this.addUpdate = function(name, object) {
+    this.bufferedUpdates.push({ name: name
+                              , data: object.serialize()});
+  }
+
+  this.getUpdates = function() {
+    return this.bufferedUpdates;
+  }
+
+  this.clearUpdates = function() {
+    this.bufferedUpdates = [];
+  }
 }
 
 // Update cell in which the object is
@@ -98,8 +111,7 @@ function updateCell(sim, object, x, y) {
         sim.removeObject(object);
       } else {
         if (server) {
-          realCell.bufferedUpdates.push({name:'object_enter_cell', 
-                                         data: object.serialize()});
+          realCell.addUpdate('object_enter_cell', object);
         }
         realCell.gameObjects.push(object);
         object.cell = realCell;
@@ -257,12 +269,16 @@ var wait = 0;
 
 
   this.addShip = function (uid, name, state, inputFunction){
-    var cell = this.coordinateToCell(state.x, state.y);
-    var ship = new Ship.Class(this, state, uid, name, inputFunction);
-    cell.gameObjects.push(ship);
-    remote.getUIDtoScores()[uid] = {shipName: remote.getPlayerNames()[uid], score: 0};
-    this.UIDtoShip[uid] = ship;
-    return ship;
+    if (!this.UIDtoShip[uid]) {
+      var cell = this.coordinateToCell(state.x, state.y);
+      var ship = new Ship.Class(this, state, uid, name, inputFunction);
+      cell.gameObjects.push(ship);
+      remote.getUIDtoScores()[uid] = {shipName: remote.getPlayerNames()[uid], score: 0};
+      this.UIDtoShip[uid] = ship;
+      return ship;
+    } else {
+      return null;
+    }
   };
 
   this.removeShip = function(ship){
@@ -297,7 +313,7 @@ var wait = 0;
     var obj = new TestObj(this, state);
     var cell = this.coordinateToCell(state.x, state.y);
     cell.gameObjects.push(obj);
-    cell.bufferedUpdates.push({name: 'create_testObj', data: state});
+    cell.addUpdate('create_testObj', obj);
   }
 }
 
