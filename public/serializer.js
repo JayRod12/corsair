@@ -74,20 +74,14 @@ function Serializer(sim) {
       return null;
     }
   };
+
   this.deserializeIsland = function(o) {
     return new Island.Class(o.x, o.y, o.h, o.w, o.angle, o.colour); 
   };
 
-  this.serializeObject = function (o) {
-    if (typeof o.serialize != "undefined") {
-      return o.serialize();
-    } else {
-      console.log('Serializing non-serializable object of type ' + typeof o); return null;
-    }
-  }
   this.serializeArray = function(array) {
     return array.map(this.serializeObject);
-  }
+  };
 }
 
 

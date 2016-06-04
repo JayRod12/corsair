@@ -101,8 +101,12 @@ io.on('connection', function(client){
   client.on('on_connect_response', function (data){
 
     remote.newPlayer(client.userid, data.name, initState);
-    sim.addShip(client.userid, data.name, initState,
+    var ship = sim.addShip(client.userid, data.name, initState,
       Game.createServerShipInput(client.userid));
+
+    // Notify players in this cell that a new ship arrives
+    var cell = sim.coordinateToCell(initState.x, initState.y);
+    cell.addUpdate('object_enter_cell', ship);
 
     //  Add to socketList, ie. start sending client updates
     socketList.push(client);
@@ -203,32 +207,42 @@ function send_loop_func(){
       client.cells = [];
     }
 
+    // Find all cells of interest for the client
     var cells = calculateCellsToSend(client.userid);
+    // Find which cells it already knows about
     var old_cells = cells.intersection(client.cells);
+    // Find which cells it has no information about
     var new_cells = cells.diff(old_cells);
+    // Store active cells to compare during next loop
     client.cells = cells;
 
-    //  Respond with current server state, instead broadcast regularly?
+    //  Send buffered updates from all cells that we already have information
+    //  about, no need to send all objects again, only the updates.
     var allBufferedUpdates = [];
     for (var i = 0; i < old_cells.length; i++){
-      var tuple = sim.cellNumberToTuple(old_cells[i]);
-      var bufferedUpdates = sim.grid[tuple.x][tuple.y].bufferedUpdates;
-      if (bufferedUpdates.length > 0){
-        allBufferedUpdates.push({num: old_cells[i], updates: bufferedUpdates});
+      var cell = sim.numberToCell(old_cells[i]);
+      var cell_updates = cell.getUpdates();
+
+      if (cell_updates.length > 0){
+        allBufferedUpdates.push({ num: old_cells[i]
+                                , updates: cell_updates });
       }
     }
-    // Send serialized objects
+    // Send all objects from the new cells (serialized)
     var new_cells_states = serializeNewCells(new_cells);
 
+    // Prepare data
     var data = { players: remote.getPlayers(), active_cells:client.cells 
                , updates: allBufferedUpdates, scoresTable: remote.getUIDtoScores(), new_cells: new_cells_states};
+
+    // Send
     client.emit('server_update', data);
   });
 
   //  Clear update buffer
   //  ASSUME NO DROPPED PACKETS
   for (var i = 0; i < allCells.length; i++){
-    sim.numberToCell(allCells[i]).bufferedUpdates = [];
+    sim.numberToCell(allCells[i]).clearUpdates();
   }
 
 }
