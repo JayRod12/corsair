@@ -9,16 +9,18 @@ else{
 
 (function(exports){
 
-function Island(x, y, height, width, angle, colour) {
+function Island(sim, x, y, height, width, angle, color) {
 	this.x = x;
 	this.y = y;
 	this.width = width;
 	this.height = height;
 	this.hypotenuse = Math.sqrt(this.width*this.width + this.height*this.height);
 	this.angle = angle;
-	this.colour = colour;
+	this.color = color;
   this.collided_timer = 0;
   this.collided_basetime = 400;
+
+  this.cell = sim.coordinateToCell(x, y);
 
   this.onTick = function(dt) {
     if(this.collided_timer > 0) {
@@ -43,7 +45,7 @@ function Island(x, y, height, width, angle, colour) {
     if (this.collided_timer > 0) {
       ctx.fillStyle = "red";
     } else {
-      ctx.fillStyle = this.colour;
+      ctx.fillStyle = this.color;
     }    
     ctx.fillRect(-this.width/2, -this.height/2, this.width, this.height);
 
@@ -70,12 +72,64 @@ function Island(x, y, height, width, angle, colour) {
                , w: this.width
                , h: this.height
                , angle: this.angle
-               , colour: this.colour } };
+               , color: this.color } };
+  }
+
+
+
+}
+
+function CosmeticIsland(sim, x, y, height, width, angle, color) {
+	this.x = x;
+	this.y = y;
+	this.width = width;
+	this.height = height;
+	this.angle = angle;
+	this.color = color;
+
+  this.cell = sim.coordinateToCell(x, y);
+
+  this.onTick = function(dt) {
+    if(this.collided_timer > 0) {
+      this.collided_timer -= dt;
+    }
+  }
+
+  this.onDraw = function(ctx){
+    //We translate to the origin of our island
+      ctx.translate(this.x, this.y);
+
+      //We rotate around this origin 
+      ctx.rotate(this.angle);
+
+        //We draw the ship, ensuring that we start drawing from the correct location 
+      //(the fillRect function draws from the topmost left corner of the rectangle 
+    if (this.collided_timer > 0) {
+      ctx.fillStyle = "red";
+    } else {
+      ctx.fillStyle = this.color;
+    }    
+    ctx.fillRect(-this.width/2, -this.height/2, this.width, this.height);
+
+      //We undo our transformations for the next draw/calculations
+      ctx.rotate(-this.angle);
+      ctx.translate(-this.x, -this.y);
+  }
+
+  this.serialize = function() {
+    return {type: "cosmetic_island",
+            o: { x: this.x
+               , y: this.y
+               , w: this.width
+               , h: this.height
+               , angle: this.angle
+               , color: this.color } };
   }
 
 
 }
 
 exports.Class = Island;
+exports.Cosmetic = CosmeticIsland;
 
 })(typeof exports == 'undefined' ? this.Island = {} : exports);

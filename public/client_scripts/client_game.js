@@ -138,6 +138,12 @@ function drawCompass() {
   drawCompassScaled(player.state.x, player.state.y, treasureX, treasureY, 50);
 }
 
+function drawFps() {
+  ctx.fillStyle = "black";
+  ctx.font = "15px Josefin Sans";
+  ctx.fillText("fps: "+ fps, (1/10)*canvas.width, (1/10)*canvas.height);
+}
+
 //  Draws all objects
 function draw(){
   viewport.x = player.state.x - canvas.width / (2 * viewport.scale);
@@ -147,6 +153,7 @@ function draw(){
   viewport.draw(ctx, canvas.width, canvas.height);
   drawCompass();
   drawHighScoresTable(localHighScoreTable);
+  drawFps();
 }
 
 
@@ -225,6 +232,8 @@ function clientTick(){
   client_loop = window.requestAnimationFrame(clientTick);
   currentTime = Date.now();
   delta = currentTime - lastTime;
+
+  fps = Math.floor(1000/(delta));
 
   if (delta > interval) {
     lastTime = currentTime - (delta % interval);

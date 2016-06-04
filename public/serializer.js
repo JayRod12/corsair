@@ -39,6 +39,8 @@ function Serializer(sim) {
         return this.deserializeTestObj(serial.o);
       case "island":
         return this.deserializeIsland(serial.o);
+      case "cosmetic_island":
+        return this.deserializeCosmeticIsland(serial.o);
       default:
         console.log('Deserializing unrecognized object');
     }
@@ -76,8 +78,15 @@ function Serializer(sim) {
   };
 
   this.deserializeIsland = function(o) {
-    return new Island.Class(o.x, o.y, o.h, o.w, o.angle, o.colour); 
+    return new Island.Class(sim, o.x, o.y, o.h, o.w, o.angle, o.color); 
   };
+
+  //  NOTE in the server these are in static objects but when we deserialize we
+  //  place in gameObjects
+  this.deserializeCosmeticIsland = function(o) {
+    return new Island.Cosmetic(sim, o.x, o.y, o.h, o.w, o.angle, o.color); 
+  };
+
 
   this.serializeArray = function(array) {
     return array.map(this.serializeObject);
