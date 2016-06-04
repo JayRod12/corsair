@@ -82,7 +82,7 @@
 
   function perlin2(x, y, size){
     var total = 0;
-    var octaves = 3;
+    var octaves = 1;
     var persistence = 0.5;
     var norm = 0;
     
@@ -108,6 +108,8 @@
     total = smoothed[xx][yy];
     */
     //total = interpolateNoise(x * gridWidth, y * gridWidth);
+    //console.log(total);
+    //console.log(norm);
     return total / norm;
 
   }
@@ -117,6 +119,8 @@
     var intxsuc = intx + 1;
     var inty = Math.floor(y);
     var intysuc = inty + 1;
+    //console.log(intx);
+    //console.log(intxsuc);
 
     var fracx = x - intx;
     var fracy = y - inty;
@@ -127,7 +131,13 @@
     intysuc = inty % gridWidth;
 
     //if (intx+1 >= gridWidth || inty+1 >= gridWidth) return 0;
+    //console.log("1st");
+    //console.log(smoothed[intx][inty]);
+    //console.log("2st");
+    //console.log(smoothed[intxsuc][inty]);
     var i1 = lerp(smoothed[intx][inty], smoothed[intxsuc][inty], fracx);
+    //console.log("interp");
+    //onsole.log(i1);
     var i2 = lerp(smoothed[intx][intysuc], smoothed[intxsuc][intysuc], fracx);
 
     var ret = lerp(i1, i2, fracy);
@@ -180,8 +190,8 @@
     canvas.height = height;
     var ctx = canvas.getContext("2d");
 
-    const renderWidth = 512;
-    const renderMult = 2;
+    const renderWidth = 128;
+    const renderMult = 1;
     const seaHue = 222;
     const seaSat = 49;
     const landHue = 94;
@@ -193,6 +203,7 @@
         ctx.translate(x*renderMult,y*renderMult);
 
         var l = perlin2(x/renderWidth, y/renderWidth);
+        //var l = 0;
         //var l = smoothed[x][y];
         if (l > sealevel){
           var c = "hsl("+landHue.toString() + ", " + landSat.toString() +
