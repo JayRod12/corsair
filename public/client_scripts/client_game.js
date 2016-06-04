@@ -7,12 +7,14 @@ var remote;
 var sim;
 var serializer;
 var viewport;
+
 // Client tick
 var fps;
 var lastTime;
 var currentTime;
 var delta;
 var interval;
+var toSendServer = [];
 
 var player;
 var meta;
@@ -263,9 +265,13 @@ function addServerShip(userid, name, state){
 
 function client_update(player){
 
+  //  TODO send server our local time
+
   if ((typeof socket != "undefined") && socket.connected) {
-    socket.emit('client_update', {state: player.state});
+    socket.emit('client_update', {state: player.state, updates : toSendServer});
+    toSendServer = [];
   }
+
 }
 
 function endClient() {

@@ -64,8 +64,10 @@ function Cell(x, y, gridNumber) {
         }
 
         if(checkCollision(this.gameObjects[i], this.gameObjects[j])) {
+          debugger;
           this.gameObjects[i].collisionHandler(this.gameObjects[j]);
-          this.gameObjects[j].collisionHandler(this.gameObjects[i]);
+          //  Avoid the case where object j is deleted
+          if (this.gameObjects[j]) this.gameObjects[j].collisionHandler(this.gameObjects[i]);
         };
       }
     }
@@ -321,6 +323,10 @@ function Treasure(xTreasure, yTreasure, onDraw) {
     this.xTreasure = xTreasure;
     this.yTreasure = yTreasure;
     this.onDraw = onDraw;
+    this.serialize = function() {
+      // TODO
+      return null;
+    };
 }
 
 //  Probably factor out

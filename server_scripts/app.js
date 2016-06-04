@@ -33,7 +33,7 @@ var sim = new Sim.Class(remote,gridNumber, cellWidth, cellHeight, allCells);
 sim.populateMap();
 //var island = new Island(100, 100, 100, 100, Math.PI/4, "black");
 
-ServerGame.generateIslands(sim, gridNumber, cellWidth, cellHeight);
+//ServerGame.generateIslands(sim, gridNumber, cellWidth, cellHeight);
 
 var sim_t = 1000 / 30;
 var serializer = new Game.Serializer(sim);
@@ -153,6 +153,17 @@ io.on('connection', function(client){
   //  On tick
   client.on('client_update', function(data) {
     remote.updatePlayer(client.userid, data.state);
+    for (var i = 0; i < data.updates.length; i++){
+      //  Only allow deserialization of certain objects
+      var serial = data.updates[i];
+      if (serial.type === "cannonball"){
+        console.log("got cannonball");
+        var cannonball = serializer.deserializeObject(serial);
+        var cell = cannonball.cell;
+        console.log(typeof cannonball.collisionHandler);
+        cell.gameObjects.push(cannonball);
+      }
+    }
   });
 
   //  On client disconnect
@@ -172,6 +183,7 @@ io.on('connection', function(client){
       playerCount + ' players');
     client.broadcast.emit('player_left',  {id : client.userid});
     remote.removePlayer(client.userid);
+    sim.removeObject(sim.UIDtoPlayer[client.userid]);
 
     //  Stop simulating if noone is connected
     if (playerCount < 1){

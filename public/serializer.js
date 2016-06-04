@@ -29,7 +29,12 @@ function Serializer(sim) {
       return null;
     }
 
-    return this.deserializeObjFunctions[serial.type](serial.o);
+    //  Temp
+    var server_time_diff = 0;
+    //  TODO calculate difference in time between server and client and send
+    //  along with update
+
+    return this.deserializeObjFunctions[serial.type](serial.o, server_time_diff);
 
   }
 
@@ -63,9 +68,16 @@ function Serializer(sim) {
     },
 
     // TODO change cannon so it can be deserialized
-    cannonball : function(state) {
-      console.log('deserializeCannonBall unimplemented');
-      return null;
+    cannonball : function(serial, server_time_diff) {
+      var state = {
+        x: serial.x * server_time_diff * serial.xvel,
+        y: serial.y * server_time_diff * serial.yvel,
+        xvel: serial.xvel,
+        yvel: serial.yvel,
+      }
+
+      return new Cannon.CannonBall(sim, sim.UIDtoShip[serial.owner_uid], state,
+          serial.level);
     },
 
 
