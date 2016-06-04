@@ -262,7 +262,7 @@ function serializeNewCells(new_cells) {
 }
 
 function calculateCellsToSend(uid){
-  var s = sim.UIDtoShip[uid];
+  var s = sim.getShip(uid);
   if (s == null) {
     //console.log('No cells to send');
     return [];

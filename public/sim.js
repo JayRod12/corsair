@@ -137,6 +137,31 @@ function Sim(remote, gridNumber, cellWidth, cellHeight, activeCells){
   this.remote = remote;
   this.UIDtoShip = {};
 
+  this.getShip = function(uid) {
+    return this.UIDtoShip[uid];
+  }
+
+  this.setShip = function(uid, ship) {
+    this.UIDtoShip[uid] = ship;
+  }
+
+  this.addShip = function (uid, name, state, inputFunction){
+    if (!this.UIDtoShip[uid]) {
+      var cell = this.coordinateToCell(state.x, state.y);
+      var ship = new Ship.Class(this, state, uid, name, inputFunction);
+      cell.gameObjects.push(ship);
+      remote.setScore(uid, 0);
+      //remote.getUIDtoScores()[uid] = {shipName: remote.getPlayerName(uid), score: 0};
+      this.UIDtoShip[uid] = ship;
+      return ship;
+    } else {
+      return null;
+    }
+  };
+
+  this.removeShip = function(ship){
+    delete this.UIDtoShip[ship.uid];
+  }
   this.grid = new Array(this.gridNumber)
   for (var i = 0; i < this.gridNumber; i++) {
     this.grid[i] = new Array(this.gridNumber);
@@ -185,7 +210,6 @@ function Sim(remote, gridNumber, cellWidth, cellHeight, activeCells){
     }
   };
 
-var wait = 0;
   // Tuple to number
   this.cellTupleToNumber = function(tuple) {
     return gridNumber * tuple.y + tuple.x;
@@ -238,6 +262,7 @@ var wait = 0;
 
   }
 
+  var wait = 0;
   this.tick = function(dt){
     for (var i = 0; i < this.activeCells.length; i++){
       this.numberToCell(this.activeCells[i]).tick(dt);
@@ -245,7 +270,7 @@ var wait = 0;
 
     if (wait == 0) {
       for (var uid in remote.getUIDtoScores()) {
-        remote.getUIDtoScores()[uid].score += 1;
+        remote.setScore(uid, remote.getScore(uid) + 1);
       }
     }
     wait = (wait + 1) % 50;
@@ -268,22 +293,6 @@ var wait = 0;
   };
 
 
-  this.addShip = function (uid, name, state, inputFunction){
-    if (!this.UIDtoShip[uid]) {
-      var cell = this.coordinateToCell(state.x, state.y);
-      var ship = new Ship.Class(this, state, uid, name, inputFunction);
-      cell.gameObjects.push(ship);
-      remote.getUIDtoScores()[uid] = {shipName: remote.getPlayerNames()[uid], score: 0};
-      this.UIDtoShip[uid] = ship;
-      return ship;
-    } else {
-      return null;
-    }
-  };
-
-  this.removeShip = function(ship){
-    delete this.UIDtoShip[ship.uid];
-  }
 
 
   this.removeObject = function(object) {

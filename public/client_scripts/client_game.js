@@ -111,13 +111,14 @@ function drawHighScoresTable(scoreTable) {
     
   for (var uid in scoreTable) {
     if (i <= displayNumber) {
+      var shipName = sim.getShip(uid).name;
       i++;
       ctx.beginPath();
       ctx.font = "20px Josefin Sans";
       ctx.lineWidth = 1;
       ctx.strokeStyle = 'black';
       ctx.textAlign="left"; 
-      ctx.strokeText("#" + i + "\t\t" + scoreTable[uid].shipName + "\t" + scoreTable[uid].score + "\n", 
+      ctx.strokeText("#" + i + "\t\t" + shipName + "\t" + scoreTable[uid] + "\n", 
         (9/10)*canvas.width, (1/10)*canvas.height + i * 20);
       ctx.stroke();
       ctx.closePath();
@@ -130,7 +131,7 @@ function drawHighScoresTable(scoreTable) {
 function drawScore() {
   ctx.fillStyle = "black";
   ctx.font = "50px Josefin Sans";
-  ctx.fillText(localHighScoreTable[player.uid].score, (1/15)*canvas.width, (9.5/10)*canvas.height);
+  ctx.fillText(localHighScoreTable[player.uid], (1/15)*canvas.width, (9.5/10)*canvas.height);
 }
 
 

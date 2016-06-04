@@ -52,15 +52,15 @@ function Serializer(sim) {
   }
 
 
-  this.deserializeShip = function(serial) {
-    if (serial.uid == our_id) {
+  this.deserializeShip = function(o) {
+    if (o.uid == our_id) {
       return null;
     }
     console.log('Deserializing ship');
      
-    var ship = new Ship.Class(this.sim, serial.state, serial.uid, serial.name,
-                              Game.createServerShipInput(serial.uid));
-    this.sim.UIDtoShip[serial.uid] = ship;
+    var ship = new Ship.Class(this.sim, o.state, o.uid, o.name,
+                              Game.createServerShipInput(o.uid));
+    this.sim.setShip(o.uid, ship);
     return ship;
   }
   this.deserializeTestObj = function(state) {

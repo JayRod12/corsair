@@ -115,8 +115,8 @@ function Ship(sim, state, uid, name, inputFunction){
     ctx.fillText(this.name, this.state.x - textWidth/2, this.state.y);
   }
 
-  this.getColType = function(){return "rectangle"};
-  this.getColObj = function(){
+  this.getColType = function() {return "rectangle"};
+  this.getColObj = function() {
     return {
       x: this.state.x,
       y: this.state.y,

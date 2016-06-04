@@ -70,9 +70,19 @@ function Remote(){
   this.getPlayerNames = function() {
     return this.playerNames;
   }
+  this.getPlayerName = function(uid) {
+    return this.playerNames[uid];
+  }
 
   this.getUIDtoScores = function() {
     return this.UIDtoScores;
+  }
+
+  this.setScore = function(uid, score) {
+    this.UIDtoScores[uid] = score;
+  }
+  this.getScore = function(uid) {
+    return this.UIDtoScores[uid];
   }
 }
 
