@@ -14,7 +14,7 @@
   const width = 1000;
   const height = 1000;
 
-  const gridWidth = 32;
+  const gridWidth = 4;
 
   var grid = [];
   var per = [];
@@ -116,29 +116,20 @@
 
   function interpolateNoise(x, y){
     var intx = Math.floor(x);
-    var intxsuc = intx + 1;
+    var intx_suc = intx+1;
     var inty = Math.floor(y);
-    var intysuc = inty + 1;
-    //console.log(intx);
-    //console.log(intxsuc);
+    var inty_suc = inty+1;
 
     var fracx = x - intx;
     var fracy = y - inty;
 
     intx = intx % gridWidth;
-    intxsuc = intx % gridWidth;
+    intx_suc = intx_suc % gridWidth;
     inty = inty % gridWidth;
-    intysuc = inty % gridWidth;
+    inty_suc = inty_suc % gridWidth;
 
-    //if (intx+1 >= gridWidth || inty+1 >= gridWidth) return 0;
-    //console.log("1st");
-    //console.log(smoothed[intx][inty]);
-    //console.log("2st");
-    //console.log(smoothed[intxsuc][inty]);
-    var i1 = lerp(smoothed[intx][inty], smoothed[intxsuc][inty], fracx);
-    //console.log("interp");
-    //onsole.log(i1);
-    var i2 = lerp(smoothed[intx][intysuc], smoothed[intxsuc][intysuc], fracx);
+    var i1 = lerp(smoothed[intx][inty], smoothed[intx_suc][inty], fracx);
+    var i2 = lerp(smoothed[intx][inty_suc], smoothed[intx_suc][inty_suc], fracx);
 
     var ret = lerp(i1, i2, fracy);
     //  DELETE ME
@@ -190,7 +181,7 @@
     canvas.height = height;
     var ctx = canvas.getContext("2d");
 
-    const renderWidth = 128;
+    const renderWidth = 256;
     const renderMult = 1;
     const seaHue = 222;
     const seaSat = 49;
@@ -198,8 +189,8 @@
     const landSat = 45;
     const sealevel = 0.55;
 
-    for (var x = 0; x < renderWidth ; x++){
-      for (var y = 0; y < renderWidth ; y++){
+    for (var y = 0; y < renderWidth ; y++){
+      for (var x = 0; x < renderWidth ; x++){
         ctx.translate(x*renderMult,y*renderMult);
 
         var l = perlin2(x/renderWidth, y/renderWidth);
