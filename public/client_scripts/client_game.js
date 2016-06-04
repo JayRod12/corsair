@@ -28,8 +28,8 @@ const MAXIMUM_SPEED = 4;
 // Constants for the game
 const speed_norm = 100 * 5*2;
 const backColor = "rgb(104, 104, 104)";
-const seaColor = "rgb(102, 204, 255)";
-const seaHighlightColor = "rgb(225, 102, 255)";
+const seaColor = "rgb(92, 184, 235)";
+const seaHighlightColor = "rgb(102, 204, 255)";
 const s_delay = 1000/40;
 
 ///////////////// DRAW METHODS ////////////////////////////
@@ -420,7 +420,7 @@ function playClientGame(data) {
 
 
   //  Using 16:9 aspect ratio
-  viewport = new Viewport(sim, 0, 0, 1.6, 0.9, 1/5);
+  viewport = new Viewport(sim, 0, 0, 1.6, 0.9, 1);
 
   our_id = data.id;
   console.log("Our id is " + our_id);

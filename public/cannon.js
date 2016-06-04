@@ -25,6 +25,8 @@ function Cannon(ship) {
 
   this.onShoot = function(side) {
 
+    //Ask server if we are allowed to shoot (MaybeTODO)
+
     var index;
     var index = ((side == 1) ? 0 : 1);
     var cooldown = this.cooldowns[index];
