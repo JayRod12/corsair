@@ -13,6 +13,7 @@ var UUID = require('node-uuid');
 var Game = require('../public/shared_game.js');
 var Sim = require('../public/sim.js');
 var Perlin = require('../public/perlin.js').Class;
+var ServerGame = require('./server_game.js');
 
 var remote = new Game.Remote();
 
@@ -32,27 +33,7 @@ var sim = new Sim.Class(remote,gridNumber, cellWidth, cellHeight, allCells);
 sim.populateMap();
 //var island = new Island(100, 100, 100, 100, Math.PI/4, "black");
 
-
-function generateIslands(){
-  var perlin = new Perlin(8 * gridNumber, 8 * gridNumber, 5, 0.5);
-  var island_size = 32;
-  var sea_level = 0.64;
-  var max_x = gridNumber * cellWidth;
-  var max_y = gridNumber * cellHeight;
-  for (var y = 0; y < max_y; y+= island_size){
-    console.log("Generating islands: " + y + "/" + Math.floor(max_y/island_size));
-    for (var x = 0; x < max_x; x+= island_size){
-      var l = perlin.perlin(x / max_x, y / max_y);
-      if (l > sea_level){
-        var color = "green";
-        var i = new Island.Class(x, y, island_size, island_size, 0, color);
-        sim.coordinateToCell(x,y).gameObjects.push(i);
-      }
-    }
-  }
-}
-
-generateIslands();
+ServerGame.generateIslands(sim, gridNumber, cellWidth, cellHeight);
 
 var sim_t = 1000 / 30;
 var serializer = new Game.Serializer(sim);
