@@ -10,6 +10,9 @@
 \usepackage{caption}
 \usepackage{multirow, float}
 \usepackage{subcaption}
+\usepackage{graphicx}
+
+
 \renewcommand{\_}{\char`_}
 \renewcommand{\tt}{\lstinline}
 
@@ -48,7 +51,7 @@
 \vspace{3in}
 }
 
-\author{Mery Bendahan \\ Ignacio Navarro \\ Dan Slocombe \\ Tom Griggs \\ Jaime Rodriguez}
+\author{Mery Noa Bendahan \\ Ignacio Navarro \\ Dan Slocombe \\ Tom Griggs \\ Jaime Rodriguez}
 \date{}
 
 %----------------------------------------------------------------------------------------
@@ -91,6 +94,82 @@ If we were to officially release this game, the problem would be the software in
 as these are not original work by the team. However, note the graphics and the idea of the game are all original. Focusing on the table, we would have to simply read the license to fulfill the requirements of using them.
 
 \section{Project Management}
+We have chosen to use Agile methodologies for project management, so we have focused on the following: Continuous improvement and delivering quality product.
+
+\begin{figure}[h!]
+\includegraphics[width=3cm]{agile-development}
+\centering
+\caption{Agile development}
+\end{figure}
+
+As a project management tool we have used Agile Planner- an app for iterative development teams:
+Here we illustrate the state of our board at different stages of the week for the second iteration.
+This tool allowed us to create cards with tasks and move them around from To-do to delivered. In a single card we could add comments, discussions, tags, developers, contributors as well as a detailed description of what was needed.
+
+\begin{figure}[h!]
+        \setbox0\hbox{%
+                \includegraphics[width=.45\textwidth]{beginning}%
+        }%
+        \setbox2\hbox{%
+                \includegraphics[width=.45\textwidth]{card}%
+        }%
+        \ifdim\ht0>\ht2
+                \setbox0\hbox{%
+                        \includegraphics[height=\ht2]{beginning}%
+                }%
+        \else
+                \setbox2\hbox{%
+                        \includegraphics[height=\ht0]{card}%
+                }%
+        \fi
+        \noindent
+        \parbox{.45\textwidth}{%
+                \centering
+                \unhbox0
+                \caption{Board at the beginning of the iteration}
+                \label{fg:beginning}
+        }%
+        \hfil
+        \parbox{.45\textwidth}{%
+                \centering
+                \unhbox2
+                \caption{A single card and its content}
+                \label{fg:card}
+        }%
+\end{figure}
+
+\begin{figure}[h!]
+        \setbox0\hbox{%
+                \includegraphics[width=.45\textwidth]{middle}%
+        }%
+        \setbox2\hbox{%
+                \includegraphics[width=.45\textwidth]{end}%
+        }%
+        \ifdim\ht0>\ht2
+                \setbox0\hbox{%
+                        \includegraphics[height=\ht2]{middle}%
+                }%
+        \else
+                \setbox2\hbox{%
+                        \includegraphics[height=\ht0]{end}%
+                }%
+        \fi
+        \noindent
+        \parbox{.45\textwidth}{%
+                \centering
+                \unhbox0
+                \caption{Board at the middle of the iteration}
+                \label{fg:middle}
+        }%
+        \hfil
+        \parbox{.45\textwidth}{%
+                \centering
+                \unhbox2
+                \caption{Board at the end of the iteration}
+                \label{fg:end}
+        }%
+\end{figure}
+
 
 \section{Project Technology}
 
