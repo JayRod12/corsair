@@ -60,6 +60,8 @@ function Ship(sim, state, uid, name, inputFunction){
     }
 
     //  If player has left the server remove their ship from the sim
+    //  TODO might cause 'ghost ships', player removed on local simulation
+    //  but stille exists on server
     if (typeof remoteState == "undefined" || this.hp < 0){
       if (this.name == "tom"){
         this.hp = 100;
@@ -91,8 +93,7 @@ function Ship(sim, state, uid, name, inputFunction){
   this.collisionHandler = function(other_object) {
 	  /*TODO: different cases (possibly) i.e. what if 
   		it's a cannonball I've collided with?*/
-   //this.colour = "red";
-    if (other_object.uid !== "undefined"){
+    if (instanceof other_object == Cannon.CannonBall){
       if (other_object.uid === this.uid) return;
       if (typeof other_object.level !== "undefined"){
         this.hp -= other_object.level;

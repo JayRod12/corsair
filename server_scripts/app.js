@@ -74,12 +74,9 @@ io.on('connection', function(client){
   //  TODO don't spawn on top of other people or in 'danger'
   //  TODO fix initial vars
   var initState = {
-    //x: Math.random()*Game.width,
-    //y: Math.random()*Game.height,
-    x: 20,
-    y: 20,
-    //angle: Math.random()*Math.PI/2,
-    angle: +Math.PI/3,
+    x: Math.random()*gridNumber * cellWidth,
+    y: Math.random()*gridNumber * cellHeight,
+    angle: Math.random()*Math.PI*2,
     speed: 0
   };
 
