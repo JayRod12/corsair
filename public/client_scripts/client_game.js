@@ -87,6 +87,31 @@ function drawBehindGrid(ctx){
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 }
 
+var bg_frames = [];
+var bg_frame_count = 14;
+var bg_frame_wait = 0;
+var bg_frame_wait_time = 8;
+for (var i = 0; i < bg_frame_count; i++){
+  var bg_frame = new Image();
+  bg_frame.src = "../media/bg/"+i+".jpeg";
+  bg_frames.push(bg_frame);
+}
+var bg_frame_num = 0;
+
+function drawCellBackground(cx, cy, ctx){
+  bg_frame_wait++
+  if (bg_frame_wait > bg_frame_wait_time){
+    bg_frame_num = (bg_frame_num + 1) % bg_frame_count;
+    bg_frame_wait = 0;
+  }
+  ctx.drawImage(bg_frames[bg_frame_num], cx * meta.cellWidth, cy * meta.cellHeight, 
+    meta.cellWidth, meta.cellHeight);
+//  ctx.fillStyle = seaColor;
+//  ctx.fillRect(cx*meta.cellWidth, cy*meta.cellHeight, meta.cellWidth+2,
+//      meta.cellHeight+2);
+}
+
+/*
 function drawCellBackground(cx, cy, ctx){
   //  If this cell is in activeCells
   var playerCell = sim.coordinateToCellIndex(player.state.x, player.state.y);
@@ -104,6 +129,7 @@ function drawCellBackground(cx, cy, ctx){
   ctx.fillRect(cx*meta.cellWidth, cy*meta.cellHeight, meta.cellWidth+2,
       meta.cellHeight+2);
 }
+*/
 
 
 var treasureX = 300;
@@ -469,6 +495,8 @@ function playClientGame(data) {
   var our_name = (localStorage['nickname'] == "") ?  randomPirate : localStorage['nickname'];
   remote.newPlayer(our_id, our_name, data.state);
   player = sim.addShip(our_id, our_name, data.state, localShipInput);
+  player.scale = 1 + Math.random() * 2;
+  player.hp = player.scale * 100;
   player.onDeath = onShipDeath;
 
   //  Set our world up in the config described by the server

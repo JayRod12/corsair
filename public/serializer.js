@@ -105,6 +105,8 @@ function Serializer(sim) {
        
       var ship = new Ship.Class(sim, serial.state, serial.uid, serial.name,
                                 Game.createServerShipInput(serial.uid));
+      ship.hp = serial.hp;
+      ship.scale = serial.scale;
       sim.UIDtoShip[serial.uid] = ship;
       return ship;
     },

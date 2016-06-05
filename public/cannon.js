@@ -12,12 +12,12 @@ else{
 
 function Cannon(ship) {
 
-  this.ballSpeed = 0.3;
-  this.cannons = 5;
-  this.spacing = 15;
-  this.delay = 30;
+  this.ballSpeed = 0.2;
+  this.cannons = 12;
+  this.spacing = 10;
+  this.delay = 10;
   this.ship = ship;
-  this.level = 3;
+  this.level = 2;
 
   this.baseCooldown = 1200;
   this.cooldowns = [10, 10];
@@ -85,8 +85,8 @@ function cannonBallFromLocal(ship, offsetX, offsetY, side, ballSpeed, level){
 
   var state = { x : ship.state.x + offsetX
                , y : ship.state.y + offsetY
-               , xvel: ship.state.speed * Math.cos(ship.state.angle)/2 + ballSpeed * Math.cos(angle)
-               , yvel: ship.state.speed * Math.sin(ship.state.angle)/2 +
+               , xvel: (ship.state.speed * Math.cos(ship.state.angle))/4 + ballSpeed * Math.cos(angle)
+               , yvel: (ship.state.speed * Math.sin(ship.state.angle))/4 +
                ballSpeed * Math.sin(angle)
   };
   return new CannonBall(sim, ship.uid, state, level);

@@ -189,12 +189,14 @@ function Sim(remote, gridNumber, cellWidth, cellHeight, activeCells){
   var yTreasure = 300;
 
   this.populateMap = function(drawTreasure, drawIsland, drawCoins, drawRocks) {
+  /*
     var treasure = new Treasure(xTreasure, yTreasure, drawTreasure);
 	  var example_island = new Island.Class(this, 500, 500, 800, 40, Math.PI/4,
 													"white");  
     var cell = this.coordinateToCell(xTreasure, yTreasure);
     cell.staticObjects.push(treasure);
 		cell.gameObjects.push(example_island);
+    */
   };
 
   //  Given a function f of a cell and some auxilary data,

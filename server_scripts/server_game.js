@@ -4,9 +4,9 @@ var Perlin = require('../public/perlin.js').Class;
 
 
 function generateIslands(sim, gridNumber, cellWidth, cellHeight){
-  var perlin = new Perlin(8 * gridNumber, 8 * gridNumber, 5, 0.5);
+  var perlin = new Perlin(8 * gridNumber, 8 * gridNumber, 6, 0.5);
   var island_size = 32;
-  var sea_level = 0.64;
+  var sea_level = 0.62;
   var max_x = gridNumber * cellWidth;
   var max_y = gridNumber * cellHeight;
   var islands = [];

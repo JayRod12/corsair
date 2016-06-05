@@ -21,7 +21,7 @@ var socketList = [];
 
 // Game related data
 
-const gridNumber = 5;
+const gridNumber = 2;
 const cellWidth  = 1500;
 const cellHeight = 1500;
 var allCells = [];
@@ -33,7 +33,7 @@ var sim = new Sim.Class(remote,gridNumber, cellWidth, cellHeight, allCells);
 sim.populateMap();
 //var island = new Island(100, 100, 100, 100, Math.PI/4, "black");
 
-//ServerGame.generateIslands(sim, gridNumber, cellWidth, cellHeight);
+ServerGame.generateIslands(sim, gridNumber, cellWidth, cellHeight);
 
 var sim_t = 1000 / 30;
 var serializer = new Game.Serializer(sim);
