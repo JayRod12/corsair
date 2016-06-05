@@ -12,11 +12,11 @@ else{
 function Cannon(ship, onDraw) {
 
   this.ballSpeed = 0.3;
-  this.cannons = 5;
-  this.spacing = 15;
-  this.delay = 30;
+  this.cannons = 12;
+  this.spacing = 8;
+  this.delay = 10;
   this.ship = ship;
-  this.level = 3;
+  this.level = 2;
   this.onDraw = onDraw;
 
   this.baseCooldown = 1200;
@@ -111,7 +111,7 @@ function CannonBall(ship, offsetX, offsetY, side, speed, onDraw, level) {
   this.collisionHandler = function(other_object){
     if (other_object !== this.ship){
       if (typeof other_object.hp !== "undefined"){
-          other_object.hp -= 10;
+          other_object.hp -= this.level;
       }
       this.destroy();
       return;

@@ -15,8 +15,8 @@ function Ship(sim, state, uid, inputFunction, onDraw, onDrawCannon){
 
   // Simulation in which the ship is.
   this.sim = sim;
-  this.hp = 99;
-
+  this.hp = 100;
+  this.speed_cap = 0.2;
   //UPDATE THIS WHEN SCALE IS UPDATED. FUCK YOU GUYS FOR NOT CARING ABOUT ME.
   this.hypotenuse = Math.sqrt(shipBaseWidth*shipBaseWidth 
                               + shipBaseHeight*shipBaseHeight);
@@ -35,7 +35,7 @@ function Ship(sim, state, uid, inputFunction, onDraw, onDrawCannon){
   };
 
   // Scale of the ship ?
-  this.scale = 1;
+  this.scale = 1.5;
 
   this.cannon = new Cannon.Class(this, onDrawCannon);
   this.inputFunction = inputFunction;
@@ -57,6 +57,7 @@ function Ship(sim, state, uid, inputFunction, onDraw, onDrawCannon){
 
     //  Updates speed and angle
     this.inputFunction();
+	this.state.speed = Math.min(this.state.speed, this.speed_cap);
 
     this.state.x += this.state.speed * Math.cos(this.state.angle) * dt;
     this.state.y += this.state.speed * Math.sin(this.state.angle) * dt;
