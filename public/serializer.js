@@ -38,6 +38,8 @@ function Serializer(sim) {
 
     return this.deserializeObjFunctions[serial.type](serial.o, server_time_diff);
 
+  }
+
   this.deserializeShip = function(o) {
     if (o.uid == our_id) {
       return null;
@@ -48,7 +50,7 @@ function Serializer(sim) {
                               Game.createServerShipInput(o.uid));
     this.sim.setShip(o.uid, ship);
     return ship;
-  }
+  };
 
   this.serializeObject = function (o) {
     if (typeof o.serialize != "undefined") {
