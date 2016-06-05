@@ -25,7 +25,6 @@ describe('Collision detection - positive cases:', function(){
     var r1 = pos_cases[i].r1;
     var h1 = Math.sqrt(r1.w * r1.w + r1.h * r1.h);
     r1 = { x : r1.x, y : r1.y, hypotenuse : h1, width : r1.w, height : r1.w, angle : r1.a };
-    console.log(r1);
     it('R1_' +i.toString()+ ' Should collide with itself', function(){
       assert(Collisions.RectRect(r1, r1), 
         'Isn\'t colliding with itself');
@@ -36,7 +35,6 @@ describe('Collision detection - positive cases:', function(){
     var r1 = pos_cases[i].r2;
     var h1 = Math.sqrt(r1.w * r1.w + r1.h * r1.h);
     r1 = { x : r1.x, y : r1.y, hypotenuse : h1, width : r1.w, height : r1.w, angle : r1.a };
-    console.log(r1);
     it('R2_' +i.toString()+ ' Should collide with itself', function(){
       assert(Collisions.RectRect(r1, r1), 
         'Isn\'t colliding with itself');
