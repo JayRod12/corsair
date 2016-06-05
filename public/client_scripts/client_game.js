@@ -10,6 +10,7 @@ var viewport;
 
 // Client tick
 var fps;
+var display_fps;
 var lastTime;
 var currentTime;
 var delta;
@@ -68,6 +69,18 @@ function Viewport(sim, x, y, baseWidth, baseHeight, scale){
   }
 }
 
+function drawRandomColors() {
+    var colors = [];
+    var letters = '0123456789ABCDEF'.split('');
+    for (var j = 0; j < 10; j++) {
+      var color = '#';
+      for (var i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];  
+      }
+      colors[j] = color;
+    }
+    return colors;
+}
 
 function drawBehindGrid(ctx){
   ctx.fillStyle = backColor;
@@ -104,25 +117,31 @@ function drawTreasure() {
     ctx.closePath();
 }
 
+var colors = drawRandomColors();
+
 function drawHighScoresTable(scoreTable) {
+  var maxLengthName = 14;
   var maxDisplay = 10;
-  var currentPlayers = Object.keys(scoreTable).length;
+  var currentPlayers = 0;
+  for (var player in scoreTable) {currentPlayers++;}
   var i = 0;
 
   var displayNumber = currentPlayers < maxDisplay ? currentPlayers : maxDisplay;
+
     
   for (var uid in scoreTable) {
-    if (i <= displayNumber) {
+    if (i < displayNumber) {
       var shipName = sim.getShip(uid).name;
       i++;
       ctx.beginPath();
-      ctx.font = "20px Josefin Sans";
-      ctx.lineWidth = 1;
-      ctx.strokeStyle = 'black';
+      ctx.font = "italic 15px Josefin Sans";
+      ctx.lineWidth = 2;
+      ctx.fillStyle = colors[i - 1];
       ctx.textAlign="left"; 
-      ctx.strokeText("#" + i + "\t\t" + shipName + "\t" + scoreTable[uid] + "\n", 
-        (9/10)*canvas.width, (1/10)*canvas.height + i * 20);
-      ctx.stroke();
+      ctx.fillText("#" + i, (7/8)*canvas.width, (1/20)*canvas.height + i * 20);
+      ctx.fillText(shipName, (7.14/8)*canvas.width, (1/20)*canvas.height + i * 20);
+      ctx.fillText(scoreTable[uid], (7.8/8)*canvas.width, (1/20)*canvas.height + i * 20);
+      ctx.fill();
       ctx.closePath();
     } else {
       break;
@@ -144,7 +163,7 @@ function drawCompass() {
 function drawFps() {
   ctx.fillStyle = "black";
   ctx.font = "15px Josefin Sans";
-  ctx.fillText("fps: "+ fps, (1/10)*canvas.width, (1/10)*canvas.height);
+  ctx.fillText("fps: "+ display_fps, (1/10)*canvas.width, (1/10)*canvas.height);
 }
 
 //  Draws all objects
@@ -237,7 +256,7 @@ function clientTick(){
   currentTime = Date.now();
   delta = currentTime - lastTime;
 
-  fps = Math.floor(1000/(delta));
+  display_fps = Math.floor(1000/(delta));
 
   if (delta > interval) {
     lastTime = currentTime - (delta % interval);
@@ -440,7 +459,12 @@ function playClientGame(data) {
 
   console.log("Our id is " + our_id);
 
-  var our_name = (localStorage['nickname'] == "") ? "Corsair" : localStorage['nickname'];
+  var pirateNames = ["William Kidd", "Blackbeard", "Long Ben", "Sir Francis Drake",
+                     "Calico Jack", "Grace O'Malley", "Anne Bonny", "Thomas Tew", "Barbarossa"];
+
+  var randomPirate = pirateNames[Math.floor(Math.random()*pirateNames.length)];
+
+  var our_name = (localStorage['nickname'] == "") ?  randomPirate : localStorage['nickname'];
   remote.newPlayer(our_id, our_name, data.state);
   player = sim.addShip(our_id, our_name, data.state, localShipInput);
   player.onDeath = onShipDeath;
