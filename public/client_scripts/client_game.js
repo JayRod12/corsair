@@ -63,10 +63,28 @@ function drawBehindGrid(ctx){
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 }
 
+var bg_frames = [];
+var bg_frame_count = 14;
+var bg_frame_wait = 0;
+var bg_frame_wait_time = 4;
+for (var i = 0; i < bg_frame_count; i++){
+  var bg_frame = new Image();
+  bg_frame.src = "../media/bg/"+i+".jpeg";
+  bg_frames.push(bg_frame);
+}
+var bg_frame_num = 0;
+
 function drawCellBackground(cx, cy, ctx){
-  ctx.fillStyle = seaColor;
-  ctx.fillRect(cx*meta.cellWidth, cy*meta.cellHeight, meta.cellWidth+2,
-      meta.cellHeight+2);
+  bg_frame_wait++
+  if (bg_frame_wait > bg_frame_wait_time){
+    bg_frame_num = (bg_frame_num + 1) % bg_frame_count;
+    bg_frame_wait = 0;
+  }
+  ctx.drawImage(bg_frames[bg_frame_num], cx * meta.cellWidth, cy * meta.cellHeight, 
+    meta.cellWidth, meta.cellHeight);
+//  ctx.fillStyle = seaColor;
+//  ctx.fillRect(cx*meta.cellWidth, cy*meta.cellHeight, meta.cellWidth+2,
+//      meta.cellHeight+2);
 }
 
 var ship_image1 = new Image();
