@@ -10,6 +10,7 @@
 \usepackage{caption}
 \usepackage{multirow, float}
 \usepackage{subcaption}
+\usepackage{enumitem}
 \renewcommand{\_}{\char`_}
 \renewcommand{\tt}{\lstinline}
 
@@ -75,8 +76,22 @@ The Free Software License and the Microsoft Research License Agreement differ ma
 \end{tabular}
 \end{table}
 
-\section{Alice vs Bob}
+\section{Alice vs Bob and Charlie}
 
+\begin{enumerate}[label=\textbf{\Alph*}]
+\item \textbf{Case under contract law}\\
+	Contracts are legally enforceable agreements. For agreements to be valid, it must be the case that the parties agree to the terms of the contract. For this reason it is already clear that Alice has no case against Charlie, since Charlie never signed a contract with Alice. 
+
+	Bob, on the other hand, signed a contract, agreeing to ``not discuss with anyone any aspect of the implementation,
+algorithms, organisation or other workings of the game \textbf{powerzap}''. Bob broke the contract by telling Charlie about the details of the AI and the game. Hence Alice has a case against Bob.
+
+\item \textbf{Case under copyright law}\\
+In terms of copyright law, the procedure taken by Bob and Charlie to produce their game is the one known as ``clean rooming''. Bob had lawful access to the source code when Alice game him read rights to the repository and under copyright law Bob is allowed to discuss details of the implementation, but not to reproduce it. Charlie on the other hand never gets to see the source code, so by receiving instructions from Bob about his interpretation of the algorithm, he can build an application without breaking Copyright law.
+
+\item \textbf{Remedies}
+As a consequence of breaking the contract, a court might rule that Bob must pay a specific sum of money to compensate for the damages that Bob has caused Alice. Alice was trying to sell her game to gaming companies, but now it will be very hard to do so since a similar game is freely available online with a GPL license, so the game cannot be sold. Consulting experts in the gaming industry might help in finding the appropriate value of the fine.
+
+\end{enumerate}
 
 %----------------------------------------------------------------------------------------
 
