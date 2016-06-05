@@ -93,7 +93,7 @@ function Serializer(sim) {
       //  TODO
       //  UIDtoShip may return false if ship is not in a loaded cell
       //  what do we do in this case?
-      return new Cannon.CannonBall(sim, sim.UIDtoShip[serial.owner_uid], state,
+      return new Cannon.CannonBall(sim, serial.uid, state,
           serial.level);
     },
 

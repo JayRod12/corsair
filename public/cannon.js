@@ -4,6 +4,7 @@ if (typeof exports === 'undefined'){
 else{
   Game = require ('./shared_game.js');
   Col = require('./collision_detection.js');
+  Ship = require('./ship.js');
   //  Server
 }
 
@@ -88,7 +89,7 @@ function cannonBallFromLocal(ship, offsetX, offsetY, side, ballSpeed, level){
                , yvel: ship.state.speed * Math.sin(ship.state.angle)/2 +
                ballSpeed * Math.sin(angle)
   };
-  return new CannonBall(sim, ship, state, level);
+  return new CannonBall(sim, ship.uid, state, level);
   
 }
 
@@ -98,10 +99,10 @@ function cannonballFromRemote(sim, x, y, xvel, yvel, ){
 }
 */
 
-function CannonBall(sim, owner, state, level) {
+function CannonBall(sim, uid, state, level) {
 
   this.sim = sim;
-  this.owner = owner;
+  this.uid = uid;
   this.state = state;
   this.level = level;
 
@@ -122,8 +123,12 @@ function CannonBall(sim, owner, state, level) {
     return {x: this.state.x, y: this.state.y};
   }
 
+
   this.collisionHandler = function(other_object){
-    if (other_object !== this.owner){
+    //if (typeof other_object == Ship.Class && other_object.uid == this.uid){
+    if (other_object.uid == this.uid){
+    }
+    else{
       this.destroy();
     }
   }
@@ -145,7 +150,7 @@ function CannonBall(sim, owner, state, level) {
                , y: this.state.y
                , xvel: this.state.xvel
                , yvel: this.state.yvel
-               , owner_uid: this.owner.uid
+               , uid: this.uid
                , level: this.level}};
   }
 }

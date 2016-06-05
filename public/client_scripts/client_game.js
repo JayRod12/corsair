@@ -382,16 +382,15 @@ function startClient() {
             if (update.data.type == "ship") {
               if (update.data.o.uid != our_id) {
                 var obj = serializer.deserializeObject(update.data);
-                console.log(obj);
                 cell.gameObjects.push(obj);
               }
             }
             break;
           case 'create_cannonball':
             //  CHECK IF OWN CANNONBALL
-              console.log(update.data);
+              if (update.data.o.uid === our_id) break;
+
               var obj = serializer.deserializeObject(update.data);
-              console.log(obj);
               obj.cell.gameObjects.push(obj);
             break;
           default:
