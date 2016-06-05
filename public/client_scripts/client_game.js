@@ -28,7 +28,7 @@ const MAXIMUM_SPEED = 4;
 
 
 // Constants for the game
-const speed_norm = 100 * 5*2;
+const speed_norm = 100 * 5;
 const backColor = "rgb(104, 104, 104)";
 const seaColor = "rgb(92, 184, 235)";
 const seaHighlightColor = "rgb(102, 204, 255)";
@@ -154,6 +154,7 @@ function draw(){
   drawBehindGrid(ctx);
   viewport.draw(ctx, canvas.width, canvas.height);
   drawCompass();
+  drawScore();
   drawHighScoresTable(localHighScoreTable);
   drawFps();
 }

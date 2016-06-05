@@ -18,7 +18,7 @@ function Ship(sim, state, uid, name, inputFunction){
   this.uid = uid;
   this.name = name;
 
-  //UPDATE THIS WHEN SCALE IS UPDATED. FUCK YOU GUYS FOR NOT CARING ABOUT ME.
+  //UPDATE THIS WHEN SCALE IS UPDATED.
   this.hypotenuse = Math.sqrt(shipBaseWidth*shipBaseWidth 
                               + shipBaseHeight*shipBaseHeight);
  
@@ -108,7 +108,7 @@ function Ship(sim, state, uid, name, inputFunction){
   
     // Ship name
     ctx.fillStyle = "white";
-    ctx.font = "5px Courier";
+    ctx.font = "15px Josefin Sans";
     ctx.textAlign="left"; 
     var metrics = ctx.measureText(this.name);
     var textWidth = metrics.width;
