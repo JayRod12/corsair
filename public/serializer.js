@@ -84,8 +84,8 @@ function Serializer(sim) {
     // TODO change cannon so it can be deserialized
     cannonball : function(serial, server_time_diff) {
       var state = {
-        x: serial.x * server_time_diff * serial.xvel,
-        y: serial.y * server_time_diff * serial.yvel,
+        x: serial.x + server_time_diff * serial.xvel,
+        y: serial.y + server_time_diff * serial.yvel,
         xvel: serial.xvel,
         yvel: serial.yvel,
       }
