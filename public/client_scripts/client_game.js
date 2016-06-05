@@ -290,6 +290,8 @@ function client_update(player){
 
   if ((typeof socket != "undefined") && socket.connected) {
     socket.emit('client_update', {state: player.state, updates : toSendServer});
+    if (toSendServer.length > 0){
+    }
     toSendServer = [];
   }
 
@@ -387,6 +389,7 @@ function startClient() {
             break;
           case 'create_cannonball':
             //  CHECK IF OWN CANNONBALL
+              console.log(update.data);
               var obj = serializer.deserializeObject(update.data);
               console.log(obj);
               obj.cell.gameObjects.push(obj);

@@ -367,8 +367,10 @@ function parseColObjects(col_type_1, col_type_2, col_obj_1, col_obj_2, first){
         case "point":
           return Col.PointRect(col_obj_2, col_obj_1);
         default:
-        parseColObjectsFailure(col_type_1, col_type_2, col_obj_1, col_obj_2);
-        return false;
+        if (!first){
+          parseColObjectsFailure(col_type_1, col_type_2, col_obj_1, col_obj_2);
+          return false;
+        }
       }
     case "circle":
       switch(col_type_2){
@@ -379,16 +381,20 @@ function parseColObjects(col_type_1, col_type_2, col_obj_1, col_obj_2, first){
           parseColObjectsFailure(col_type_1, col_type_2, col_obj_1, col_obj_2);
           return false;
         default:
-        parseColObjectsFailure(col_type_1, col_type_2, col_obj_1, col_obj_2);
-        return false;
+        if (!first){
+          parseColObjectsFailure(col_type_1, col_type_2, col_obj_1, col_obj_2);
+          return false;
+        }
       }
     case "point":
       switch(col_type_2){
         case "point":
           return Col.PointPoint(col_obj_1, col_obj_2);
         default:
-        parseColObjectsFailure(col_type_1, col_type_2, col_obj_1, col_obj_2);
-        return false;
+        if (!first){
+          parseColObjectsFailure(col_type_1, col_type_2, col_obj_1, col_obj_2);
+          return false;
+        }
       }
     default:
       if (first){
@@ -401,8 +407,10 @@ function parseColObjects(col_type_1, col_type_2, col_obj_1, col_obj_2, first){
 }
 function parseColObjectsFailure(t1, t2, o1, o2){
   console.log("Collision of unknown types " + t1 + " and " + t2);
-  console.log("Object 1: " + o1);
-  console.log("Object 2: " + o2);
+  console.log("Object 1: ");
+  console.log(o1);
+  console.log("Object 2: ");
+  console.log(o2);
 }
 
 function TestObj(sim, state) {
