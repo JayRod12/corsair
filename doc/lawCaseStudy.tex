@@ -8,7 +8,7 @@
 \usepackage{listings} % Required for insertion of code
 \usepackage{courier} % Required for the courier font
 \usepackage{caption}
-\usepackage{multirow}
+\usepackage{multirow, float}
 \usepackage{subcaption}
 \renewcommand{\_}{\char`_}
 \renewcommand{\tt}{\lstinline}
@@ -48,7 +48,7 @@
 \vspace{3in}
 }
 
-\author{Mery Bendahan \\ Ignacio Navarro \\ Dan Slocombe \\ Tom Griggs \\ Jaime Rodriguez}
+\author{Mery Bendahan \\ Ignacio Navarro \\ Dan Slocombe \\ Tom Griggs \\ Jaime Rodriguez}
 \date{}
 
 %----------------------------------------------------------------------------------------
@@ -60,6 +60,20 @@
 
 \section{License Agreement Study}
 
+The Free Software License and the Microsoft Research License Agreement differ mainly in three points. Firstly, according to Freedom 0,  the free software license allows the programmer to run the program for any purpose, while the custom license allows the programmer to run the program for any non-commercial academic purpose. We can therefore see the custom license is a restriction of the free license in that sense. Secondly, in terms of redistribution, the free software license allows resdistribution of the software to whomever (Freedom 2), while Microsoft's custom license allows redistribution for any non-commercial academic purpose only. Lastly, according to Freedom 3, the free software license allows to distribute modified copies as the person wishes, while the custom license again only allows modified distribution solely for any non-commercial purpose only.
+
+\begin{table}[H]
+\centering
+\caption{Summary of differences}
+\label{my-label}
+\begin{tabular}{l|l|l|}
+\cline{2-3}
+   & \textbf{Free Software License}         & \textbf{Microsoft Custom License}                              \\ \cline{2-3} 
+1. & Run program for any purpose            & Run program for any non-commercial academic purpose            \\ \cline{2-3} 
+2. & Redistribute as you wish               & Redistribute for any non-commercial academic purpose           \\ \cline{2-3} 
+3. & Distribute modified copies as you wish & Distribute derivative work for non-commercial academic purpose \\ \cline{2-3} 
+\end{tabular}
+\end{table}
 
 \section{Alice vs Bob}
 
