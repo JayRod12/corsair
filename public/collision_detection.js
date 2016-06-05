@@ -8,6 +8,7 @@
   C4 ----- C3
  */
 
+var epsilon = 0.0001;
 /*PRE: rectangle_1, rectangle_2 are objects with 
 fields: {x, y, width, height, hypotenuse, angle}*/
 function queryRectangleRectangleCollision(rectangle_1, rectangle_2, first) {	
@@ -19,7 +20,7 @@ function queryRectangleRectangleCollision(rectangle_1, rectangle_2, first) {
    var squared_origin_diff = 
          (rectangle_1.x - rectangle_2.x)*(rectangle_1.x - rectangle_2.x) 
        + (rectangle_1.y - rectangle_2.y)*(rectangle_1.y - rectangle_2.y);
-   if (squared_origin_diff >= radial_diff_sq) {
+   if (squared_origin_diff + epsilon >= radial_diff_sq) {
     return false;
     }
   }
@@ -66,13 +67,13 @@ function queryPointRectangleCollision(point, rectangle) {
 	var odv_p = {x: rectangle.x - point.x, y: rectangle.y - point.y};
 	var odv_p_square_length = odv_p.x*odv_p.x + odv_p.y*odv_p.y;
 	//HEURISTIC CHECK
-	if(4*odv_p_square_length >= rectangle.hypotenuse*rectangle.hypotenuse) {
+	if(4*odv_p_square_length + epsilon >= rectangle.hypotenuse*rectangle.hypotenuse) {
   return false;
   }
 	var odv_p_theta = trimBranch(Math.atan2(odv_p.y, odv_p.x));
 	var odv_p_angle_to_rectangle = trimBranch(odv_p_theta - rectangle.angle);
 	var trav = getRectangleTravel(Math.abs(odv_p_angle_to_rectangle), rectangle);
-	return trav*trav >= odv_p_square_length; 
+	return trav*trav + epsilon >= odv_p_square_length;
 }
 
 /*PRE: circles are objects with: {x, y, radius}*/
