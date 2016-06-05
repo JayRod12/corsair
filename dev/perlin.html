@@ -1,0 +1,209 @@
+<html>
+
+<head>
+  <title>Testing</title>
+  <script
+  src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+</head>
+
+
+<body>
+  <canvas id="main"></canvas>
+  <script>
+
+  const width = 1000;
+  const height = 1000;
+
+  const gridWidth = 16;
+
+  var grid = [];
+  var per = [];
+  for (var i = 0; i <= gridWidth; i++){
+    per.push([]);
+  }
+  var smoothed = [];
+  for (var i = 0; i < gridWidth; i++){
+    smoothed.push([]);
+  }
+
+
+  //  Basic smoothing
+  function smooth(x, y){
+
+    var xPrev = (x-1<0) ? gridWidth-1 : x-1;
+    var xNext = (x+1>=gridWidth) ? 0 : x+1;
+
+    var yPrev = (y-1<0) ? gridWidth-1 : y-1;
+    var yNext = (y+1>=gridWidth) ? 0 : y+1;
+
+
+    corners = ( grid[xPrev][yPrev]+grid[xNext][yPrev]+grid[xPrev][yNext]+grid[xNext][yNext]
+        ) / 16;
+    sides = ( grid[xPrev][y]+grid[xNext][y]+grid[x][yNext]+grid[x][yNext]
+        ) / 8;
+    centre = grid[x][y]/4;
+
+    smoothed[x][y] = corners + sides + centre;
+  }
+
+
+  function randVector(){
+    var angle = Math.random()*2*Math.PI;
+    return {x: Math.cos(angle), y: Math.sin(angle)};
+    //return Math.random();
+  }
+
+  function lerp(a, b, x){
+    return a + x * (b-a);
+  }
+
+  function fade(t){
+    return t * t * t * (t * (t * 6 - 15) + 10); // 6t^5 - 15t^4 + 10t^3
+  }
+
+  function perlin2(x, y, size){
+    var total = 0;
+    var octaves = 5;
+    var persistence = 0.5;
+    var norm = 0;
+    
+    for (var i = 0; i < octaves; i++){
+      var f = Math.pow(2, i);
+      var a = Math.pow(persistence, i);
+      norm += a;
+
+      //var div = size;
+      var div = 1;
+      var mult = gridWidth;
+      var ix, iy;
+      //ix = ix 
+      //if (Math.floor(x * f / div) >= gridWidth-1 || Math.floor(y * f /
+      //div) >= gridWidth-1) break;
+      total += interpolateNoise(x * f * mult / div, y * f * mult / div) * a;
+      //total += interpolateNoise(x , y) * a;
+    }
+    /*
+    var xx, yy;
+    xx = Math.floor(x*gridWidth);
+    yy = Math.floor(y*gridWidth);
+    total = smoothed[xx][yy];
+    */
+    //total = interpolateNoise(x * gridWidth, y * gridWidth);
+    //console.log(total);
+    //console.log(norm);
+    return total / norm;
+
+  }
+
+  function interpolateNoise(x, y){
+    var intx = Math.floor(x);
+    var intx_suc = intx+1;
+    var inty = Math.floor(y);
+    var inty_suc = inty+1;
+
+    var fracx = x - intx;
+    var fracy = y - inty;
+
+    intx = intx % gridWidth;
+    intx_suc = intx_suc % gridWidth;
+    inty = inty % gridWidth;
+    inty_suc = inty_suc % gridWidth;
+
+    var i1 = lerp(smoothed[intx][inty], smoothed[intx_suc][inty], fracx);
+    var i2 = lerp(smoothed[intx][inty_suc], smoothed[intx_suc][inty_suc], fracx);
+
+    var ret = lerp(i1, i2, fracy);
+    //  DELETE ME
+    //ret = smoothed[intx][inty];
+    //
+    //fade(ret);
+    return ret;
+  }
+
+  
+
+  function generatePerlin(){
+    //  Init grid
+    for (var x = 0; x <= gridWidth; x++){
+      var col = [];
+      for (var y = 0; y <= gridWidth; y++){
+        //col.push(randVector());
+        col.push(Math.random());
+      }
+      grid.push(col);
+    }
+    for (var x = 0; x < gridWidth; x++){
+      for (var y = 0; y < gridWidth; y++){
+        smooth(x, y);
+
+      }
+    }
+
+    /*
+    for (var x = 1; x < gridWidth-1; x++){
+      for (var y = 1; y < gridWidth-1; y++){
+        //per[x][y] = perlin2(x,y);
+
+      }
+    }
+    */
+
+  }
+  function makeRGB(b){
+    var n = Math.floor(b * 255);
+    var s = n.toString();
+    return "rgb(" + s + "," + s + "," + s + ")";
+  }
+  function drawPerlin(){
+
+    
+    //const octaves = 1;
+
+    //const amp = 0.5;
+    var canvas = $("#main")[0];
+    canvas.width = width;
+    canvas.height = height;
+    var ctx = canvas.getContext("2d");
+
+    const renderWidth = 256;
+    const renderMult = 2;
+    const seaHue = 222;
+    const seaSat = 49;
+    const landHue = 94;
+    const landSat = 45;
+    const sealevel = 0.55;
+
+    for (var y = 0; y < renderWidth ; y++){
+      for (var x = 0; x < renderWidth ; x++){
+        ctx.translate(x*renderMult,y*renderMult);
+
+        var l = perlin2(x/renderWidth, y/renderWidth);
+        //var l = 0;
+        //var l = smoothed[x][y];
+        if (l > sealevel){
+          var c = "hsl("+landHue.toString() + ", " + landSat.toString() +
+            "%, " + (l*100).toString() +"%)";
+        }
+        else{
+          var c = "hsl("+seaHue.toString() + ", " + seaSat.toString() +
+          "%, " + (l*100).toString() +"%)";
+        }
+        ctx.fillStyle = c;
+
+
+        ctx.fillRect(0,0,renderMult,renderMult);
+        ctx.translate(-x*renderMult, -y*renderMult);
+      }
+    }
+  }
+
+  console.log("Working...");
+  generatePerlin();
+  console.log("Done");
+  drawPerlin();
+  console.log("Drawn");
+  </script>
+</body>
+
+
+</html>

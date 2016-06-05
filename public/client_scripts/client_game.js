@@ -7,12 +7,14 @@ var remote;
 var sim;
 var serializer;
 var viewport;
+
 // Client tick
 var fps;
 var lastTime;
 var currentTime;
 var delta;
 var interval;
+var toSendServer = [];
 
 var player;
 var meta;
@@ -26,10 +28,10 @@ const MAXIMUM_SPEED = 4;
 
 
 // Constants for the game
-const speed_norm = 100 * 5*2;
+const speed_norm = 100 * 5;
 const backColor = "rgb(104, 104, 104)";
-const seaColor = "rgb(102, 204, 255)";
-const seaHighlightColor = "rgb(225, 102, 255)";
+const seaColor = "rgb(92, 184, 235)";
+const seaHighlightColor = "rgb(102, 204, 255)";
 const s_delay = 1000/40;
 
 ///////////////// DRAW METHODS ////////////////////////////
@@ -139,6 +141,12 @@ function drawCompass() {
   drawCompassScaled(player.state.x, player.state.y, treasureX, treasureY, 50);
 }
 
+function drawFps() {
+  ctx.fillStyle = "black";
+  ctx.font = "15px Josefin Sans";
+  ctx.fillText("fps: "+ fps, (1/10)*canvas.width, (1/10)*canvas.height);
+}
+
 //  Draws all objects
 function draw(){
   viewport.x = player.state.x - canvas.width / (2 * viewport.scale);
@@ -147,7 +155,9 @@ function draw(){
   drawBehindGrid(ctx);
   viewport.draw(ctx, canvas.width, canvas.height);
   drawCompass();
+  drawScore();
   drawHighScoresTable(localHighScoreTable);
+  drawFps();
 }
 
 
@@ -227,6 +237,8 @@ function clientTick(){
   currentTime = Date.now();
   delta = currentTime - lastTime;
 
+  fps = Math.floor(1000/(delta));
+
   if (delta > interval) {
     lastTime = currentTime - (delta % interval);
     mouse_x = (mouse_screen_x/viewport.scale + viewport.x);
@@ -255,9 +267,13 @@ function addServerShip(userid, name, state){
 
 function client_update(player){
 
+  //  TODO send server our local time
+
   if ((typeof socket != "undefined") && socket.connected) {
-    socket.emit('client_update', {state: player.state});
+    socket.emit('client_update', {state: player.state, updates : toSendServer});
+    toSendServer = [];
   }
+
 }
 
 function endClient() {
@@ -350,6 +366,12 @@ function startClient() {
               }
             }
             break;
+          case 'create_cannonball':
+            //  CHECK IF OWN CANNONBALL
+              var obj = serializer.deserializeObject(update.data);
+              console.log(obj);
+              obj.cell.gameObjects.push(obj);
+            break;
           default:
             console.log("Unrecognised command from server " + update.name);
         }
@@ -402,19 +424,20 @@ function playClientGame(data) {
 
   remote = new Game.Remote();
   meta = data.meta;
+  our_id = data.id;
   sim = new Sim.Class(remote, meta.gridNumber, meta.cellWidth, meta.cellHeight,
     meta.activeCells);
+  console.log(sim);
+  //sim.populateMap(drawTreasure);
   serializer = new Serializer.Class(sim);
   deserializeNewStates(data.new_cells_states);
-  //sim.populateMap(drawTreasure);
   
   updateHighScoresTable(data.scoresTable);
 
 
   //  Using 16:9 aspect ratio
-  viewport = new Viewport(sim, 0, 0, 1.6, 0.9, 1/5);
+  viewport = new Viewport(sim, 0, 0, 1.6, 0.9, 1);
 
-  our_id = data.id;
   console.log("Our id is " + our_id);
 
   var our_name = (localStorage['nickname'] == "") ? "Corsair" : localStorage['nickname'];
@@ -428,6 +451,7 @@ function playClientGame(data) {
       addServerShip(userid, data.names[userid], data.players[userid]);
     }
   }
+
 
   if (typeof socket != "undefined") {
     socket.emit('on_connect_response', {name : our_name});

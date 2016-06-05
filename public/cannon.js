@@ -25,10 +25,11 @@ function Cannon(ship) {
 
   this.onShoot = function(side) {
 
+    //Ask server if we are allowed to shoot (MaybeTODO)
+
     var index;
     var index = ((side == 1) ? 0 : 1);
     var cooldown = this.cooldowns[index];
-    console.log(cooldown);
 
     if (cooldown > 0) return false;
 
@@ -47,7 +48,8 @@ function Cannon(ship) {
       var shot = function(i){
         var offsetX = spacing * (cannons / 2 - i) * Math.cos(ship.state.angle);
         var offsetY = spacing * (cannons / 2 - i) * Math.sin(ship.state.angle);
-        var ball = new CannonBall(ship, offsetX, offsetY, side, ballSpeed, level);
+        var ball = cannonBallFromLocal(ship, offsetX, offsetY, side, ballSpeed, level);
+        toSendServer.push(ball.serialize());
         var cell = ship.sim.coordinateToCell(ship.state.x,ship.state.y);
         cell.gameObjects.push(ball);
       }
@@ -75,19 +77,33 @@ function Cannon(ship) {
   };
 }
 
-function CannonBall(ship, offsetX, offsetY, side, speed, level) {
-
-  this.sim = ship.sim;
-  this.ship = ship; 
-  this.level = level;
+function cannonBallFromLocal(ship, offsetX, offsetY, side, ballSpeed, level){
+  var sim = ship.sim;
 
   var angle = Col.trimBranch(ship.state.angle + side * Math.PI / 2);
 
-  this.state = { x : ship.state.x + offsetX
+  var state = { x : ship.state.x + offsetX
                , y : ship.state.y + offsetY
-               , xvel: ship.state.speed * Math.cos(ship.state.angle)/2 + speed * Math.cos(angle)
-               , yvel: ship.state.speed * Math.sin(ship.state.angle)/2 + speed * Math.sin(angle)
+               , xvel: ship.state.speed * Math.cos(ship.state.angle)/2 + ballSpeed * Math.cos(angle)
+               , yvel: ship.state.speed * Math.sin(ship.state.angle)/2 +
+               ballSpeed * Math.sin(angle)
   };
+  return new CannonBall(sim, ship, state, level);
+  
+}
+
+/*
+function cannonballFromRemote(sim, x, y, xvel, yvel, ){
+
+}
+*/
+
+function CannonBall(sim, owner, state, level) {
+
+  this.sim = sim;
+  this.owner = owner;
+  this.state = state;
+  this.level = level;
 
   this.cell = this.sim.coordinateToCell(this.state.x, this.state.y);
 
@@ -95,10 +111,10 @@ function CannonBall(ship, offsetX, offsetY, side, speed, level) {
     if (this.state.life == 0) {
       this.sim.removeObject(this);
     }
-    // TODO interpolation with remote state
     this.state.x += dt * this.state.xvel;
     this.state.y += dt * this.state.yvel;
     this.life -= 1;
+    console.log("cannonballontick");
     Game.updateCell(this.sim, this, this.state.x, this.state.y);
   };
 
@@ -106,8 +122,9 @@ function CannonBall(ship, offsetX, offsetY, side, speed, level) {
   this.getColObj = function(){
     return {x: this.state.x, y: this.state.y};
   }
+
   this.collisionHandler = function(other_object){
-    if (other_object !== this.ship){
+    if (other_object !== this.owner){
       this.destroy();
     }
   }
@@ -117,15 +134,26 @@ function CannonBall(ship, offsetX, offsetY, side, speed, level) {
   }
 
   this.onDraw = function(ctx) {
+    console.log("cannonballondraw");
     var radius = this.level;
     ctx.beginPath();
     ctx.arc(this.state.x, this.state.y, radius, 2 * Math.PI, false);
     ctx.fillStyle = "black";
     ctx.fill();
   }
+  this.serialize = function() {
+    return {type: "cannonball",
+            o: { x: this.state.x
+               , y: this.state.y
+               , xvel: this.state.xvel
+               , yvel: this.state.yvel
+               , owner_uid: this.owner.uid
+               , level: this.level}};
+  }
 }
 
+
 exports.Class = Cannon;
-exports.Ball = CannonBall;
+exports.CannonBall = CannonBall;
 
 })(typeof exports == 'undefined' ? this.Cannon = {} : exports);

@@ -12,6 +12,8 @@ var io = require('socket.io')(http);
 var UUID = require('node-uuid');
 var Game = require('../public/shared_game.js');
 var Sim = require('../public/sim.js');
+var Perlin = require('../public/perlin.js').Class;
+var ServerGame = require('./server_game.js');
 
 var remote = new Game.Remote();
 
@@ -30,6 +32,8 @@ for (var i = 0; i < gridNumber * gridNumber; i++) {
 var sim = new Sim.Class(remote,gridNumber, cellWidth, cellHeight, allCells);
 sim.populateMap();
 //var island = new Island(100, 100, 100, 100, Math.PI/4, "black");
+
+//ServerGame.generateIslands(sim, gridNumber, cellWidth, cellHeight);
 
 var sim_t = 1000 / 30;
 var serializer = new Game.Serializer(sim);
@@ -149,6 +153,16 @@ io.on('connection', function(client){
   //  On tick
   client.on('client_update', function(data) {
     remote.updatePlayer(client.userid, data.state);
+    for (var i = 0; i < data.updates.length; i++){
+      //  Only allow deserialization of certain objects
+      var serial = data.updates[i];
+      if (serial.type === "cannonball"){
+        var cannonball = serializer.deserializeObject(serial);
+        var cell = cannonball.cell;
+        cell.gameObjects.push(cannonball);
+        cell.addUpdate('create_cannonball', cannonball);
+      }
+    }
   });
 
   //  On client disconnect
@@ -168,6 +182,9 @@ io.on('connection', function(client){
       playerCount + ' players');
     client.broadcast.emit('player_left',  {id : client.userid});
     remote.removePlayer(client.userid);
+    if (sim.UIDtoShip[client.userid]){
+      sim.removeObject(sim.UIDtoShip[client.userid]);
+    }
 
     //  Stop simulating if noone is connected
     if (playerCount < 1){
