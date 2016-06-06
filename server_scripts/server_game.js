@@ -6,6 +6,36 @@ var Ship = require('../public/ship.js').Class;
 var TestObj = require('../public/sim.js').TestObj;
 //var Treasure = require('../public/treasure.js');
 
+const seaHue = 222;
+const seaSat = 49;
+
+const landHue = 123;
+const landSat = 52;
+
+const beachHue = 60;
+const beachSat = 35;
+
+const mountainSat = 7;
+const mountainHue = 222;
+
+const seaLevel = 0.55;
+const landLevel = 0.65;
+const mountainLevel = 0.75;
+
+function makeHSL(h, s, l){
+  return "hsl("+h.toString()+", "+s.toString()+"%, "+l.toString()+"%)";
+}
+function islandColor(height){
+  if (height > mountainLevel){
+    return makeHSL(mountainHue, mountainSat, height*100);
+  }
+  else if (height > landLevel){
+    return makeHSL(landHue, landSat, height*100);
+  }
+  else{
+    return makeHSL(beachHue, beachSat, height*100);
+  }
+}
 function generateIslands(sim, gridNumber, cellWidth, cellHeight){
   var perlin = new Perlin(8 * gridNumber, 8 * gridNumber, 6, 0.5);
   var island_size = 32;
@@ -27,7 +57,7 @@ function generateIslands(sim, gridNumber, cellWidth, cellHeight){
     for (var y = 0; y < max_y; y+= island_size){
       var l = perlin.perlin(x / max_x, y / max_y);
       if (l > sea_level){
-        var color = "green";
+        var color = islandColor(l);
         var i = new Island(sim, x, y, island_size, island_size, 0, color);
         sim.coordinateToCell(x,y).gameObjects.push(i);
         //island_col.push(i);
