@@ -206,12 +206,14 @@ function Sim(remote, gridNumber, cellWidth, cellHeight, activeCells){
     var x_coord = Math.floor(x / this.cellWidth);
     var y_coord = Math.floor(y / this.cellHeight);
     var x_max = Math.floor((x + width) / this.cellWidth);
+    x_max = Math.min(gridNumber-1, x_max);
     var y_max = Math.floor((y + height) / this.cellWidth);
+    y_max = Math.min(gridNumber-1, y_max);
     var ret = [];
     for (var y = y_coord; y <= y_max; y++){
       for (var x = x_coord; x <= x_max; x++){
         ret.push({cell: this.cellTupleToNumber({x:x, y:y}),
-                  ret: f(this.grid[x_coord][y_coord], aux)});
+                  ret: f(this.grid[x][y], aux)});
       }
     }
     return ret;

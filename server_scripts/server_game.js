@@ -112,13 +112,13 @@ function generateIslands(sim, gridNumber, cellWidth, cellHeight){
 }
 
 //  Check to see if a given x,y coordinate is safe to spawn a player
-var dangerMinDist = 800;
+var dangerMinDist = 600;
 var dangerousClasses = [
   Ship
   ,TestObj
   //,Treasure.Class
 ];
-var obstacleMinDist = 300;
+var obstacleMinDist = 200;
 var obstacleClasses = [
   Island,
   CosmeticIsland
@@ -138,7 +138,8 @@ function checkSafeSpawn(sim, x, y){
           for (var j = 0; j < dangerousClasses.length; j++){
             if (obj instanceof dangerousClasses[j]){
               var colObj = obj.getColObj();
-              if (Col.PointCircle({x:(colObj.x), y:(colObj.y)}, danger_circle)){
+              //if (Col.CircleCircle({origin:{x:colObj.x, y:colObj.y}, radius:10}, danger_circle)){
+              if (Col.PointCircle({x:colObj.x, y:colObj.y}, danger_circle)){
                 return false;
               }
             }
@@ -146,7 +147,8 @@ function checkSafeSpawn(sim, x, y){
           for (var j = 0; j < obstacleClasses.length; j++){
             if (obj instanceof obstacleClasses[j]){
               var colObj = obj.getColObj();
-              if (Col.PointCircle({x:(colObj.x), y:(colObj.y)}, obstacle_circle)){
+              if (Col.CircleCircle({origin:{x:colObj.x, y:colObj.y},
+                    radius:10}, obstacle_circle)){
                 return false;
               }
             }
@@ -156,11 +158,9 @@ function checkSafeSpawn(sim, x, y){
       });
   for (var i = 0; i < ret_list.length; i++){
     if (!ret_list[i].ret){
-      console.log("failing");
       return false;
     }
   }
-  console.log("passing");
   return true;
 }
 
