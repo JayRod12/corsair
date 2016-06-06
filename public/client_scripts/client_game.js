@@ -88,9 +88,9 @@ function drawBehindGrid(ctx){
 }
 
 var bg_frames = [];
-var bg_frame_count = 27;
+var bg_frame_count = 16;
 var bg_frame_wait = 0;
-var bg_frame_wait_time = 8;
+var bg_frame_wait_time = 15;
 for (var i = 0; i < bg_frame_count; i++){
   var bg_frame = new Image();
   bg_frame.src = "../media/bg/"+i+".jpeg";
@@ -105,7 +105,7 @@ function drawCellBackground(cx, cy, ctx){
     bg_frame_wait = 0;
   }
   ctx.drawImage(bg_frames[bg_frame_num], cx * meta.cellWidth, cy * meta.cellHeight, 
-    meta.cellWidth, meta.cellHeight);
+    meta.cellWidth + 2, meta.cellHeight + 2);
 //  ctx.fillStyle = seaColor;
 //  ctx.fillRect(cx*meta.cellWidth, cy*meta.cellHeight, meta.cellWidth+2,
 //      meta.cellHeight+2);
