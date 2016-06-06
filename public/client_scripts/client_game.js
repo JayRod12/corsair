@@ -88,7 +88,7 @@ function drawBehindGrid(ctx){
 }
 
 var bg_frames = [];
-var bg_frame_count = 14;
+var bg_frame_count = 27;
 var bg_frame_wait = 0;
 var bg_frame_wait_time = 8;
 for (var i = 0; i < bg_frame_count; i++){
