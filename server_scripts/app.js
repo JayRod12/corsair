@@ -35,6 +35,27 @@ sim.populateMap();
 
 ServerGame.generateIslands(sim, gridNumber, cellWidth, cellHeight);
 
+//  Testing safe spawn algorithm
+
+/*
+for (var i = 0; i < 250; i++){
+  var timeout = 10000;
+  var x, y;
+  while (timeout --> 0){
+    x = Math.random()*gridNumber * cellWidth;
+    y = Math.random()*gridNumber * cellHeight;
+    if (ServerGame.checkSafeSpawn(sim, x, y)) break;
+  }
+  if (timeout <= 0) {
+    console.log("breaking");
+    break;
+  }
+  var testObj = new Sim.TestObj(sim, {x:x, y:y, w:32, h:32});
+  //  Ugly
+  sim.coordinateToCell(x, y).gameObjects.push(testObj);
+}
+*/
+
 var sim_t = 1000 / 30;
 var serializer = new Game.Serializer(sim);
 
@@ -71,14 +92,25 @@ io.on('connection', function(client){
   //  Generate new client id associate with their connection
   client.userid = UUID();
 
-  //  TODO don't spawn on top of other people or in 'danger'
-  //  TODO fix initial vars
+  var initState;
+  var timeout = 1000;
+  var x, y;
+  while (timeout > 0){
+    x = Math.random()*gridNumber * cellWidth;
+    y = Math.random()*gridNumber * cellHeight;
+    if (ServerGame.checkSafeSpawn(sim, x, y)) break;
+  }
+  
+
+
   var initState = {
-    x: Math.random()*gridNumber * cellWidth,
-    y: Math.random()*gridNumber * cellHeight,
+    x: x,
+    y: y,
     angle: Math.random()*Math.PI*2,
     speed: 0
   };
+
+
 
   var ac = [];
   ac.push(sim.coordinateToCellNumber(initState.x, initState.y));

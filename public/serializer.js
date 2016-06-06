@@ -111,7 +111,7 @@ function Serializer(sim) {
       return ship;
     },
 
-    deserializeTestObj : function(state) {
+    test_obj : function(state) {
       return new Sim.TestObj(sim, state);
     }
 
