@@ -220,7 +220,6 @@ Array.prototype.intersection = function(a) {
 };
 
 function send_loop_func(){
-  //console.log('SocketList of length ' + socketList.length);
   socketList.forEach(function (client) {
     if (typeof client.cells == "undefined") {
       client.cells = [];
@@ -238,11 +237,9 @@ function send_loop_func(){
     // Replenish treasures
     var missing_treasures = treasure_number - sim.treasures.length;
     if (missing_treasures > 0) {
-      console.log('HEREEE@E@');
-      var new_treasures = ServerGame.generateTreasures(sim, gridNumber, cellWidth
+      ServerGame.generateTreasures(sim, gridNumber, cellWidth
           , cellHeight, missing_treasures);
       console.log(missing_treasures + ' NEW TREASURES');
-      //console.log(new_treasures);
     }
     //  Send buffered updates from all cells that we already have information
     //  about, no need to send all objects again, only the updates.
@@ -295,7 +292,6 @@ function serializeNewCells(new_cells) {
 function calculateCellsToSend(uid){
   var s = sim.getShip(uid);
   if (s == null) {
-    //console.log('No cells to send');
     return [];
   }
   var list = [];

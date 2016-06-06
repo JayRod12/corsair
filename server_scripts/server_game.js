@@ -132,7 +132,7 @@ function generateTreasures(sim, gridNumber, cellWidth, cellHeight, treasure_num)
     treasure = new Treasure(sim, x, y, val, hp);
     cell = sim.coordinateToCell(x, y);
     cell.addObject(treasure);
-    cell.addUpdate('new_treasure', treasure);
+    cell.addUpdate('add_treasure', treasure);
     new_treasures.push(treasure);
   }
   //sim.treasures = new_treasures;

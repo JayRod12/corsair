@@ -343,16 +343,6 @@ function Sim(remote, gridNumber, cellWidth, cellHeight, activeCells){
   }
 }
 
-function Treasure(xTreasure, yTreasure, onDraw) {
-    this.xTreasure = xTreasure;
-    this.yTreasure = yTreasure;
-    this.onDraw = onDraw;
-    this.serialize = function() {
-      // TODO
-      return null;
-    };
-}
-
 //  Probably factor out
 
 function checkCollision(object_1, object_2) {

@@ -435,7 +435,7 @@ function startClient() {
             sim.removeTreasure(treasure);
             break;
           case 'add_treasure':
-            var treasure = serializer.deserializeObject(update.data.o);
+            var treasure = serializer.deserializeObject(update.data);
             sim.treasures.push(treasure);
             treasure.cell.gameObjects.push(treasure);
             break;
