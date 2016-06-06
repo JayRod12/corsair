@@ -6,7 +6,6 @@ var Ship = require('../public/ship.js').Class;
 var TestObj = require('../public/sim.js').TestObj;
 //var Treasure = require('../public/treasure.js');
 
-
 function generateIslands(sim, gridNumber, cellWidth, cellHeight){
   var perlin = new Perlin(8 * gridNumber, 8 * gridNumber, 6, 0.5);
   var island_size = 32;
