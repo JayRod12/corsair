@@ -179,18 +179,34 @@ function drawCompass() {
   drawCompassScaled(player.state.x, player.state.y, nearest_treasure.x, nearest_treasure.y, 50);
 }
 
-function setupCompass() {
-  sim.treasures.sort(function(t1, t2) {
-    var d1x = player.state.x - t1.x;
-    var d1y = player.state.y - t1.y;
-    var d2x = player.state.x - t2.x;
-    var d2y = player.state.y - t2.y;
-    var d1 = d1x * d1x + d1y * d1y;
-    var d2 = d2x * d2x + d2y * d2y;
-    return d1 > d2;
-  });
-  //console.log(sim.treasures.map(function(t1) {return Math.sqrt((player.state.x - t1.x) * (player.state.x - t1.x) + (player.state.y - t1.y) * (player.state.y - t1.y));}));
+// Sort treasures by distance (squared but its the same)
+function insertionSort(array) {
+  var i, j, d1x, d1y, d2x, d2y, d1, d2, t1, t2, temp;
+  for (i = 1; i < array.length; i++) {
+    t1 = array[i];
+    d1x = player.state.x - t1.x;
+    d1y = player.state.y - t1.y;
+    d1 = d1x * d1x + d1y * d1y;
 
+    for (j = i - 1; j >= 0; j--) {
+      t2 = array[j];
+      d2x = player.state.x - t2.x;
+      d2y = player.state.y - t2.y;
+      d2 = d2x * d2x + d2y * d2y;
+      if (d2 > d1) {
+        temp = array[j];
+        array[j] = array[j+1];
+        array[j+1] = temp;
+      } else {
+        break;
+      }
+    }
+  }
+}
+function setupCompass() {
+  insertionSort(sim.treasures);
+
+  //console.log(sim.treasures.map(function(t1) {return Math.sqrt((player.state.x - t1.x) * (player.state.x - t1.x) + (player.state.y - t1.y) * (player.state.y - t1.y));}));
 
   if (sim.treasures.length > 0) {
     nearest_treasure = { x : sim.treasures[0].x, y : sim.treasures[0].y };
@@ -471,7 +487,7 @@ function onShipDeath() {
   $('#game_canvas').hide();
   $('body').css({'background':'black'});
   $('#welcomeScreen').fadeIn('slow');
-  console.log('Ship death' + mouse_x + ', ' + mouse_y);
+  console.log('Ship death ' + mouse_x + ', ' + mouse_y);
   endClient();
 }
 
@@ -496,7 +512,6 @@ function playClientGame(data) {
   our_id = data.id;
   sim = new Sim.Class(remote, meta.gridNumber, meta.cellWidth, meta.cellHeight,
     meta.activeCells);
-  console.log(sim);
   serializer = new Serializer.Class(sim);
   sim.treasures = serializer.deserializeArray(data.treasures);
 
@@ -535,7 +550,6 @@ function playClientGame(data) {
 
   if (typeof socket != "undefined") {
     socket.emit('on_connect_response', {name : our_name});
-    console.log('ON CONNECT RESPONSE');
   }
 }
 

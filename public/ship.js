@@ -105,11 +105,14 @@ function Ship(sim, state, uid, name, inputFunction){
         this.hp -= other_object.level;
       }
     } else if (other_object instanceof Treasure.Class) {
+      // TODO: ALL COLLISIONS ONLY ON SERVER
+      if (!server) {
+        return;
+      }
       this.gold += other_object.value;
       this.hp = Math.min(this.maxhp, this.hp + other_object.hp);
-      console.log(this.hp + ', ' + this.gold);
       other_object.cell.addUpdate('remove_treasure', other_object);
-      sim.removeObject(other_object);
+      sim.removeTreasure(other_object);
     }
 
    this.collided_timer = this.collided_basetime;

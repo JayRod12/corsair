@@ -170,14 +170,34 @@ function Sim(remote, gridNumber, cellWidth, cellHeight, activeCells){
   this.removeShip = function(ship){
     delete this.UIDtoShip[ship.uid];
   }
+
   this.removeTreasure = function(treasure) {
+    var cell = treasure.cell;
+    var found = false;
+    for (var i = 0; i < cell.gameObjects.length; i++) {
+      if (cell.gameObjects[i].x == treasure.x
+          && cell.gameObjects[i].y == treasure.y) {
+        cell.gameObjects.splice(i,1);
+        found = true;
+      }
+    }
+    if (!found) {
+      console.log('Treasure remove: found in cell :: ' + found);
+    }
+
+    found = false;
     for (var i = 0; i < this.treasures.length; i++) {
       if (this.treasures[i].cell == treasure.cell
           && this.treasures[i].x == treasure.x
           && this.treasures[i].y == treasure.y) {
         this.treasures.splice(i, 1); 
+        found = true;
         break;
       }
+    }
+
+    if (!found) {
+      console.log('Treasure remove: found in treasures :: ' + found);
     }
   };
 
@@ -318,10 +338,6 @@ function Sim(remote, gridNumber, cellWidth, cellHeight, activeCells){
 
     if (object instanceof Ship.Class){
       this.removeShip(object);
-    }
-
-    if (object instanceof Treasure.Class) {
-      this.removeTreasure(object);
     }
 
     if (typeof object.onDeath != "undefined") {

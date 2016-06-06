@@ -31,6 +31,7 @@ for (var i = 0; i < gridNumber * gridNumber; i++) {
 }
 
 var treasure_number = Math.floor(gridNumber * gridNumber / 4);
+var treasure_number = Math.floor(gridNumber * gridNumber / 2);
 var sim = new Sim.Class(remote,gridNumber, cellWidth, cellHeight, allCells);
 // serialized treasures
 ServerGame.generateTreasures(sim, gridNumber, cellWidth, cellHeight, treasure_number);
@@ -237,9 +238,11 @@ function send_loop_func(){
     // Replenish treasures
     var missing_treasures = treasure_number - sim.treasures.length;
     if (missing_treasures > 0) {
-      ServerGame.generateTreasures(sim, gridNumber, cellWidth
+      var new_treasures = ServerGame.generateTreasures(sim, gridNumber, cellWidth
           , cellHeight, missing_treasures);
-      console.log(missing_treasures + ' NEW TREASURES');
+      for (var i = 0; i < missing_treasures; i++) {
+        new_treasures[i].cell.addUpdate('add_treasure', new_treasures[i]);
+      }
     }
     //  Send buffered updates from all cells that we already have information
     //  about, no need to send all objects again, only the updates.
