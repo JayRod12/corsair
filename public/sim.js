@@ -214,6 +214,7 @@ function Sim(remote, gridNumber, cellWidth, cellHeight, activeCells){
                   ret: f(this.grid[x_coord][y_coord], aux)});
       }
     }
+    return ret;
   };
 
   // Tuple to number

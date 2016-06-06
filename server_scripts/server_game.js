@@ -102,18 +102,27 @@ function checkSafeSpawn(sim, x, y){
           let obj = cell.gameObjects[i];
           for (let j = 0; j < dangerousClasses; j++){
             if (obj instanceof dangerousClasses[j]){
-              
-              if (Col.CircleCircle({origin: obj.))
+              var colObj = obj.getColObj();
+              if (Col.PointCircle({x:(colObj.x), y:(colObj.y)}, danger_circle)){
+                return false;
+              }
             }
           }
           for (let j = 0; j < obstacleClasses; j++){
-
+            if (obj instanceof dangerousClasses[j]){
+              let colObj = obj.getColObj();
+              if (Col.PointCircle({x:(colObj.x), y:(colObj.y)}, obstacle_circl)){
+              return false;
+              }
+            }
           }
         }
+        return true;
       });
-
-  
-  var cell = sim.coordinateToCell
+  for (let i = 0; i < ret_list.length; i++){
+    if (!ret_list[i].ret) return false;
+  }
+  return true;
 }
 
 exports.checkSafeSpawn = checkSafeSpawn;

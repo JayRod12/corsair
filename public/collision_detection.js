@@ -76,7 +76,7 @@ function queryPointRectangleCollision(point, rectangle) {
 	return trav*trav + epsilon >= odv_p_square_length;
 }
 
-/*PRE: circles are objects with: {x, y, radius}*/
+/*PRE: circles are objects with: {origin {x y}, radius}*/
 function queryCircleCircleCollision(circle_1, circle_2) {
 	var odv = {x: circle_1.origin.x - circle_2.origin.x, 
 				     y: circle_1.origin.y - circle_2.origin.y};
@@ -85,10 +85,21 @@ function queryCircleCircleCollision(circle_1, circle_2) {
             + circle_2.radius*circle_2.radius >= odv_square_length;
 }
 
+/*PRE: circles are objects with: {x, y, radius}*/
+function queryPointCircleCollision(p, c) {
+	var diff_vect = {x: c.origin.x - p.x, 
+				           y: c.origin.y - p.y};
+
+  var dist_2 = diff_vect.x * diff_vect.x + diff_vect.y * diff_vect.y;
+
+  return dist_2 <= c.radius * c.radius + epsilon; 
+}
+
 /*PRE: points are objects with: {x, y}*/
 function queryPointPointCollision(p1, p2) {
-	return queryCircleCircleCollision({origin: p1, radius: 0}, 
-									                  {origin: p2, radius: 0});
+  return (p1 === p2); //  Think this is the right number of equals signs?
+	//return queryCircleCircleCollision({origin: p1, radius: 0}, 
+									                  //{origin: p2, radius: 0});
 }
 
 
@@ -133,6 +144,7 @@ console.log(queryRectangleRectangleCollision({x: 357, y: 548, height: 22, width:
 exports.RectRect = function(o1, o2){return queryRectangleRectangleCollision(o1, o2, true)};
 exports.PointRect = queryPointRectangleCollision;
 exports.PointPoint = queryPointPointCollision;
+exports.PointCircle = queryPointCircleCollision;
 exports.CircleCircle = queryCircleCircleCollision;
 exports.trimBranch = trimBranch;
 }(typeof exports === 'undefined' ? this.Col = {} : exports));
