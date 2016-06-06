@@ -15,13 +15,14 @@ var Sim = require('../public/sim.js');
 var Perlin = require('../public/perlin.js').Class;
 var ServerGame = require('./server_game.js');
 
+
 var remote = new Game.Remote();
 
 var socketList = [];
 
 // Game related data
 
-const gridNumber = 2;
+const gridNumber = 5;
 const cellWidth  = 1500;
 const cellHeight = 1500;
 var allCells = [];
@@ -29,11 +30,14 @@ for (var i = 0; i < gridNumber * gridNumber; i++) {
     allCells.push(i);
 }
 
+var treasure_number = Math.floor(gridNumber * gridNumber / 4);
 var sim = new Sim.Class(remote,gridNumber, cellWidth, cellHeight, allCells);
-sim.populateMap();
+// serialized treasures
+ServerGame.generateTreasures(sim, gridNumber, cellWidth, cellHeight, treasure_number);
+ServerGame.generateIslands(sim, gridNumber, cellWidth, cellHeight);
+ 
 //var island = new Island(100, 100, 100, 100, Math.PI/4, "black");
 
-ServerGame.generateIslands(sim, gridNumber, cellWidth, cellHeight);
 
 var sim_t = 1000 / 30;
 var serializer = new Game.Serializer(sim);
@@ -92,8 +96,9 @@ io.on('connection', function(client){
   };
 
   var new_cells_states = serializeNewCells(ac);
-  var data = {id : client.userid, names : remote.getPlayerNames(),
-        players : remote.getPlayers(), state: initState, meta: metadata, new_cells_states: new_cells_states };
+  var data = { id : client.userid, names : remote.getPlayerNames()
+             , players : remote.getPlayers(), state: initState, meta: metadata
+             , new_cells_states: new_cells_states, treasures: serializer.serializeArray(sim.treasures) };
   client.emit('on_connect', data);
 
 
@@ -230,6 +235,15 @@ function send_loop_func(){
     // Store active cells to compare during next loop
     client.cells = cells;
 
+    // Replenish treasures
+    var missing_treasures = treasure_number - sim.treasures.length;
+    if (missing_treasures > 0) {
+      console.log('HEREEE@E@');
+      var new_treasures = ServerGame.generateTreasures(sim, gridNumber, cellWidth
+          , cellHeight, missing_treasures);
+      console.log(missing_treasures + ' NEW TREASURES');
+      //console.log(new_treasures);
+    }
     //  Send buffered updates from all cells that we already have information
     //  about, no need to send all objects again, only the updates.
     var allBufferedUpdates = [];
@@ -242,12 +256,15 @@ function send_loop_func(){
                                 , updates: cell_updates });
       }
     }
+
     // Send all objects from the new cells (serialized)
     var new_cells_states = serializeNewCells(new_cells);
 
+
     // Prepare data
     var data = { players: remote.getPlayers(), active_cells:client.cells 
-               , updates: allBufferedUpdates, scoresTable: remote.getUIDtoScores(), new_cells: new_cells_states};
+               , updates: allBufferedUpdates, scoresTable: remote.getUIDtoScores()
+               , new_cells: new_cells_states };
 
     // Send
     client.emit('server_update', data);

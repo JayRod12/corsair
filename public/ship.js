@@ -1,5 +1,6 @@
 //NEW
 var loadGraphics = false;
+var server;
 if (typeof exports === 'undefined'){
   loadGraphics = true;
   //  Browser
@@ -7,11 +8,14 @@ if (typeof exports === 'undefined'){
   ship_image1.src = "../media/ship1.png";
   var ship_image2 = new Image();
   ship_image2.src = "../media/ship2.png";
+  server = false;
 }
 else{
   //  Server
   Cannon = require('../public/cannon.js');
   Game = require('../public/shared_game.js');
+  Treasure = require('../public/treasure.js');
+  server = true;
 }
 
 (function(exports){
@@ -25,8 +29,10 @@ function Ship(sim, state, uid, name, inputFunction){
   this.uid = uid;
   this.name = name;
 
-  this.hp = 100;
   this.speed_cap = 0.8;
+  this.gold = 0;
+  this.maxhp = 100;
+  this.hp = this.maxhp;
 
   //UPDATE THIS WHEN SCALE IS UPDATED.
   this.hypotenuse = Math.sqrt(shipBaseWidth*shipBaseWidth 
@@ -98,7 +104,14 @@ function Ship(sim, state, uid, name, inputFunction){
       if (typeof other_object.level !== "undefined"){
         this.hp -= other_object.level;
       }
+    } else if (other_object instanceof Treasure.Class) {
+      this.gold += other_object.value;
+      this.hp = Math.min(this.maxhp, this.hp + other_object.hp);
+      console.log(this.hp + ', ' + this.gold);
+      other_object.cell.addUpdate('remove_treasure', other_object);
+      sim.removeObject(other_object);
     }
+
    this.collided_timer = this.collided_basetime;
    //decrement health & handle physics;
   }
@@ -140,18 +153,16 @@ function Ship(sim, state, uid, name, inputFunction){
     //We undo our transformations for the next draw/calculations
     ctx.rotate(-this.state.angle);
 
-    if (this.hp < 99){
-      var hp_len = 80;
-      var hp_height = 8;
-      ctx.translate(-hp_len/2, -hp_height/2-50);
-      ctx.fillStyle = "red";
-      ctx.fillRect(0, 0, hp_len, hp_height); 
-      ctx.fillStyle = "green";
-      ctx.fillRect(0, 0, hp_len * this.hp/100, hp_height); 
-      ctx.translate(hp_len/2, hp_height/2+50);
-    }
+    var hp_len = 80;
+    var hp_height = 8;
+    ctx.translate(-hp_len/2, -hp_height/2-50);
+    ctx.fillStyle = "red";
+    ctx.fillRect(0, 0, hp_len, hp_height); 
+    ctx.fillStyle = "green";
+    ctx.fillRect(0, 0, hp_len * this.hp/100, hp_height); 
+    ctx.translate(hp_len/2, hp_height/2+50);
 
-      ctx.translate(-this.state.x, -this.state.y);
+    ctx.translate(-this.state.x, -this.state.y);
 
     // Ship name
     ctx.fillStyle = "white";
@@ -159,7 +170,7 @@ function Ship(sim, state, uid, name, inputFunction){
     ctx.textAlign="left"; 
     var metrics = ctx.measureText(this.name);
     var textWidth = metrics.width;
-    ctx.fillText(this.name, this.state.x - textWidth/2, this.state.y);
+    ctx.fillText(this.name, this.state.x - textWidth/2, this.state.y + height);
   }
 
   this.getColType = function() {return "rectangle"};

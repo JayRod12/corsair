@@ -1,6 +1,7 @@
 var Island = require('../public/island.js').Class;
 var CosmeticIsland = require('../public/island.js').Cosmetic;
 var Perlin = require('../public/perlin.js').Class;
+var Treasure = require('../public/treasure.js').Class;
 
 
 function generateIslands(sim, gridNumber, cellWidth, cellHeight){
@@ -110,8 +111,38 @@ function generateIslands(sim, gridNumber, cellWidth, cellHeight){
       */
     }
   }
-
 }
 
+
+function generateTreasures(sim, gridNumber, cellWidth, cellHeight, treasure_num) {
+  var maxHP = 80;
+  var minHP = 40;
+  var maxVal = 5000;
+  var minVal = 500;
+  var prob_val = 0.8;
+  var x, y, val, hp, treasure, cell;
+
+  // Serialized version of all treasures
+  var new_treasures = [];
+  for (var i = 0; i < treasure_num; i++) {
+    x = Math.random() * gridNumber * cellWidth;
+    y = Math.random() * gridNumber * cellHeight;
+    val = Math.random() > prob_val ? Math.random() * maxVal : Math.random() * minVal;
+    hp = minHP + Math.random() * (maxHP - minHP);
+    treasure = new Treasure(sim, x, y, val, hp);
+    cell = sim.coordinateToCell(x, y);
+    cell.addObject(treasure);
+    cell.addUpdate('new_treasure', treasure);
+    new_treasures.push(treasure);
+  }
+  //sim.treasures = new_treasures;
+  Array.prototype.push.apply(sim.treasures, new_treasures);
+  //console.log(sim.treasures);
+  //console.log(new_treasures);
+  return new_treasures;
+}
+
+
+exports.generateTreasures = generateTreasures;
 exports.generateIslands = generateIslands;
 

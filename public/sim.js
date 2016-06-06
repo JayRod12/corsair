@@ -11,6 +11,7 @@ else{
   Ship = require('../public/ship.js');
   Col = require('../public/collision_detection.js');
   Island = require('../public/island.js');
+  Treasure = require('../public/treasure.js');
   server = true;
 }
 
@@ -84,6 +85,10 @@ function Cell(x, y, gridNumber) {
   this.clearUpdates = function() {
     this.bufferedUpdates = [];
   }
+  
+  this.addObject = function(object) {
+    this.gameObjects.push(object);
+  }
 }
 
 // Update cell in which the object is
@@ -94,29 +99,30 @@ function updateCell(sim, object, x, y) {
     console.log('updateCell::Invalid cells ' + curCell + '.');
     return;
   }
-  if (curCell != realCell) {
-    var found = 0;
-    for (var i = 0; i < curCell.gameObjects.length; i++){
-      if (curCell.gameObjects[i] == object) {
-        curCell.gameObjects.splice(i,1);
-        found = 1;
-      }
-    }
 
-    if (found == 0) {
-      console.log('updateCell::Could not remove object from previous current cell');
-      return;
+  if (curCell != realCell) {
+    if (realCell == null) {
+      sim.removeObject(object);
+      object.cell = null;
     } else {
-      if (realCell == null) {
-        // Object has gone out of the grid, delete it
-        sim.removeObject(object);
-      } else {
-        if (server) {
-          realCell.addUpdate('object_enter_cell', object);
+      var found = false;
+      for (var i = 0; i < curCell.gameObjects.length; i++){
+        if (curCell.gameObjects[i] == object) {
+          curCell.gameObjects.splice(i,1);
+          found = true;
         }
-        realCell.gameObjects.push(object);
-        object.cell = realCell;
       }
+
+      if (!found) {
+        console.log('updateCell::Could not remove object from previous current cell');
+      }
+
+      if (server) {
+        realCell.addUpdate('object_enter_cell', object);
+      }
+      realCell.gameObjects.push(object);
+      object.cell = realCell;
+
     }
   }
 }
@@ -137,6 +143,7 @@ function Sim(remote, gridNumber, cellWidth, cellHeight, activeCells){
   this.activeCells = activeCells;
   this.remote = remote;
   this.UIDtoShip = {};
+  this.treasures = [];
 
   this.getShip = function(uid) {
     return this.UIDtoShip[uid];
@@ -163,6 +170,17 @@ function Sim(remote, gridNumber, cellWidth, cellHeight, activeCells){
   this.removeShip = function(ship){
     delete this.UIDtoShip[ship.uid];
   }
+  this.removeTreasure = function(treasure) {
+    for (var i = 0; i < this.treasures.length; i++) {
+      if (this.treasures[i].cell == treasure.cell
+          && this.treasures[i].x == treasure.x
+          && this.treasures[i].y == treasure.y) {
+        this.treasures.splice(i, 1); 
+        break;
+      }
+    }
+  };
+
   this.grid = new Array(this.gridNumber)
   for (var i = 0; i < this.gridNumber; i++) {
     this.grid[i] = new Array(this.gridNumber);
@@ -184,20 +202,6 @@ function Sim(remote, gridNumber, cellWidth, cellHeight, activeCells){
     }
   };
 
-
-  var xTreasure = 300;
-  var yTreasure = 300;
-
-  this.populateMap = function(drawTreasure, drawIsland, drawCoins, drawRocks) {
-  /*
-    var treasure = new Treasure(xTreasure, yTreasure, drawTreasure);
-	  var example_island = new Island.Class(this, 500, 500, 800, 40, Math.PI/4,
-													"white");  
-    var cell = this.coordinateToCell(xTreasure, yTreasure);
-    cell.staticObjects.push(treasure);
-		cell.gameObjects.push(example_island);
-    */
-  };
 
   //  Given a function f of a cell and some auxilary data,
   //  apply that function to all cells in a given area
@@ -300,14 +304,24 @@ function Sim(remote, gridNumber, cellWidth, cellHeight, activeCells){
 
   this.removeObject = function(object) {
     var cell = object.cell;
+    var found = false;
     for (var i = 0; i < cell.gameObjects.length; i++){
       if (cell.gameObjects[i] == object) {
         cell.gameObjects.splice(i,1);
+        found = true;
       }
+    }
+
+    if (!found) {
+      console.log('Remove object didnt find object in cell');
     }
 
     if (object instanceof Ship.Class){
       this.removeShip(object);
+    }
+
+    if (object instanceof Treasure.Class) {
+      this.removeTreasure(object);
     }
 
     if (typeof object.onDeath != "undefined") {

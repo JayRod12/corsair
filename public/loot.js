@@ -61,4 +61,4 @@ function Loot(x, y, value) {
 }
 
 exports.Class = Loot;
-})(typeof exports == 'undefined' ? this.Island = {} : exports);
+})(typeof exports == 'undefined' ? this.Loot = {} : exports);

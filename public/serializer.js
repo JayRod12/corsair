@@ -7,6 +7,7 @@ else{
   Game = require('../public/shared_game.js');
   Sim = require('../public/sim.js');
   Ship = require('../public/ship.js');
+  Treasure = require('../public/treasure.js');
 }
 
 (function(exports){
@@ -68,7 +69,9 @@ function Serializer(sim) {
   this.deserializeObjFunctions = {
 
     //  Identity function
-    treasure : function(o) {return o},
+    treasure : function(o) {
+      return new Treasure.Class(sim, o.x, o.y, o.value, o.hp);
+    },
 
     island : function(o) {
       return new Island.Class(sim, o.x, o.y, o.h, o.w, o.angle, o.color); 

@@ -51,7 +51,7 @@ function Cannon(ship) {
         var offsetY = spacing * (cannons / 2 - i) * Math.sin(ship.state.angle);
         var ball = cannonBallFromLocal(ship, offsetX, offsetY, side, ballSpeed, level);
         toSendServer.push(ball.serialize());
-        var cell = ship.sim.coordinateToCell(ship.state.x,ship.state.y);
+        var cell = ship.sim.coordinateToCell(ship.state.x + offsetX,ship.state.y + offsetY);
         cell.gameObjects.push(ball);
       }
 
@@ -105,6 +105,7 @@ function CannonBall(sim, uid, state, level) {
   this.uid = uid;
   this.state = state;
   this.level = level;
+  this.life = level * 100;
 
   this.cell = this.sim.coordinateToCell(this.state.x, this.state.y);
 

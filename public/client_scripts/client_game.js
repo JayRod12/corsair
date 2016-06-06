@@ -21,6 +21,9 @@ var player;
 var meta;
 var our_id;
 
+// Game objects
+var nearest_treasure = { x : -1, y : -1 };
+
 // Game loops
 var server_loop = 0;
 var client_loop = 0;
@@ -132,16 +135,6 @@ function drawCellBackground(cx, cy, ctx){
 */
 
 
-var treasureX = 300;
-var treasureY = 300;
-
-function drawTreasure() {
-    ctx.beginPath();
-    ctx.arc(treasureX, treasureY, 10, 2 * Math.PI, false);
-    ctx.fillStyle = "yellow";
-    ctx.fill();
-    ctx.closePath();
-}
 
 var colors = drawRandomColors();
 
@@ -183,7 +176,27 @@ function drawScore() {
 
 
 function drawCompass() {
-  drawCompassScaled(player.state.x, player.state.y, treasureX, treasureY, 50);
+  drawCompassScaled(player.state.x, player.state.y, nearest_treasure.x, nearest_treasure.y, 50);
+}
+
+function setupCompass() {
+  sim.treasures.sort(function(t1, t2) {
+    var d1x = player.state.x - t1.x;
+    var d1y = player.state.y - t1.y;
+    var d2x = player.state.x - t2.x;
+    var d2y = player.state.y - t2.y;
+    var d1 = d1x * d1x + d1y * d1y;
+    var d2 = d2x * d2x + d2y * d2y;
+    return d1 > d2;
+  });
+  //console.log(sim.treasures.map(function(t1) {return Math.sqrt((player.state.x - t1.x) * (player.state.x - t1.x) + (player.state.y - t1.y) * (player.state.y - t1.y));}));
+
+
+  if (sim.treasures.length > 0) {
+    nearest_treasure = { x : sim.treasures[0].x, y : sim.treasures[0].y };
+  } else {
+    nearest_treasure = { x : 0, y : 0 };
+  }
 }
 
 function drawFps() {
@@ -290,6 +303,7 @@ function clientTick(){
     mouse_y = (mouse_screen_y/viewport.scale + viewport.y);
 
     sim.tick(delta);
+    setupCompass();
     draw();
   }
 }
@@ -303,9 +317,6 @@ function updateHighScoresTable(global) {
 function addServerShip(userid, name, state){
   console.log("adding new player");
   remote.newPlayer(userid, name, state);
-  //sim.addShip(userid, state, userid,
-  //    Game.createServerShipInput(userid));
-
 }
 
 //  Update the server about the player's position
@@ -414,10 +425,19 @@ function startClient() {
             break;
           case 'create_cannonball':
             //  CHECK IF OWN CANNONBALL
-              if (update.data.o.uid === our_id) break;
+            if (update.data.o.uid === our_id) break;
 
-              var obj = serializer.deserializeObject(update.data);
-              obj.cell.gameObjects.push(obj);
+            var obj = serializer.deserializeObject(update.data);
+            obj.cell.gameObjects.push(obj);
+            break;
+          case 'remove_treasure':
+            var treasure = serializer.deserializeObject(update.data);
+            sim.removeTreasure(treasure);
+            break;
+          case 'add_treasure':
+            var treasure = serializer.deserializeObject(update.data.o);
+            sim.treasures.push(treasure);
+            treasure.cell.gameObjects.push(treasure);
             break;
           default:
             console.log("Unrecognised command from server " + update.name);
@@ -429,6 +449,8 @@ function startClient() {
     deserializeNewStates(data.new_cells);
     // Sim will only draw the active cells
     sim.activeCells = data.active_cells;
+
+
   });
 }
 
@@ -475,8 +497,9 @@ function playClientGame(data) {
   sim = new Sim.Class(remote, meta.gridNumber, meta.cellWidth, meta.cellHeight,
     meta.activeCells);
   console.log(sim);
-  //sim.populateMap(drawTreasure);
   serializer = new Serializer.Class(sim);
+  sim.treasures = serializer.deserializeArray(data.treasures);
+
   deserializeNewStates(data.new_cells_states);
   
   updateHighScoresTable(data.scoresTable);
@@ -495,9 +518,12 @@ function playClientGame(data) {
   var our_name = (localStorage['nickname'] == "") ?  randomPirate : localStorage['nickname'];
   remote.newPlayer(our_id, our_name, data.state);
   player = sim.addShip(our_id, our_name, data.state, localShipInput);
-  player.scale = 1 + Math.random() * 2;
+  player.scale = 1;
   player.hp = player.scale * 100;
   player.onDeath = onShipDeath;
+
+  // Make compass point to nearest treasure
+  setupCompass();
 
   //  Set our world up in the config described by the server
   for (var userid in data.players){
