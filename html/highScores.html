@@ -1,20 +1,25 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
 <head>
 	<meta charset="UTF-8">
 	<title>High Scores</title>
-	<link rel="stylesheet" href="style/highScores.css">
-	<link href='https://fonts.googleapis.com/css?family=Josefin+Sans' rel='stylesheet' type='text/css'>
+
+
 </head>
+
+
+<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+<script src="top_scores.js"></script>
+<div ng-app="app" ng-controller="controller">
+			<tr ng-repeat="name in data">
+					<td>{{name}}</td>
+			</tr>
+</div>
+
 <body>
-	<form action="/" method="get">
-    	<button id="goBackButton"><img id="goBackImage" 
-      		src="media/goBack.png" alt="Go Back"></button>
-  	</form>
-	<h1>Hall of Fame</h1>
-	<div id="tableContainer">
-		<table>
-			<tr id="first">
+
+			<!--
+		  <tr id="first">
 				<td>Nacho</td>
 				<td>13832</td>
 			</tr>
@@ -53,8 +58,7 @@
 			<tr>
 				<td>Bye</td>
 				<td>938</td>
-			</tr>
-		</table>
-	</div>
+			</tr> -->
+
 </body>
-</html>
+</HTML>

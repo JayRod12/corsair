@@ -25,6 +25,10 @@ app.get('/highScores', function(req, res) {
   res.sendFile(path.resolve(__dirname + '/../html/highScores.html'));
 });
 
+app.get('/top10', function(req, res) {
+  Database.getTopTen(res);
+});
+
 http.listen(process.env.PORT || port, function() {
   console.log('Listening on 3000');
 });
