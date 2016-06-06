@@ -93,7 +93,7 @@ function Ship(sim, state, uid, name, inputFunction){
   this.collisionHandler = function(other_object) {
 	  /*TODO: different cases (possibly) i.e. what if 
   		it's a cannonball I've collided with?*/
-    if (instanceof other_object == Cannon.CannonBall){
+    if (other_object instanceof Cannon.CannonBall){
       if (other_object.uid === this.uid) return;
       if (typeof other_object.level !== "undefined"){
         this.hp -= other_object.level;
