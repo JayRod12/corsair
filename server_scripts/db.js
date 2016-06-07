@@ -19,7 +19,6 @@ function saveFinalScore(name,score){
 
     console.log('Connected with database');
     var query = client.query("INSERT INTO scores(name,score,ts) values($1,$2,now())", [name,score]);
-
   });
 }
 
@@ -42,59 +41,6 @@ function getTopTen(res) {
   });
   return;
 }
-//var query = client.query("CREATE TABLE IF NOT EXISTS scores(name varchar(64), score integer, ts timestamp)");
-//client.query("INSERT INTO scores(name, score) values($1, $2)", ['Mery', db]);
-//client.query("INSERT INTO scores(name, score) values($1, $2)", ['nacho', 1]);
-//console.log("Connected with database");
 
-//function saveFinalScore(name,score) {
-  //var query = client.query("INSERT INTO scores(name,score,ts) values($1,$2,now())", [name,score]);
-
-// UNUSED
-//  query.on("end", function (result) {
-//      console.log(JSON.stringify(result.rows, null, "    "));
-//      client.end();
-//  });
-
-//}
-
-// app.listen(3000,function(){
-// console.log("It's Started on PORT 3000");
-// });
-//
-// app.get('/',function(req,res){
-// console.log("Done this")
-// res.sendfile('/../html/index.html');
-//
-// });
-
-/*
-* Here we will call Database.
-* Fetch news from table.
-* Return it in JSON.
-*/
-// app.get('/load',function(req,res){
-// client.query("SELECT * from scores",function(err,rows){
-// if(err)
-// {
-// console.log("Problem with psql"+err);
-// }
-// else
-// {
-// res.end(JSON.stringify(rows));
-// }
-// });
-// });
-
-
-
-// var allRows = [];
-// var query = client.query("SELECT name, score FROM scores ORDER BY score DESC");
-//
-// query.on("row", function (row) {
-//    allRows.push(row);
-// });
-// console.log(allRows);
-//
 exports.saveFinalScore = saveFinalScore;
 exports.getTopTen = getTopTen;

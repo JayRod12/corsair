@@ -11,8 +11,7 @@
 <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
 <script src="top_scores.js"></script>
 <div ng-app="app" ng-controller="controller">
-			<tr ng-repeat="name in data">
-					<td>{{name}}</td>
+			<li ng-repeat="o in data track by $index"> {{o}} </l>
 			</tr>
 </div>
 
