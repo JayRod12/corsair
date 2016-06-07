@@ -221,6 +221,15 @@ Array.prototype.intersection = function(a) {
 };
 
 function send_loop_func(){
+  // Replenish treasures
+  var missing_treasures = treasure_number - sim.treasures.length;
+  if (missing_treasures > 0) {
+    var new_treasures = ServerGame.generateTreasures(sim, gridNumber, cellWidth
+        , cellHeight, missing_treasures);
+    for (var i = 0; i < missing_treasures; i++) {
+      new_treasures[i].cell.addUpdate('add_treasure', new_treasures[i]);
+    }
+  }
   socketList.forEach(function (client) {
     if (typeof client.cells == "undefined") {
       client.cells = [];
@@ -235,15 +244,6 @@ function send_loop_func(){
     // Store active cells to compare during next loop
     client.cells = cells;
 
-    // Replenish treasures
-    var missing_treasures = treasure_number - sim.treasures.length;
-    if (missing_treasures > 0) {
-      var new_treasures = ServerGame.generateTreasures(sim, gridNumber, cellWidth
-          , cellHeight, missing_treasures);
-      for (var i = 0; i < missing_treasures; i++) {
-        new_treasures[i].cell.addUpdate('add_treasure', new_treasures[i]);
-      }
-    }
     //  Send buffered updates from all cells that we already have information
     //  about, no need to send all objects again, only the updates.
     var allBufferedUpdates = [];
