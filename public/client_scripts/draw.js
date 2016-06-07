@@ -39,12 +39,19 @@ var prerenderClasses = [
 ];
 
 function prerenderBackground(cell) {
-  console.log('preing');
   var canvas = document.createElement('canvas');
   canvas.width = meta.cellWidth;
   canvas.height = meta.cellHeight;
   var render_target = canvas.getContext('2d');
   render_target.translate(-cell.x * meta.cellWidth, -cell.y * meta.cellHeight);
+  for (var i = 0; i < cell.prerenderObjects.length; i++){
+    cell.prerenderObjects[i].onDraw(render_target);
+  }
+
+  //  Clear objects
+  cell.prerenderObjects = [];
+
+  /*
   var go = cell.gameObjects;  
   for (var i = 0; i < go.length; i++){
     for (var j = 0; j < prerenderClasses.length; j++){
@@ -53,6 +60,7 @@ function prerenderBackground(cell) {
       }
     }
   }
+  */
   render_target.translate(cell.x * meta.cellWidth, cell.y * meta.cellHeight);
   return canvas;
 }

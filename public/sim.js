@@ -26,6 +26,7 @@ function Cell(x, y, gridNumber, width, height) {
   this.gameObjects = [];
   this.staticObjects = [];
   this.drawObjects = [];
+  this.prerenderObjects = [];
   this.colObjects = [];
   this.bufferedUpdates = [];
 
@@ -34,7 +35,9 @@ function Cell(x, y, gridNumber, width, height) {
     //its work!
     this.checkCollisions();
     for (var i = 0; i < this.gameObjects.length; i++){
-      this.gameObjects[i].onTick(dt);
+      if (typeof this.gameObjects[i].onTick !== "undefined"){
+        this.gameObjects[i].onTick(dt);
+      }
     }
   }
 
@@ -69,22 +72,30 @@ function Cell(x, y, gridNumber, width, height) {
   }
 
   this.addObject = function(object) {
-    this.gameObjects.push(object);
+
+    if (typeof object.onTick !== "undefined" || server){
+      this.gameObjects.push(object);
+    }
+
     if (!server){
       if (typeof object.onDraw !== "undefined"){
-        var add = true;
+        var pre = false;
         for (var i = 0; i < prerenderClasses.length; i++){
           if (object instanceof prerenderClasses[i]){
-            add = false;
+            console.log('preee');
+            pre = true;
             break;
           }
-          this.drawObjects.push(object);
         }
+        if (!pre) this.drawObjects.push(object);
+        else this.prerenderObjects.push(object);
       }
     }
+
     if (typeof object.getColType !== "undefined"){
       this.colObjects.push(object);
     }
+
   }
 
 

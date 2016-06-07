@@ -304,6 +304,7 @@ function deserializeNewStates(new_cells_states) {
                 .filter(function(x) { return x != null; });
 
     for (var j = 0; j < objects.length; j++){
+      console.log(objects[j]);
       cell.addObject(objects[j]);
     }
 

@@ -9,18 +9,18 @@ var TestObj = require('../public/sim.js').TestObj;
 const seaHue = 222;
 const seaSat = 49;
 
-const landHue = 123;
-const landSat = 52;
+const landHue = 94;
+const landSat = 45;
 
-const beachHue = 60;
-const beachSat = 35;
+const beachHue = 63;
+const beachSat = 46;
 
 const mountainSat = 7;
 const mountainHue = 222;
 
 const seaLevel = 0.55;
-const landLevel = 0.65;
-const mountainLevel = 0.75;
+const landLevel = 0.58;
+const mountainLevel = 0.65;
 
 function makeHSL(h, s, l){
   return "hsl("+h.toString()+", "+s.toString()+"%, "+l.toString()+"%)";
@@ -32,8 +32,11 @@ function islandColor(height){
   else if (height > landLevel){
     return makeHSL(landHue, landSat, height*100);
   }
-  else{
+  else if (height > seaLevel){
     return makeHSL(beachHue, beachSat, height*100);
+  }
+  else {
+    return makeHSL(seaHue, seaSat, height*100);
   }
 }
 function generateIslands(sim, gridNumber, cellWidth, cellHeight){
@@ -56,12 +59,19 @@ function generateIslands(sim, gridNumber, cellWidth, cellHeight){
     //var island_col = [];
     for (var y = 0; y < max_y; y+= island_size){
       var l = perlin.perlin(x / max_x, y / max_y);
+      var color = islandColor(l);
       if (l > sea_level){
-        var color = islandColor(l);
         var i = new Island(sim, x, y, island_size, island_size, 0, color);
         sim.coordinateToCell(x,y).addObject(i);
         //island_col.push(i);
         islands[Math.floor(x/island_size)][Math.floor(y/island_size)] = i;
+      }
+      else{
+        /*
+        var i = new CosmeticIsland(sim, x, y, island_size, island_size, 0, color);
+        sim.coordinateToCell(x,y).addObject(i);
+
+        */
       }
       //island_col.push(false);
     }
