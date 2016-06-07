@@ -205,13 +205,15 @@ function Sim(remote, gridNumber, cellWidth, cellHeight, activeCells){
   this.applyToCells = function(x, y, width, height, f, aux){
     var x_coord = Math.floor(x / this.cellWidth);
     var y_coord = Math.floor(y / this.cellHeight);
-    var x_cellcount = Math.floor(width / this.cellWidth);
-    var y_cellcount = Math.floor(height / this.cellWidth);
+    var x_max = Math.floor((x + width) / this.cellWidth);
+    x_max = Math.min(gridNumber-1, x_max);
+    var y_max = Math.floor((y + height) / this.cellWidth);
+    y_max = Math.min(gridNumber-1, y_max);
     var ret = [];
-    for (var y = y_coord; y < y_cellcount; y++){
-      for (var x = x_coord; x < x_cellcount; x++){
+    for (var y = y_coord; y <= y_max; y++){
+      for (var x = x_coord; x <= x_max; x++){
         ret.push({cell: this.cellTupleToNumber({x:x, y:y}),
-                  ret: f(this.grid[x_coord][y_coord], aux)});
+                  ret: f(this.grid[x][y], aux)});
       }
     }
     return ret;
@@ -422,6 +424,8 @@ function parseColObjectsFailure(t1, t2, o1, o2){
 function TestObj(sim, state) {
   this.sim = sim;
   this.state = state;
+  this.hypotenuse = Math.sqrt(this.state.w * this.state.w + this.state.h *
+      this.state.h);
   this.onTick = function(){return true;};
   this.onDraw = function(ctx) {
     ctx.translate(this.state.x, this.state.y);
@@ -431,6 +435,18 @@ function TestObj(sim, state) {
   };
   this.serialize = function() {
     return {type: "test_obj", o: this.state};
+  };
+
+  this.getColType = function() {return "rectangle"};
+  this.getColObj = function() {
+    return {
+      x: this.state.x,
+      y: this.state.y,
+      width: this.state.w,
+      height: this.state.h,
+      hypotenuse: this.hypotenuse,
+      angle: this.state.a
+    }
   };
 }
 
