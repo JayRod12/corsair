@@ -67,11 +67,9 @@ function generateIslands(sim, gridNumber, cellWidth, cellHeight){
         islands[Math.floor(x/island_size)][Math.floor(y/island_size)] = i;
       }
       else{
-        /*
         var i = new CosmeticIsland(sim, x, y, island_size, island_size, 0, color);
-        sim.coordinateToCell(x,y).addObject(i);
+        sim.coordinateToCell(x,y).serverObjects.push(i);
 
-        */
       }
       //island_col.push(false);
     }

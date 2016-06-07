@@ -56,10 +56,10 @@ for (var i = 0; i < 250; i++){
 }
 */
 
-var sim_t = 1000 / 30;
+var sim_t = 1000 / 40;
 var serializer = new Game.Serializer(sim);
 
-var send_t = 1000 / 30;
+var send_t = 1000 / 40;
 var test_t = 1000 / 100;
 var sim_loop = 0;
 var send_loop = 0;
@@ -302,10 +302,9 @@ function serializeNewCells(new_cells) {
   var new_cells_states = [];
   for (var i = 0; i < new_cells.length; i++) {
     var cell_game_objects = sim.numberToCell(new_cells[i]).gameObjects;
-    var cell_static_objects = sim.numberToCell(new_cells[i]).staticObjects;
-    var cell_state = { game_obj: serializer.serializeArray(cell_game_objects)
-                     , static_obj: serializer.serializeArray(cell_static_objects) };
-
+    var cell_server_objects = sim.numberToCell(new_cells[i]).serverObjects;
+    var cell_state = { game_obj:
+      serializer.serializeArray(cell_game_objects).concat(serializer.serializeArray(cell_server_objects))};
     new_cells_states.push({ num: new_cells[i]
                           , state: cell_state });
   }

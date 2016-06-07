@@ -29,6 +29,9 @@ function Cell(x, y, gridNumber, width, height) {
   this.prerenderObjects = [];
   this.colObjects = [];
   this.bufferedUpdates = [];
+  if (server){
+    this.serverObjects = [];
+  }
 
   this.tick = function(dt){
     //Check collisions first, important so that collisionHandler can do 
