@@ -164,20 +164,30 @@ function updateCell(sim, object, x, y) {
         found = 1;
       }
     }
+    for (var i = 0; i < curCell.drawObjects.length; i++){
+      if (curCell.drawObjects[i] == object) {
+        curCell.drawObjects.splice(i,1);
+        found = 1;
+      }
+    }
+    for (var i = 0; i < curCell.colObjects.length; i++){
+      if (curCell.colObjects[i] == object) {
+        curCell.colObjects.splice(i,1);
+        found = 1;
+      }
+    }
 
     if (found == 0) {
       console.log('updateCell::Could not remove object from previous current cell');
-      return;
+    }
+    if (realCell == null) {
+      // Object has gone out of the grid, delete it
+      sim.removeObject(object);
     } else {
-      if (realCell == null) {
-        // Object has gone out of the grid, delete it
-        sim.removeObject(object);
-      } else {
-        if (server) {
-          realCell.addUpdate('object_enter_cell', object);
-        }
-        realCell.addObject(object);
-        object.cell = realCell;
+      object.cell = realCell;
+      realCell.addObject(object);
+      if (server) {
+        realCell.addUpdate('object_enter_cell', object);
       }
     }
   }
