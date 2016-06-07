@@ -30,8 +30,6 @@ var ping_timeout = 1000;
 var ping_sent_time;
 var localHighScoreTable = {};
 const MAXIMUM_SPEED = 4;
-var client_time = 0;
-var time_mod = 1;
 
 
 // Constants for the game
@@ -333,9 +331,6 @@ function playClientGame(data) {
   remote = new Game.Remote();
 
   meta = data.meta;
-
-  client_time = data.server_time;
-  time_mod = meta.server_time_mod;
 
   our_id = data.id;
   sim = new Sim.Class(remote, meta.gridNumber, meta.cellWidth, meta.cellHeight,
