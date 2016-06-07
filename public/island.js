@@ -22,12 +22,6 @@ function Island(sim, x, y, height, width, angle, color) {
 
   this.cell = sim.coordinateToCell(x, y);
 
-  this.onTick = function(dt) {
-    if(this.collided_timer > 0) {
-      this.collided_timer -= dt;
-    }
-  }
-
   this.collisionHandler = function(other_object) {
     //expect instanceoffing
     this.collided_timer = this.collided_basetime;
@@ -89,12 +83,6 @@ function CosmeticIsland(sim, x, y, height, width, angle, color) {
 	this.color = color;
 
   this.cell = sim.coordinateToCell(x, y);
-
-  this.onTick = function(dt) {
-    if(this.collided_timer > 0) {
-      this.collided_timer -= dt;
-    }
-  }
 
   this.onDraw = function(ctx){
     //We translate to the origin of our island
