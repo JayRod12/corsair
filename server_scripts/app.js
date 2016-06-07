@@ -120,12 +120,13 @@ io.on('connection', function(client){
     gridNumber: gridNumber,
     cellWidth: cellWidth,
     cellHeight: cellHeight,
-    activeCells: ac
+    activeCells: ac,
   };
 
   var new_cells_states = serializeNewCells(ac);
   var data = {id : client.userid, names : remote.getPlayerNames(),
-        players : remote.getPlayers(), state: initState, meta: metadata, new_cells_states: new_cells_states };
+        players : remote.getPlayers(), state: initState, meta: metadata,
+        new_cells_states: new_cells_states};
   client.emit('on_connect', data);
 
 
@@ -177,6 +178,10 @@ io.on('connection', function(client){
   });
 
 
+
+  client.on('corsair_ping', function(data) {
+    client.emit('corsair_pong', {});
+  });
 
 
   //  On tick
@@ -279,8 +284,8 @@ function send_loop_func(){
 
     // Prepare data
     var data = { players: remote.getPlayers(), active_cells:client.cells 
-               , updates: allBufferedUpdates, scoresTable: remote.getUIDtoScores(), new_cells: new_cells_states};
-
+               , updates: allBufferedUpdates, scoresTable: 
+                 remote.getUIDtoScores(), new_cells: new_cells_states}; 
     // Send
     client.emit('server_update', data);
   });
