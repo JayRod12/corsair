@@ -49,19 +49,29 @@ function Cell(x, y, gridNumber) {
 
   this.checkCollisions = function() {
     for (var i = 0; i < this.gameObjects.length; i++) {
-      for (var j = i + 1; j <= this.gameObjects.length; j++) {
-        if (!this.gameObjects[i]){
-          //  TODO what is going on here?
-          //console.log("undefined gameObject");
-          //this.gameObjects.splice(i, 1);
-          continue;
-        }
+      if (!this.gameObjects[i]){
+        //  TODO what is going on here?
+        //console.log("undefined gameObject");
+        //this.gameObjects.splice(i, 1);
+        continue;
+      }
+      if (!this.gameObjects[i].getColType) continue;
+
+      var static_obj = (this.gameObjects[i].getColCategory() === "static");
+
+      for (var j = i + 1; j < this.gameObjects.length; j++) {
         if (!this.gameObjects[j]){
           //  TODO what is going on here?
           //console.log("undefined gameObject");
           //this.gameObjects.splice(i, 1);
           continue;
         }
+
+        if (!this.gameObjects[j].getColType) continue;
+
+        //  Do not check two static objects against each other
+        if (static_obj && this.gameObjects[j].getColCategory() === "static")
+          continue;
 
         if(checkCollision(this.gameObjects[i], this.gameObjects[j])) {
           this.gameObjects[i].collisionHandler(this.gameObjects[j]);
@@ -438,6 +448,7 @@ function TestObj(sim, state) {
   };
 
   this.getColType = function() {return "rectangle"};
+  this.getColCategory = function() {return "dynamic";};
   this.getColObj = function() {
     return {
       x: this.state.x,

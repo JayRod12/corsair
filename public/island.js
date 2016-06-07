@@ -55,6 +55,7 @@ function Island(sim, x, y, height, width, angle, color) {
   }
 
   this.getColType = function(){return "rectangle"};
+  this.getColCategory = function() {return "static";};
   this.getColObj = function(){
     return {
       x: this.x,

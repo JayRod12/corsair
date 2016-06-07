@@ -35,6 +35,7 @@ function Loot(x, y, value) {
 
   }
   this.getColType = function(){return "circle"};
+  this.getColCategory = function(){return "static";};
   this.getColObj = function(){
     return {
       x: this.x,

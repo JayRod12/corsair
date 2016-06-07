@@ -33,6 +33,14 @@ function Viewport(sim, x, y, baseWidth, baseHeight, scale){
   }
 }
 
+function preRenderCellIslands() {
+  var canvas = document.createElement('canvas');
+  canvas.width = meta.cellWidth;
+  canvas.height = meta.cellHeight;
+  var render_target = canvas.getContext('2d');
+  //for ()
+}
+
 function drawRandomColors() {
     var colors = [];
     var letters = '0123456789ABCDEF'.split('');

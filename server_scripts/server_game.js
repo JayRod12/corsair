@@ -39,7 +39,7 @@ function islandColor(height){
 function generateIslands(sim, gridNumber, cellWidth, cellHeight){
   var perlin = new Perlin(8 * gridNumber, 8 * gridNumber, 6, 0.5);
   var island_size = 32;
-  var sea_level = 0.62;
+  var sea_level = 0.52;
   var max_x = gridNumber * cellWidth;
   var max_y = gridNumber * cellHeight;
   var islands = [];
@@ -123,6 +123,7 @@ var obstacleClasses = [
   Island,
   CosmeticIsland
 ];
+
 function checkSafeSpawn(sim, x, y){
 
   var danger_circle = {origin: {x:x, y:y}, radius: dangerMinDist}
