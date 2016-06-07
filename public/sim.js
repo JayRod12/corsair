@@ -82,7 +82,6 @@ function Cell(x, y, gridNumber, width, height) {
         var pre = false;
         for (var i = 0; i < prerenderClasses.length; i++){
           if (object instanceof prerenderClasses[i]){
-            console.log('preee');
             pre = true;
             break;
           }
@@ -380,7 +379,7 @@ function Sim(remote, gridNumber, cellWidth, cellHeight, activeCells){
       for (var i = 0; i < cell.drawObjects.length; i++){
         if (cell.drawObjects[i] == object) {
           cell.drawObjects.splice(i,1);
-        i = 0;
+          i = 0;
         }
       }
     }
@@ -389,7 +388,7 @@ function Sim(remote, gridNumber, cellWidth, cellHeight, activeCells){
       for (var i = 0; i < cell.colObjects.length; i++){
         if (cell.colObjects[i] == object) {
           cell.colObjects.splice(i,1);
-        i = 0;
+          i = 0;
         }
       }
     }

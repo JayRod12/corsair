@@ -42,7 +42,6 @@ function islandColor(height){
 function generateIslands(sim, gridNumber, cellWidth, cellHeight){
   var perlin = new Perlin(8 * gridNumber, 8 * gridNumber, 6, 0.5);
   var island_size = 32;
-  var sea_level = 0.52;
   var max_x = gridNumber * cellWidth;
   var max_y = gridNumber * cellHeight;
   var islands = [];
@@ -60,7 +59,7 @@ function generateIslands(sim, gridNumber, cellWidth, cellHeight){
     for (var y = 0; y < max_y; y+= island_size){
       var l = perlin.perlin(x / max_x, y / max_y);
       var color = islandColor(l);
-      if (l > sea_level){
+      if (l > seaLevel){
         var i = new Island(sim, x, y, island_size, island_size, 0, color);
         sim.coordinateToCell(x,y).addObject(i);
         //island_col.push(i);
@@ -70,7 +69,6 @@ function generateIslands(sim, gridNumber, cellWidth, cellHeight){
         /*
         var i = new CosmeticIsland(sim, x, y, island_size, island_size, 0, color);
         sim.coordinateToCell(x,y).addObject(i);
-
         */
       }
       //island_col.push(false);
