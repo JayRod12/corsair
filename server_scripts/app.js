@@ -185,8 +185,8 @@ io.on('connection', function(client){
       playerCount + ' players');
     client.broadcast.emit('player_left',  {id : client.userid});
     remote.removePlayer(client.userid);
-    if (sim.UIDtoShip[client.userid]){
-      sim.removeObject(sim.UIDtoShip[client.userid]);
+    if (sim.getShip(client.userid)){
+      sim.removeObject(sim.getShip(client.userid));
     }
 
     //  Stop simulating if noone is connected
