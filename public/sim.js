@@ -73,9 +73,14 @@ function Cell(x, y, gridNumber) {
     }
   }
 
-  this.addUpdate = function(name, object) {
+  this.addSerializedUpdate = function(name, object) {
     this.bufferedUpdates.push({ name: name
                               , data: object.serialize()});
+  }
+  
+  this.addNonSerialUpdate = function(name, object) {
+    this.bufferedUpdates.push({ name: name
+                              , data: object });
   }
 
   this.getUpdates = function() {
@@ -118,7 +123,7 @@ function updateCell(sim, object, x, y) {
       }
 
       if (server) {
-        realCell.addUpdate('object_enter_cell', object);
+        realCell.addSerializedUpdate('object_enter_cell', object);
       }
       realCell.gameObjects.push(object);
       object.cell = realCell;
@@ -295,11 +300,11 @@ function Sim(remote, gridNumber, cellWidth, cellHeight, activeCells){
       this.numberToCell(this.activeCells[i]).tick(dt);
     }
 
-    if (wait == 0) {
-      for (var uid in remote.getUIDtoScores()) {
-        remote.setScore(uid, remote.getScore(uid) + 1);
-      }
-    }
+    //if (wait == 0) {
+    //  for (var uid in remote.getUIDtoScores()) {
+    //    remote.setScore(uid, remote.getScore(uid) + 1);
+    //  }
+    //}
     wait = (wait + 1) % 50;
   };
 
@@ -355,7 +360,19 @@ function Sim(remote, gridNumber, cellWidth, cellHeight, activeCells){
     var obj = new TestObj(this, state);
     var cell = this.coordinateToCell(state.x, state.y);
     cell.gameObjects.push(obj);
-    cell.addUpdate('create_testObj', obj);
+    cell.addSerializedUpdate('create_testObj', obj);
+  }
+
+  this.updateScale = function(uid) {
+    var ship = this.getShip(uid);
+    ship.scale = 1 + Math.floor(ship.gold/100);
+    if (ship.gold > 1000) {
+      ship.scale = 3;
+    } else if (ship.gold > 500) {
+      ship.scale = 2;
+    } else {
+      ship.scale = 1.5;
+    }
   }
 }
 

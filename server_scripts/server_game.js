@@ -129,10 +129,9 @@ function generateTreasures(sim, gridNumber, cellWidth, cellHeight, treasure_num)
     y = Math.random() * gridNumber * cellHeight;
     val = Math.random() > prob_val ? Math.random() * maxVal : Math.random() * minVal;
     hp = minHP + Math.random() * (maxHP - minHP);
-    treasure = new Treasure(sim, x, y, val, hp);
+    treasure = new Treasure(sim, x, y, Math.floor(val), Math.floor(hp));
     cell = sim.coordinateToCell(x, y);
     cell.addObject(treasure);
-    //cell.addUpdate('add_treasure', treasure);
     new_treasures.push(treasure);
   }
   Array.prototype.push.apply(sim.treasures, new_treasures);

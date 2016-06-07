@@ -113,7 +113,7 @@ io.on('connection', function(client){
 
     // Notify players in this cell that a new ship arrives
     var cell = sim.coordinateToCell(initState.x, initState.y);
-    cell.addUpdate('object_enter_cell', ship);
+    cell.addSerializedUpdate('object_enter_cell', ship);
 
     //  Add to socketList, ie. start sending client updates
     socketList.push(client);
@@ -163,7 +163,7 @@ io.on('connection', function(client){
         var cannonball = serializer.deserializeObject(serial);
         var cell = cannonball.cell;
         cell.gameObjects.push(cannonball);
-        cell.addUpdate('create_cannonball', cannonball);
+        cell.addSerializedUpdate('create_cannonball', cannonball);
       }
     }
   });
@@ -227,7 +227,7 @@ function send_loop_func(){
     var new_treasures = ServerGame.generateTreasures(sim, gridNumber, cellWidth
         , cellHeight, missing_treasures);
     for (var i = 0; i < missing_treasures; i++) {
-      new_treasures[i].cell.addUpdate('add_treasure', new_treasures[i]);
+      new_treasures[i].cell.addSerializedUpdate('add_treasure', new_treasures[i]);
     }
   }
   socketList.forEach(function (client) {

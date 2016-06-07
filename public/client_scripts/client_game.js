@@ -141,12 +141,16 @@ var colors = drawRandomColors();
 function drawHighScoresTable(scoreTable) {
   var maxLengthName = 14;
   var maxDisplay = 10;
-  var currentPlayers = 0;
-  for (var player in scoreTable) {currentPlayers++;}
+  //var currentPlayers = 0;
+  var currentPlayers = Object.keys(scoreTable).length;
+  debugger;
+
+  //for (var player in scoreTable) {currentPlayers++;}
   var i = 0;
 
-  var displayNumber = currentPlayers < maxDisplay ? currentPlayers : maxDisplay;
+//  var displayNumber = currentPlayers < maxDisplay ? currentPlayers : maxDisplay;
 
+  var displayNumber = Math.min(maxDisplay, currentPlayers);
     
   for (var uid in scoreTable) {
     if (i < displayNumber) {
@@ -454,6 +458,15 @@ function startClient() {
             var treasure = serializer.deserializeObject(update.data);
             sim.treasures.push(treasure);
             treasure.cell.gameObjects.push(treasure);
+            break;
+          case 'ship_update':
+            console.log('ship update');
+            var data = update.data;
+            var ship = sim.getShip(data.uid);
+            ship.hp = data.hp;
+            ship.gold = data.gold;
+            sim.updateScale(data.uid);
+            console.log('GOLD ' + ship.gold);
             break;
           default:
             console.log("Unrecognised command from server " + update.name);
