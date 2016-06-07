@@ -487,10 +487,8 @@ function playClientGame(data) {
 
   console.log("Our id is " + our_id);
 
-  var pirateNames = ["William Kidd", "Blackbeard", "Long Ben", "Sir Francis Drake",
-                     "Calico Jack", "Grace O'Malley", "Anne Bonny", "Thomas Tew", "Barbarossa"];
 
-  var randomPirate = pirateNames[Math.floor(Math.random()*pirateNames.length)];
+  var randomPirate = PirateNameGenerator.generate();
 
   var our_name = (localStorage['nickname'] == "") ?  randomPirate : localStorage['nickname'];
   remote.newPlayer(our_id, our_name, data.state);
