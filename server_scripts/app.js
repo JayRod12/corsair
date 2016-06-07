@@ -19,6 +19,9 @@ var remote = new Game.Remote();
 
 var socketList = [];
 
+var server_time = 0;
+var server_time_mod = 10000000;
+
 // Game related data
 
 const gridNumber = 2;
@@ -120,12 +123,14 @@ io.on('connection', function(client){
     gridNumber: gridNumber,
     cellWidth: cellWidth,
     cellHeight: cellHeight,
-    activeCells: ac
+    activeCells: ac,
+    server_time_mod: server_time_mod
   };
 
   var new_cells_states = serializeNewCells(ac);
   var data = {id : client.userid, names : remote.getPlayerNames(),
-        players : remote.getPlayers(), state: initState, meta: metadata, new_cells_states: new_cells_states };
+        players : remote.getPlayers(), state: initState, meta: metadata,
+        new_cells_states: new_cells_states, server_time: server_time };
   client.emit('on_connect', data);
 
 
@@ -177,6 +182,10 @@ io.on('connection', function(client){
   });
 
 
+
+  client.on('corsair_ping', function(data) {
+    client.emit('corsair_pong', {});
+  });
 
 
   //  On tick
@@ -279,7 +288,9 @@ function send_loop_func(){
 
     // Prepare data
     var data = { players: remote.getPlayers(), active_cells:client.cells 
-               , updates: allBufferedUpdates, scoresTable: remote.getUIDtoScores(), new_cells: new_cells_states};
+               , updates: allBufferedUpdates, scoresTable: 
+                 remote.getUIDtoScores(), new_cells: new_cells_states, server_time:
+                 server_time};
 
     // Send
     client.emit('server_update', data);
@@ -355,6 +366,7 @@ function calculateCellsToSend(uid){
 }
 
 var sim_loop_func = function(dt){
+  server_time = (server_time + dt) % server_time_mod ;
   sim.tick(dt);
 }
 
