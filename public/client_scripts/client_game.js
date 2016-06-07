@@ -66,7 +66,7 @@ function Viewport(sim, x, y, baseWidth, baseHeight, scale){
     sim.draw(ctx);
 
     // Inverse scale
-    ctx.translate(this.x, this.y); 
+    ctx.translate(this.x, this.y);
     ctx.scale(1/scale, 1/scale);
 
   }
@@ -78,7 +78,7 @@ function drawRandomColors() {
     for (var j = 0; j < 10; j++) {
       var color = '#';
       for (var i = 0; i < 6; i++) {
-        color += letters[Math.floor(Math.random() * 16)];  
+        color += letters[Math.floor(Math.random() * 16)];
       }
       colors[j] = color;
     }
@@ -107,7 +107,7 @@ function drawCellBackground(cx, cy, ctx){
     bg_frame_num = (bg_frame_num + 1) % bg_frame_count;
     bg_frame_wait = 0;
   }
-  ctx.drawImage(bg_frames[bg_frame_num], cx * meta.cellWidth, cy * meta.cellHeight, 
+  ctx.drawImage(bg_frames[bg_frame_num], cx * meta.cellWidth, cy * meta.cellHeight,
     meta.cellWidth, meta.cellHeight);
 //  ctx.fillStyle = seaColor;
 //  ctx.fillRect(cx*meta.cellWidth, cy*meta.cellHeight, meta.cellWidth+2,
@@ -147,7 +147,7 @@ function drawHighScoresTable(scoreTable) {
 
   var displayNumber = currentPlayers < maxDisplay ? currentPlayers : maxDisplay;
 
-    
+
   for (var uid in scoreTable) {
     if (i < displayNumber) {
       var shipName = sim.getShip(uid).name;
@@ -156,7 +156,7 @@ function drawHighScoresTable(scoreTable) {
       ctx.font = "italic 15px Josefin Sans";
       ctx.lineWidth = 2;
       ctx.fillStyle = colors[i - 1];
-      ctx.textAlign="left"; 
+      ctx.textAlign="left";
       ctx.fillText("#" + i, (7/8)*canvas.width, (1/20)*canvas.height + i * 20);
       ctx.fillText(shipName, (7.14/8)*canvas.width, (1/20)*canvas.height + i * 20);
       ctx.fillText(scoreTable[uid], (7.8/8)*canvas.width, (1/20)*canvas.height + i * 20);
@@ -255,7 +255,7 @@ $( "#main_canvas" ).mousemove(function(event){
 
 
 //  Disable right click context menu
-$(document).ready(function(){ 
+$(document).ready(function(){
   $(document).bind("contextmenu", function(event){
       return false;
     });
@@ -280,12 +280,12 @@ $( "#main_canvas" ).mousedown(function(event){
 
 var delta_angle_limit = Math.PI/45;
 var localShipInput = function(){
-  var delta_angle = (Math.atan2(mouse_y - this.state.y, mouse_x - this.state.x) 
-						- this.state.angle); 
+  var delta_angle = (Math.atan2(mouse_y - this.state.y, mouse_x - this.state.x)
+						- this.state.angle);
 
   //Ensure delta_angle stays within the range [-PI, PI]
   delta_angle = Col.trimBranch(delta_angle);
- 
+
   if (delta_angle > delta_angle_limit) {
     delta_angle = delta_angle_limit;
   } else if (delta_angle < -delta_angle_limit) {
@@ -306,7 +306,7 @@ var localShipInput = function(){
 //  TODO maybe skip frames if at more than 60fps?
 
 function clientTick(){
-       
+
   client_loop = window.requestAnimationFrame(clientTick);
   currentTime = Date.now();
   delta = currentTime - lastTime;
@@ -374,17 +374,17 @@ function startClient() {
     console.log('New connection');
     playClientGame(data);
   });
-  
+
   socket.on('start_game', function(data){
-  
+
     lastTime = Date.now();
     if (client_loop == 0) {
       client_loop = window.requestAnimationFrame(clientTick);
     }
 
-  
+
     //  Delay between updating the server
-  
+
     //  Send information about the local player to the server every s_delay
     if(server_loop == 0) {
       server_loop = setInterval(client_update, s_delay, player);
@@ -398,14 +398,14 @@ function startClient() {
       addServerShip(data.id, data.name, data.state);
     }
   });
-  
+
   //  Recieved when another player leaves the server
   //  We delete the local ship
   socket.on('player_left', function (data){
     console.log('player left');
     remote.removePlayer(data.id);
   });
-  
+
   //  On update from server
   socket.on('server_update', function (data){
     updateHighScoresTable(data.scoresTable);
@@ -476,7 +476,7 @@ function deserializeNewStates(new_cells_states) {
     cell.staticObjects =
       serializer.deserializeArray(new_cells_states[i].state.static_obj)
                 .filter(function(x) { return x != null; });
-    cell.gameObjects = 
+    cell.gameObjects =
       serializer.deserializeArray(new_cells_states[i].state.game_obj)
                 .filter(function(x) { return x != null; });
   }
@@ -516,12 +516,12 @@ function playClientGame(data) {
   sim.treasures = serializer.deserializeArray(data.treasures);
 
   deserializeNewStates(data.new_cells_states);
-  
+
   updateHighScoresTable(data.scoresTable);
 
 
   //  Using 16:9 aspect ratio
-  viewport = new Viewport(sim, 0, 0, 1.6, 0.9, 1);
+  viewport = new Viewport(sim, 0, 0, 1.6, 0.9, 1/3);
 
   console.log("Our id is " + our_id);
 

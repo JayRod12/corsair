@@ -14,6 +14,7 @@ var Game = require('../public/shared_game.js');
 var Sim = require('../public/sim.js');
 var Perlin = require('../public/perlin.js').Class;
 var ServerGame = require('./server_game.js');
+var Database = require('./db.js');
 
 
 var remote = new Game.Remote();
@@ -22,7 +23,7 @@ var socketList = [];
 
 // Game related data
 
-const gridNumber = 5;
+const gridNumber = 1;
 const cellWidth  = 1500;
 const cellHeight = 1500;
 var allCells = [];
@@ -36,7 +37,7 @@ var sim = new Sim.Class(remote,gridNumber, cellWidth, cellHeight, allCells);
 // serialized treasures
 ServerGame.generateTreasures(sim, gridNumber, cellWidth, cellHeight, treasure_number);
 ServerGame.generateIslands(sim, gridNumber, cellWidth, cellHeight);
- 
+
 //var island = new Island(100, 100, 100, 100, Math.PI/4, "black");
 
 
@@ -61,6 +62,10 @@ app.get('/highScores', function(req, res) {
   res.sendFile(path.resolve(__dirname + '/../html/highScores.html'));
 });
 
+app.get('/top10', function(req, res) {
+  Database.getTopTen(res);
+});
+
 http.listen(process.env.PORT || port, function() {
   console.log('Listening on 3000');
 });
@@ -72,7 +77,7 @@ http.listen(process.env.PORT || port, function() {
 //  On client connection
 io.on('connection', function(client){
 
-  
+
   //  Generate new client id associate with their connection
   client.userid = UUID();
 
@@ -170,7 +175,12 @@ io.on('connection', function(client){
 
   //  On client disconnect
   client.on('disconnect', function () {
-    
+    console.log('DISCONNECTING');
+
+    //saveFinalScore in database
+    var finalScore = remote.getScore(client.userid);
+    Database.saveFinalScore(remote.getPlayerName(client.userid),finalScore);
+
     //  Remove from socketlist
     for (var i = 0; i < socketList.length; i++){
       if (socketList[i] == client){
@@ -192,11 +202,11 @@ io.on('connection', function(client){
     //  Stop simulating if noone is connected
     if (playerCount < 1){
       console.log("stopping simulation");
-      if (sim_loop != 0) { 
+      if (sim_loop != 0) {
         clearInterval(sim_loop);
         sim_loop = 0;
       }
-      if (test_loop != 0) { 
+      if (test_loop != 0) {
         clearInterval(test_loop);
         test_loop = 0;
       }
@@ -262,7 +272,7 @@ function send_loop_func(){
 
 
     // Prepare data
-    var data = { players: remote.getPlayers(), active_cells:client.cells 
+    var data = { players: remote.getPlayers(), active_cells:client.cells
                , updates: allBufferedUpdates, scoresTable: remote.getUIDtoScores()
                , new_cells: new_cells_states };
 
@@ -305,7 +315,7 @@ function calculateCellsToSend(uid){
   var y_neg = false;
   if (base != null) {
     const bufferConst = 2;
-   
+
     x_pos = base.x + 1 < gridNumber && s.state.x % cellWidth > cellWidth/bufferConst;
     y_pos = base.y + 1 < gridNumber && s.state.y % cellHeight > cellHeight/bufferConst;
     x_neg = base.x - 1 >= 0 && s.state.x % cellWidth < cellWidth/bufferConst;
@@ -332,7 +342,7 @@ function calculateCellsToSend(uid){
     } else if(y_neg) {
       list.push(sim.cellTupleToNumber({x:base.x, y:base.y-1}));
     }
-    
+
     list.push(sim.cellTupleToNumber(base));
   }
   return list;
@@ -346,5 +356,3 @@ var sim_loop_func = function(dt){
 var test_loop_func = function(){
   sim.addTestObject();
 }
-
-

@@ -8,53 +8,19 @@
 </head>
 <body>
 	<form action="/" method="get">
-    	<button id="goBackButton"><img id="goBackImage" 
+    	<button id="goBackButton"><img id="goBackImage"
       		src="media/goBack.png" alt="Go Back"></button>
   	</form>
 	<h1>Hall of Fame</h1>
-	<div id="tableContainer">
-		<table>
-			<tr id="first">
-				<td>Nacho</td>
-				<td>13832</td>
-			</tr>
-			<tr id="second">
-				<td>Dan</td>
-				<td>9482</td>
-			</tr>
-			<tr id="third">
-				<td>Jaime</td>
-				<td>2848</td>
-			</tr>
-			<tr>
-				<td>Tom</td>
-				<td>2384</td>
-			</tr>
-			<tr>
-				<td>Heyo</td>
-				<td>1945</td>
-			</tr>
-			<tr>
-				<td>Heya</td>
-				<td>1932</td>
-			</tr>
-			<tr>
-				<td>Best</td>
-				<td>1284</td>
-			</tr>
-			<tr>
-				<td>Hieu</td>
-				<td>1112</td>
-			</tr>
-			<tr>
-				<td>Stop</td>
-				<td>1000</td>
-			</tr>
-			<tr>
-				<td>Bye</td>
-				<td>938</td>
-			</tr>
+	<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+  <script src="top_scores.js"></script>
+  <div id= "tableContainer" ng-app="app" ng-controller="controller">
+			<table>
+				<tr ng-repeat="o in data track by $index">
+				<td>{{o.name}}</td>
+				<td>{{o.score}}</td>
+			</td>
 		</table>
-	</div>
+  </div>
 </body>
 </html>
