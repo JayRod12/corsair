@@ -64,9 +64,10 @@ function Cell(x, y, gridNumber) {
         }
 
         if(checkCollision(this.gameObjects[i], this.gameObjects[j])) {
-          this.gameObjects[i].collisionHandler(this.gameObjects[j]);
+		  var pre_update_object = this.gameObjects[i].getColObj();
+          this.gameObjects[i].collisionHandler(this.gameObjects[j].getColObj());
           //  Avoid the case where object j is deleted
-          if (this.gameObjects[j]) this.gameObjects[j].collisionHandler(this.gameObjects[i]);
+          if (this.gameObjects[j]) this.gameObjects[j].collisionHandler(pre_update_object);
         };
       }
     }

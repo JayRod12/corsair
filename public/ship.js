@@ -12,6 +12,7 @@ else{
   //  Server
   Cannon = require('../public/cannon.js');
   Game = require('../public/shared_game.js');
+  Col = require('../public/collision_detection.js');
 }
 
 (function(exports){
@@ -72,7 +73,9 @@ function Ship(sim, state, uid, name, inputFunction){
     }
 
     //  Updates speed and angle
+    if (!(this.collided_timer > 300)) {
     this.inputFunction();
+    }
 
     this.state.speed = Math.min(this.state.speed, this.speed_cap);
     this.state.x += this.state.speed * Math.cos(this.state.angle) * dt;
@@ -93,12 +96,37 @@ function Ship(sim, state, uid, name, inputFunction){
   this.collisionHandler = function(other_object) {
 	  /*TODO: different cases (possibly) i.e. what if 
   		it's a cannonball I've collided with?*/
-    if (other_object instanceof Cannon.CannonBall){
-      if (other_object.uid === this.uid) return;
-      if (typeof other_object.level !== "undefined"){
+    if (other_object.type == "cannonball"){
+      if (other_object.uid == this.uid) return;
+        //else decrement hp w.r.t. cannonball
         this.hp -= other_object.level;
-      }
     }
+
+    if (other_object.type == "ship") {
+      console.log("get to the update");
+      var intersect_angle = Math.atan2(this.state.y - other_object.y, this.state.x - other_object.x);
+      console.log(intersect_angle);
+      console.log("angle: "+ other_object.angle);
+      console.log("speed: " + other_object.speed);
+      var x_speed_update = (other_object.speed
+                            *Math.cos(Col.trimBranch(other_object.angle - intersect_angle))
+                            *Math.cos(intersect_angle))
+                            + (this.state.speed*Math.sin(Col.trimBranch(this.state.angle - intersect_angle))
+                              *Math.cos(Col.trimBranch(intersect_angle + Math.PI/2)));
+    console.log(x_speed_update);
+   
+
+      var y_speed_update = (other_object.speed
+                            *Math.cos(Col.trimBranch(other_object.angle - intersect_angle))
+                            *Math.sin(intersect_angle))
+                            + (this.state.speed*Math.sin(Col.trimBranch(this.state.angle - intersect_angle))
+                               *Math.sin(Col.trimBranch(intersect_angle + Math.PI/2)));
+      console.log(y_speed_update);
+      this.state.speed = Math.sqrt(x_speed_update*x_speed_update + y_speed_update*y_speed_update);
+      this.state.angle = Col.trimBranch(Math.atan2(y_speed_update, x_speed_update));
+    }
+
+    
    this.collided_timer = this.collided_basetime;
    //decrement health & handle physics;
   }
@@ -165,8 +193,11 @@ function Ship(sim, state, uid, name, inputFunction){
   this.getColType = function() {return "rectangle"};
   this.getColObj = function() {
     return {
+	    type: "ship",
+	    uid: this.uid,
       x: this.state.x,
       y: this.state.y,
+      speed: this.state.speed,
       width: shipBaseWidth * this.scale,
       height: shipBaseHeight * this.scale,
       hypotenuse: this.hypotenuse,

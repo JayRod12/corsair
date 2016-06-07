@@ -120,7 +120,7 @@ function CannonBall(sim, uid, state, level) {
 
   this.getColType = function(){return "point"};
   this.getColObj = function(){
-    return {x: this.state.x, y: this.state.y};
+    return {type: "cannonball", uid: this.uid, level: this.level, x: this.state.x, y: this.state.y};
   }
 
 

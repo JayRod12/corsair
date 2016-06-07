@@ -105,7 +105,77 @@ function drawCellBackground(cx, cy, ctx){
     bg_frame_wait = 0;
   }
   ctx.drawImage(bg_frames[bg_frame_num], cx * meta.cellWidth, cy * meta.cellHeight, 
-    meta.cellWidth + 2, meta.cellHeight + 2);
+    meta.cellWidth/4, meta.cellHeight/4);
+  ctx.drawImage(bg_frames[bg_frame_num], (cx +1/4)* meta.cellWidth, cy * meta.cellHeight, 
+    meta.cellWidth/4, meta.cellHeight/4); 
+  ctx.drawImage(bg_frames[bg_frame_num], (cx +2/4)* meta.cellWidth, cy * meta.cellHeight, 
+    meta.cellWidth/4, meta.cellHeight/4);
+  ctx.drawImage(bg_frames[bg_frame_num], (cx +3/4)* meta.cellWidth, cy * meta.cellHeight, 
+    meta.cellWidth/4, meta.cellHeight/4);
+   ctx.drawImage(bg_frames[bg_frame_num], cx * meta.cellWidth, (cy + 1/4) * meta.cellHeight, 
+    meta.cellWidth/4, meta.cellHeight/4);
+  ctx.drawImage(bg_frames[bg_frame_num], (cx +1/4)* meta.cellWidth, (cy + 1/4) * meta.cellHeight, 
+    meta.cellWidth/4, meta.cellHeight/4); 
+  ctx.drawImage(bg_frames[bg_frame_num], (cx +2/4)* meta.cellWidth, (cy + 1/4) * meta.cellHeight, 
+    meta.cellWidth/4, meta.cellHeight/4);
+  ctx.drawImage(bg_frames[bg_frame_num], (cx +3/4)* meta.cellWidth, (cy + 1/4) * meta.cellHeight, 
+    meta.cellWidth/4, meta.cellHeight/4);
+   ctx.drawImage(bg_frames[bg_frame_num], cx * meta.cellWidth, (cy + 2/4) * meta.cellHeight, 
+    meta.cellWidth/4, meta.cellHeight/4);
+  ctx.drawImage(bg_frames[bg_frame_num], (cx +1/4)* meta.cellWidth, (cy + 2/4) * meta.cellHeight, 
+    meta.cellWidth/4, meta.cellHeight/4); 
+  ctx.drawImage(bg_frames[bg_frame_num], (cx +2/4)* meta.cellWidth, (cy + 2/4) * meta.cellHeight, 
+    meta.cellWidth/4, meta.cellHeight/4);
+  ctx.drawImage(bg_frames[bg_frame_num], (cx +3/4)* meta.cellWidth, (cy + 2/4) * meta.cellHeight, 
+    meta.cellWidth/4, meta.cellHeight/4);
+   ctx.drawImage(bg_frames[bg_frame_num], cx * meta.cellWidth, (cy + 3/4) * meta.cellHeight, 
+    meta.cellWidth/4, meta.cellHeight/4);
+  ctx.drawImage(bg_frames[bg_frame_num], (cx +1/4)* meta.cellWidth, (cy + 3/4) * meta.cellHeight, 
+    meta.cellWidth/4, meta.cellHeight/4); 
+  ctx.drawImage(bg_frames[bg_frame_num], (cx +2/4)* meta.cellWidth, (cy + 3/4) * meta.cellHeight, 
+    meta.cellWidth/4, meta.cellHeight/4);
+  ctx.drawImage(bg_frames[bg_frame_num], (cx +3/4)* meta.cellWidth, (cy + 3/4) * meta.cellHeight, 
+    meta.cellWidth/4, meta.cellHeight/4);
+
+
+
+
+/*
+  ctx.drawImage(bg_frames[bg_frame_num], cx * meta.cellWidth + meta.cellWidth/4, cy * meta.cellHeight + meta.cellHeight/4, 
+    meta.cellWidth/4, meta.cellHeight/4);
+  ctx.drawImage(bg_frames[bg_frame_num], cx * meta.cellWidth + meta.cellWidth/2, cy * meta.cellHeight + meta.cellHeight/2, 
+    meta.cellWidth/4, meta.cellHeight/4);
+  ctx.drawImage(bg_frames[bg_frame_num], cx * meta.cellWidth + (3*meta.cellWidth/4), cy * meta.cellHeight + (3*meta.cellheight/4), 
+    meta.cellWidth/4, meta.cellHeight/4);
+  ctx.drawImage(bg_frames[bg_frame_num], (cx+1) * meta.cellWidth, (cy + 1)* meta.cellHeight, 
+    meta.cellWidth/4, meta.cellHeight/4);
+
+*/
+
+/*
+  ctx.drawImage(bg_frames[bg_frame_num], cx * meta.cellWidth + meta.cellWidth/4, cy * meta.cellHeight + meta.cellHeight/4, 
+    meta.cellWidth/4, meta.cellHeight/4);
+  ctx.drawImage(bg_frames[bg_frame_num], cx * meta.cellWidth + meta.cellWidth/2, cy * meta.cellHeight + meta.cellHeight/2, 
+    meta.cellWidth/4, meta.cellHeight/4);
+  ctx.drawImage(bg_frames[bg_frame_num], cx * meta.cellWidth + (3*meta.cellWidth/4), cy * meta.cellHeight + (3*meta.cellheight/4), 
+    meta.cellWidth/4, meta.cellHeight/4);
+  ctx.drawImage(bg_frames[bg_frame_num], cx * meta.cellWidth, cy * meta.cellHeight, 
+    meta.cellWidth/4, meta.cellHeight/4);
+  ctx.drawImage(bg_frames[bg_frame_num], cx * meta.cellWidth + meta.cellWidth/4, cy * meta.cellHeight + meta.cellHeight/4, 
+    meta.cellWidth/4, meta.cellHeight/4);
+  ctx.drawImage(bg_frames[bg_frame_num], cx * meta.cellWidth + meta.cellWidth/2, cy * meta.cellHeight + meta.cellHeight/2, 
+    meta.cellWidth/4, meta.cellHeight/4);
+  ctx.drawImage(bg_frames[bg_frame_num], cx * meta.cellWidth + (3*meta.cellWidth/4), cy * meta.cellHeight + (3*meta.cellheight/4), 
+    meta.cellWidth/4, meta.cellHeight/4);
+  ctx.drawImage(bg_frames[bg_frame_num], cx * meta.cellWidth, cy * meta.cellHeight, 
+    meta.cellWidth/4, meta.cellHeight/4);
+  ctx.drawImage(bg_frames[bg_frame_num], cx * meta.cellWidth + meta.cellWidth/4, cy * meta.cellHeight + meta.cellHeight/4, 
+    meta.cellWidth/4, meta.cellHeight/4);
+  ctx.drawImage(bg_frames[bg_frame_num], cx * meta.cellWidth + meta.cellWidth/2, cy * meta.cellHeight + meta.cellHeight/2, 
+    meta.cellWidth/4, meta.cellHeight/4);
+  ctx.drawImage(bg_frames[bg_frame_num], cx * meta.cellWidth + (3*meta.cellWidth/4), cy * meta.cellHeight + (3*meta.cellheight/4), 
+    meta.cellWidth/4, meta.cellHeight/4);
+*/
 //  ctx.fillStyle = seaColor;
 //  ctx.fillRect(cx*meta.cellWidth, cy*meta.cellHeight, meta.cellWidth+2,
 //      meta.cellHeight+2);
