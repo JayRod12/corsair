@@ -22,8 +22,8 @@ var socketList = [];
 // Game related data
 
 const gridNumber = 2;
-const cellWidth  = 1500;
-const cellHeight = 1500;
+const cellWidth  = 2048;
+const cellHeight = 2048;
 var allCells = [];
 for (var i = 0; i < gridNumber * gridNumber; i++) {
     allCells.push(i);
@@ -193,7 +193,7 @@ io.on('connection', function(client){
       if (serial.type === "cannonball"){
         var cannonball = serializer.deserializeObject(serial);
         var cell = cannonball.cell;
-        cell.gameObjects.push(cannonball);
+        cell.addObject(cannonball);
         cell.addUpdate('create_cannonball', cannonball);
       }
     }

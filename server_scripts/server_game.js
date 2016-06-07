@@ -59,7 +59,7 @@ function generateIslands(sim, gridNumber, cellWidth, cellHeight){
       if (l > sea_level){
         var color = islandColor(l);
         var i = new Island(sim, x, y, island_size, island_size, 0, color);
-        sim.coordinateToCell(x,y).gameObjects.push(i);
+        sim.coordinateToCell(x,y).addObject(i);
         //island_col.push(i);
         islands[Math.floor(x/island_size)][Math.floor(y/island_size)] = i;
       }
@@ -95,7 +95,7 @@ function generateIslands(sim, gridNumber, cellWidth, cellHeight){
           var color = islands[x][y].color;
           var i = new CosmeticIsland(sim, islands[x][y].x, islands[x][y].y, 
               island_size, island_size, 0, color);
-          i.cell.staticObjects.push(i);
+          i.cell.addObject(i);
 
           sim.removeObject(islands[x][y]);
           islands[x][y] = true;
@@ -120,8 +120,7 @@ var dangerousClasses = [
 ];
 var obstacleMinDist = 200;
 var obstacleClasses = [
-  Island,
-  CosmeticIsland
+  Island
 ];
 
 function checkSafeSpawn(sim, x, y){

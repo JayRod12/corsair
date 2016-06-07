@@ -47,7 +47,7 @@ function Island(sim, x, y, height, width, angle, color) {
     } else {
       ctx.fillStyle = this.color;
     }    
-    ctx.fillRect(-this.width/2, -this.height/2, this.width, this.height);
+    ctx.fillRect(0, 0, this.width, this.height);
 
       //We undo our transformations for the next draw/calculations
       ctx.rotate(-this.angle);
@@ -110,7 +110,7 @@ function CosmeticIsland(sim, x, y, height, width, angle, color) {
     } else {
       ctx.fillStyle = this.color;
     }    
-    ctx.fillRect(-this.width/2, -this.height/2, this.width, this.height);
+    ctx.fillRect(0, 0, this.width, this.height);
 
       //We undo our transformations for the next draw/calculations
       ctx.rotate(-this.angle);

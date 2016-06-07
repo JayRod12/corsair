@@ -33,12 +33,28 @@ function Viewport(sim, x, y, baseWidth, baseHeight, scale){
   }
 }
 
-function preRenderCellIslands() {
+var prerenderClasses = [
+  Island.Class,
+  Island.Cosmetic
+];
+
+function prerenderBackground(cell) {
+  console.log('preing');
   var canvas = document.createElement('canvas');
   canvas.width = meta.cellWidth;
   canvas.height = meta.cellHeight;
   var render_target = canvas.getContext('2d');
-  //for ()
+  render_target.translate(-cell.x * meta.cellWidth, -cell.y * meta.cellHeight);
+  var go = cell.gameObjects;  
+  for (var i = 0; i < go.length; i++){
+    for (var j = 0; j < prerenderClasses.length; j++){
+      if (go[i] instanceof prerenderClasses[j]){
+        go[i].onDraw(render_target);
+      }
+    }
+  }
+  render_target.translate(cell.x * meta.cellWidth, cell.y * meta.cellHeight);
+  return canvas;
 }
 
 function drawRandomColors() {
@@ -71,6 +87,7 @@ for (var i = 0; i < bg_frame_count; i++){
 var bg_frame_num = 0;
 
 function drawCellBackground(cx, cy, ctx){
+  /*
   bg_frame_wait++
   if (bg_frame_wait > bg_frame_wait_time){
     bg_frame_num = (bg_frame_num + 1) % bg_frame_count;
@@ -78,9 +95,11 @@ function drawCellBackground(cx, cy, ctx){
   }
   ctx.drawImage(bg_frames[bg_frame_num], cx * meta.cellWidth, cy * meta.cellHeight, 
     meta.cellWidth + 2, meta.cellHeight + 2);
-//  ctx.fillStyle = seaColor;
-//  ctx.fillRect(cx*meta.cellWidth, cy*meta.cellHeight, meta.cellWidth+2,
-//      meta.cellHeight+2);
+    */
+  var seaColor = "#0066ff";
+  ctx.fillStyle = seaColor;
+  ctx.fillRect(cx*meta.cellWidth, cy*meta.cellHeight, meta.cellWidth+2,
+      meta.cellHeight+2);
 }
 
 

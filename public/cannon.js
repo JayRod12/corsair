@@ -52,7 +52,7 @@ function Cannon(ship) {
         var ball = cannonBallFromLocal(ship, offsetX, offsetY, side, ballSpeed, level);
         toSendServer.push(ball.serialize());
         var cell = ship.sim.coordinateToCell(ship.state.x,ship.state.y);
-        cell.gameObjects.push(ball);
+        cell.addObject(ball);
       }
 
       this.futureShots.push({time: i*this.delay, f : shot, i: i});
@@ -92,12 +92,6 @@ function cannonBallFromLocal(ship, offsetX, offsetY, side, ballSpeed, level){
   return new CannonBall(sim, ship.uid, state, level);
   
 }
-
-/*
-function cannonballFromRemote(sim, x, y, xvel, yvel, ){
-
-}
-*/
 
 function CannonBall(sim, uid, state, level) {
 

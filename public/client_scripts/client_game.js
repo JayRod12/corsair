@@ -260,13 +260,13 @@ function startClient() {
         var update = updates[j];
         switch(update.name){
           case 'create_testObj':
-            cell.gameObjects.push(new Sim.TestObj(sim, update.data));
+            cell.addObject(new Sim.TestObj(sim, update.data));
             break;
           case 'object_enter_cell':
             if (update.data.type == "ship") {
               if (update.data.o.uid != our_id) {
                 var obj = serializer.deserializeObject(update.data);
-                cell.gameObjects.push(obj);
+                cell.addObject(obj);
               }
             }
             break;
@@ -274,7 +274,7 @@ function startClient() {
               if (update.data.o.uid === our_id) break;
 
               var obj = serializer.deserializeObject(update.data);
-              obj.cell.gameObjects.push(obj);
+              obj.cell.addObject(obj);
             break;
           default:
             console.log("Unrecognised command from server " + update.name);
@@ -294,12 +294,20 @@ function startClient() {
 function deserializeNewStates(new_cells_states) {
   for (var i = 0; i < new_cells_states.length; i++) {
     var cell = sim.numberToCell(new_cells_states[i].num);
+    /*
     cell.staticObjects =
       serializer.deserializeArray(new_cells_states[i].state.static_obj)
                 .filter(function(x) { return x != null; });
-    cell.gameObjects = 
+                */
+    var objects = 
       serializer.deserializeArray(new_cells_states[i].state.game_obj)
                 .filter(function(x) { return x != null; });
+
+    for (var j = 0; j < objects.length; j++){
+      cell.addObject(objects[j]);
+    }
+
+    cell.prerenderedBackground = prerenderBackground(cell);
   }
 }
 

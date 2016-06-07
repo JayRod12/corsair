@@ -17,12 +17,16 @@ else{
 
 (function(exports){
 
-function Cell(x, y, gridNumber) {
+function Cell(x, y, gridNumber, width, height) {
   this.number = gridNumber * y + x;
   this.x = x;
   this.y = y;
+  this.width = width;
+  this.height = height;
   this.gameObjects = [];
   this.staticObjects = [];
+  this.drawObjects = [];
+  this.colObjects = [];
   this.bufferedUpdates = [];
 
   this.tick = function(dt){
@@ -35,9 +39,21 @@ function Cell(x, y, gridNumber) {
   }
 
   this.draw = function(ctx){
-    for (var i = 0; i < this.gameObjects.length; i++){
+    ctx.drawImage(this.prerenderedBackground, this.x * this.width, this.y *
+        this.height, this.width, this.height);
+
+    
+    /*
       if (typeof this.gameObjects[i].onDraw != "undefined"){
-        this.gameObjects[i].onDraw(ctx);
+        var toDraw = true;
+        for (var j = 0; j < prerenderClasses.length; j++){
+          if (this.gameObjects[i] instanceof prerenderClasses[j]){
+            toDraw = false;
+            console.log("AFWA");
+            break;
+          }
+        if (toDraw) this.gameObjects[i].onDraw(ctx);
+        }
       } 
     }
     for (var i = 0; i < this.staticObjects.length; i++){
@@ -45,38 +61,64 @@ function Cell(x, y, gridNumber) {
         this.staticObjects[i].onDraw(ctx);
       } 
     }
+    */
+    for (var i = 0; i < this.drawObjects.length; i++){
+      this.drawObjects[i].onDraw(ctx);
+    }
+    
   }
 
+  this.addObject = function(object) {
+    this.gameObjects.push(object);
+    if (!server){
+      if (typeof object.onDraw !== "undefined"){
+        var add = true;
+        for (var i = 0; i < prerenderClasses.length; i++){
+          if (object instanceof prerenderClasses[i]){
+            add = false;
+            break;
+          }
+          this.drawObjects.push(object);
+        }
+      }
+    }
+    if (typeof object.getColType !== "undefined"){
+      this.colObjects.push(object);
+    }
+  }
+
+
+
   this.checkCollisions = function() {
-    for (var i = 0; i < this.gameObjects.length; i++) {
-      if (!this.gameObjects[i]){
+    for (var i = 0; i < this.colObjects.length; i++) {
+      if (!this.colObjects[i]){
         //  TODO what is going on here?
-        //console.log("undefined gameObject");
-        //this.gameObjects.splice(i, 1);
+        //console.log("undefined colObject");
+        //this.colObjects.splice(i, 1);
         continue;
       }
-      if (!this.gameObjects[i].getColType) continue;
+      if (!this.colObjects[i].getColType) continue;
 
-      var static_obj = (this.gameObjects[i].getColCategory() === "static");
+      var static_obj = (this.colObjects[i].getColCategory() === "static");
 
-      for (var j = i + 1; j < this.gameObjects.length; j++) {
-        if (!this.gameObjects[j]){
+      for (var j = i + 1; j < this.colObjects.length; j++) {
+        if (!this.colObjects[j]){
           //  TODO what is going on here?
-          //console.log("undefined gameObject");
-          //this.gameObjects.splice(i, 1);
+          //console.log("undefined colObject");
+          //this.colObjects.splice(i, 1);
           continue;
         }
 
-        if (!this.gameObjects[j].getColType) continue;
+        if (!this.colObjects[j].getColType) continue;
 
         //  Do not check two static objects against each other
-        if (static_obj && this.gameObjects[j].getColCategory() === "static")
+        if (static_obj && this.colObjects[j].getColCategory() === "static")
           continue;
 
-        if(checkCollision(this.gameObjects[i], this.gameObjects[j])) {
-          this.gameObjects[i].collisionHandler(this.gameObjects[j]);
+        if(checkCollision(this.colObjects[i], this.colObjects[j])) {
+          this.colObjects[i].collisionHandler(this.colObjects[j]);
           //  Avoid the case where object j is deleted
-          if (this.gameObjects[j]) this.gameObjects[j].collisionHandler(this.gameObjects[i]);
+          if (this.colObjects[j]) this.colObjects[j].collisionHandler(this.colObjects[i]);
         };
       }
     }
@@ -124,7 +166,7 @@ function updateCell(sim, object, x, y) {
         if (server) {
           realCell.addUpdate('object_enter_cell', object);
         }
-        realCell.gameObjects.push(object);
+        realCell.addObject(object);
         object.cell = realCell;
       }
     }
@@ -160,7 +202,7 @@ function Sim(remote, gridNumber, cellWidth, cellHeight, activeCells){
     if (!this.UIDtoShip[uid]) {
       var cell = this.coordinateToCell(state.x, state.y);
       var ship = new Ship.Class(this, state, uid, name, inputFunction);
-      cell.gameObjects.push(ship);
+      cell.addObject(ship);
       remote.setScore(uid, 0);
       //remote.getUIDtoScores()[uid] = {shipName: remote.getPlayerName(uid), score: 0};
       this.UIDtoShip[uid] = ship;
@@ -177,7 +219,7 @@ function Sim(remote, gridNumber, cellWidth, cellHeight, activeCells){
   for (var i = 0; i < this.gridNumber; i++) {
     this.grid[i] = new Array(this.gridNumber);
     for (var j = 0; j < this.gridNumber; j++) {
-      this.grid[i][j] = new Cell(i, j, this.gridNumber);
+      this.grid[i][j] = new Cell(i, j, this.gridNumber, this.cellWidth, this.cellHeight);
     }
   }
 
@@ -319,8 +361,28 @@ function Sim(remote, gridNumber, cellWidth, cellHeight, activeCells){
     for (var i = 0; i < cell.gameObjects.length; i++){
       if (cell.gameObjects[i] == object) {
         cell.gameObjects.splice(i,1);
+        i = 0;
       }
     }
+
+    if (typeof object.onDraw !== "undefined"){
+      for (var i = 0; i < cell.drawObjects.length; i++){
+        if (cell.drawObjects[i] == object) {
+          cell.drawObjects.splice(i,1);
+        i = 0;
+        }
+      }
+    }
+
+    if (typeof object.getColType !== "undefined"){
+      for (var i = 0; i < cell.colObjects.length; i++){
+        if (cell.colObjects[i] == object) {
+          cell.colObjects.splice(i,1);
+        i = 0;
+        }
+      }
+    }
+    
 
     if (object instanceof Ship.Class){
       this.removeShip(object);
@@ -340,7 +402,7 @@ function Sim(remote, gridNumber, cellWidth, cellHeight, activeCells){
     var state = {x: x, y: y, w: w, h: h};
     var obj = new TestObj(this, state);
     var cell = this.coordinateToCell(state.x, state.y);
-    cell.gameObjects.push(obj);
+    cell.addObject(obj);
     cell.addUpdate('create_testObj', obj);
   }
 }
