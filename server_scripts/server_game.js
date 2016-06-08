@@ -123,9 +123,8 @@ function generateIslands(sim, gridNumber, cellWidth, cellHeight){
 function generateTreasures(sim, gridNumber, cellWidth, cellHeight, treasure_num) {
   var maxHP = 80;
   var minHP = 40;
-  var maxVal = 5000;
-  var minVal = 500;
-  var prob_val = 0.8;
+  var minVal = 300;
+  var maxVal = 500;
   var x, y, val, hp, treasure, cell;
 
   // Serialized version of all treasures
@@ -133,7 +132,7 @@ function generateTreasures(sim, gridNumber, cellWidth, cellHeight, treasure_num)
   for (var i = 0; i < treasure_num; i++) {
     x = Math.random() * gridNumber * cellWidth;
     y = Math.random() * gridNumber * cellHeight;
-    val = Math.random() > prob_val ? Math.random() * maxVal : Math.random() * minVal;
+    val = minVal + Math.random() * (maxVal - minVal);
     hp = minHP + Math.random() * (maxHP - minHP);
     treasure = new Treasure(sim, x, y, Math.floor(val), Math.floor(hp));
     cell = sim.coordinateToCell(x, y);

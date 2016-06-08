@@ -279,6 +279,7 @@ function startClient() {
             obj.cell.addObject(obj);
             break;
           case 'remove_treasure':
+            console.log('remove treasure');
             var treasure = serializer.deserializeObject(update.data);
             sim.removeTreasure(treasure);
             break;
@@ -292,7 +293,7 @@ function startClient() {
             var ship = sim.getShip(update.data.uid);
             ship.hp = update.data.hp;
             ship.gold = update.data.gold;
-            sim.updateScale(update.data.uid, viewport, update.data.gold);
+            sim.increaseScale(update.data.uid, update.data.gold);
             console.log('GOLD ' + ship.gold);
             break;
           default:
@@ -365,12 +366,7 @@ function playClientGame(data) {
   sim.treasures = serializer.deserializeArray(data.treasures);
 
   deserializeNewStates(data.new_cells_states);
-
   updateHighScoresTable(data.scoresTable);
-
-
-  //  Using 16:9 aspect ratio
-  viewport = new Viewport(sim, 0, 0, 1.6, 0.9, 0.8);
 
   console.log("Our id is " + our_id);
 
@@ -380,9 +376,11 @@ function playClientGame(data) {
   remote.newPlayer(our_id, our_name, data.state);
   player = sim.addShip(our_id, our_name, data.state, localShipInput);
   player.isLocalShip = true;
-  player.scale = 1;
   player.hp = player.scale * 100;
   player.onDeath = onShipDeath;
+
+  //  Using 16:9 aspect ratio
+  viewport = new Viewport(sim, player, 0, 0, 1.6, 0.9);
 
   // Make compass point to nearest treasure
   setupCompass();

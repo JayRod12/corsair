@@ -22,7 +22,7 @@ else{
 
 (function(exports){
 
-var valueToScale = 1/1000;
+var valueToScale = 1/10000;
 
 //  Inputfunction determines updates to the ship
 //  onDraw can be null
@@ -40,6 +40,8 @@ function Ship(sim, state, uid, name, inputFunction){
   this.hp = this.maxhp;
 
   this.scale = 1.5;
+  this.targetScale = this.scale;
+  this.growthRate = 0;
   this.hypotenuse = Math.sqrt(this.scale*this.scale * shipBaseWidth*shipBaseWidth 
                             + this.scale*this.scale * shipBaseHeight*shipBaseHeight);
  
@@ -102,6 +104,11 @@ function Ship(sim, state, uid, name, inputFunction){
 
     this.cannon.onTick(dt);
 
+    // scale update
+    if (this.scale < this.targetScale) {
+      this.updateScale();
+    }
+
   }
 
   this.collisionHandler = function(other_object) {
@@ -127,7 +134,7 @@ function Ship(sim, state, uid, name, inputFunction){
 
       sim.remote.setScore(this.uid, this.gold);
       shipUpdate = true;
-      this.increaseScale(this.gold * valueToScale);
+      this.increaseScale(this.gold);
       other_object.cell.addSerializedUpdate('remove_treasure', other_object);
       sim.removeObject(other_object);
     }
@@ -150,11 +157,16 @@ function Ship(sim, state, uid, name, inputFunction){
   this.animationFrame = 0;
   this.animationFrameElapse = 0;
 
-  this.increaseScale = function(scale) {
-    this.scale += scale;
+  this.increaseScale = function(scale_increase) {
+    scale_increase *= valueToScale;
+    this.targetScale = this.scale + scale_increase;
+    this.growthRate = scale_increase / 100;
+  }
+
+  this.updateScale = function() {
+    this.scale += this.growthRate;
     this.hypotenuse = Math.sqrt(this.scale * this.scale * shipBaseWidth*shipBaseWidth 
                               + this.scale * this.scale * shipBaseHeight*shipBaseHeight);
-
   }
 
   this.onDraw = function(ctx){
@@ -246,6 +258,5 @@ var shipBaseHeight = 80;
 exports.Class = Ship;
 exports.shipBaseWidth = shipBaseWidth;
 exports.shipBaseHeight = shipBaseHeight;
-exports.valueToScale = valueToScale;
 
 })(typeof exports == 'undefined' ? this.Ship = {} : exports);

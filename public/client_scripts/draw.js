@@ -2,14 +2,15 @@
 ///////////////// DRAW METHODS ////////////////////////////
 
 //  Viewport maps world area to canvas for printing
-function Viewport(sim, x, y, baseWidth, baseHeight, scale){
+function Viewport(sim, ship, x, y, baseWidth, baseHeight){
 
   this.sim = sim;
+  this.ship = ship;
   this.x = x;
   this.y = y;
   this.baseHeight = baseHeight / baseWidth;
   this.baseWidth = 1;
-  this.scale = scale;
+  this.scale = 1/this.ship.scale;
 
   this.getWidth = function(){
     return this.baseWidth * scale;
@@ -20,6 +21,8 @@ function Viewport(sim, x, y, baseWidth, baseHeight, scale){
   }
 
   this.draw = function(ctx, canvaswidth, canvasheight){
+
+    this.scale = 1 / this.ship.scale;
     ctx.scale(this.scale, this.scale);
     ctx.translate(-this.x, -this.y);
 
@@ -28,6 +31,7 @@ function Viewport(sim, x, y, baseWidth, baseHeight, scale){
     ctx.translate(this.x, this.y);
     ctx.scale(1/this.scale, 1/this.scale);
   }
+
 }
 
 var prerenderClasses = [

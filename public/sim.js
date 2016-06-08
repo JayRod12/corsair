@@ -453,12 +453,9 @@ function Sim(remote, starttime, gridNumber, cellWidth, cellHeight, activeCells){
     cell.addObject(obj);
     cell.addSerializedUpdate('create_testObj', obj);
   }
-  this.updateScale = function(uid, viewport, value) {
-    var ship = this.getShip(uid);
-    ship.increaseScale(value * Ship.valueToScale);
-    // TODO decrease scale as ship increases in size.
-    //      Works weirdly.
-    viewport.scale = 1/ship.scale;
+
+  this.increaseScale = function(uid, value) {
+    this.getShip(uid).increaseScale(value);
   }
 }
 
