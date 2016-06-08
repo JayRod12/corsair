@@ -23,7 +23,7 @@ var socketList = [];
 
 // Game related data
 
-const gridNumber = 1;
+const gridNumber = 5;
 const cellWidth  = 1500;
 const cellHeight = 1500;
 var allCells = [];

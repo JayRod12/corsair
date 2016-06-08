@@ -19,6 +19,7 @@
     "socket.io": "~1.4.6",
     "chai": "~3.5.0",
     "mocha": "~2.5.3"
+    "pg": "^5.0.0",
   },
   "devDependencies": {
     "chai": "~3.5.0"
