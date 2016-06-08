@@ -146,14 +146,14 @@ function Cell(sim, x, y, gridNumber, width, height) {
       console.log('Remove object didnt find object in cell');
     }
     
+    if (typeof object.onDeath != "undefined") {
+      object.onDeath();
+    }
 
     if (object instanceof Ship.Class){
       this.sim.removeShip(object);
     }
 
-    if (typeof object.onDeath != "undefined") {
-      object.onDeath();
-    }
     return found;
   };
 
@@ -455,7 +455,7 @@ function Sim(remote, starttime, gridNumber, cellWidth, cellHeight, activeCells){
   }
   this.updateScale = function(uid, viewport, value) {
     var ship = this.getShip(uid);
-    ship.setScale(value * Ship.valueToScale);
+    ship.increaseScale(value * Ship.valueToScale);
     // TODO decrease scale as ship increases in size.
     //      Works weirdly.
     viewport.scale = 1/ship.scale;

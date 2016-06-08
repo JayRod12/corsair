@@ -22,7 +22,7 @@ else{
 
 (function(exports){
 
-var valueToScale = 1/10000;
+var valueToScale = 1/1000;
 
 //  Inputfunction determines updates to the ship
 //  onDraw can be null
@@ -127,6 +127,7 @@ function Ship(sim, state, uid, name, inputFunction){
 
       sim.remote.setScore(this.uid, this.gold);
       shipUpdate = true;
+      this.increaseScale(this.gold * valueToScale);
       other_object.cell.addSerializedUpdate('remove_treasure', other_object);
       sim.removeObject(other_object);
     }
@@ -137,11 +138,7 @@ function Ship(sim, state, uid, name, inputFunction){
       , gold : this.gold
       , hp : this.hp
       };
-      this.setScale(this.gold);
       other_object.cell.addNonSerialUpdate('ship_update', ship_update); 
-      sim.remote.setScore(this.uid, this.gold);
-      other_object.cell.addSerializedUpdate('remove_treasure', other_object);
-      sim.removeTreasure(other_object);
     }
 
    this.collided_timer = this.collided_basetime;
@@ -153,10 +150,10 @@ function Ship(sim, state, uid, name, inputFunction){
   this.animationFrame = 0;
   this.animationFrameElapse = 0;
 
-  this.setScale = function(scale) {
-    this.scale = scale;
-    this.hypotenuse = Math.sqrt(scale * scale * shipBaseWidth*shipBaseWidth 
-                              + scale * scale * shipBaseHeight*shipBaseHeight);
+  this.increaseScale = function(scale) {
+    this.scale += scale;
+    this.hypotenuse = Math.sqrt(this.scale * this.scale * shipBaseWidth*shipBaseWidth 
+                              + this.scale * this.scale * shipBaseHeight*shipBaseHeight);
 
   }
 

@@ -175,7 +175,6 @@ function client_update(player){
 }
 
 function endClient() {
-  socket.disconnect();
 
   if (client_loop) {
     window.cancelAnimationFrame(client_loop);
@@ -185,6 +184,7 @@ function endClient() {
     clearInterval(server_loop);
     server_loop = 0;
   }
+  socket.disconnect();
 }
 
 function startClient() {

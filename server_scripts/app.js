@@ -1,5 +1,9 @@
 console.log("Starting...");
 
+// dotenv config
+require('dotenv').config();
+console.log('dotenv: ' + process.env.CORSAIR_DB_URL);
+
 const port = 3000;
 const server = true;
 
