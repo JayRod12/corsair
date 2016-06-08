@@ -27,7 +27,7 @@ var socketList = [];
 
 // Game related data
 
-const gridNumber = 5;
+const gridNumber = 2;
 const cellWidth  = 2048;
 const cellHeight = 2048;
 var allCells = [];
@@ -181,11 +181,12 @@ io.on('connection', function(client){
   //  On tick
   client.on('client_update', function(data) {
     remote.updatePlayer(client.userid, data.state);
+    var time_diff = sim.time - data.clienttime;
     for (var i = 0; i < data.updates.length; i++){
       //  Only allow deserialization of certain objects
       var serial = data.updates[i];
       if (serial.type === "cannonball"){
-        var cannonball = serializer.deserializeObject(serial);
+        var cannonball = serializer.deserializeObject(serial, time_diff);
         var cell = cannonball.cell;
         cell.addObject(cannonball);
         cell.addSerializedUpdate('create_cannonball', cannonball);
