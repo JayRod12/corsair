@@ -173,7 +173,6 @@ function Ship(sim, state, uid, name, inputFunction){
     
 
     ctx.drawImage(ship_frames[this.animationFrame], -width/2, -height/2, width, height);
-    debugger;
 
     if (this.wait < 50) {
     } else {
