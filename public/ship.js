@@ -105,28 +105,37 @@ function Ship(sim, state, uid, name, inputFunction){
   this.collisionHandler = function(other_object) {
 	  /*TODO: different cases (possibly) i.e. what if 
   		it's a cannonball I've collided with?*/
+
+    var shipUpdate = false;
+
     if (other_object instanceof Cannon.CannonBall){
       if (other_object.uid === this.uid) return;
       if (typeof other_object.level !== "undefined"){
-        this.hp -= other_object.level;
+        if (server){
+          this.hp -= other_object.level;
+          shipUpdate = true;
+        }
       }
     } else if (other_object instanceof Treasure.Class) {
-      // TODO: ALL COLLISIONS ONLY ON SERVER
       if (!server) {
         return;
       }
       this.gold += other_object.value;
       this.hp = Math.min(this.maxhp, this.hp + other_object.hp);
+      sim.remote.setScore(this.uid, this.gold);
+      shipUpdate = true;
+      other_object.cell.addSerializedUpdate('remove_treasure', other_object);
+      sim.removeObject(other_object);
+    }
+
+    if (server && shipUpdate){
       var ship_update = {
         uid : this.uid
       , gold : this.gold
       , hp : this.hp
       };
-
       other_object.cell.addNonSerialUpdate('ship_update', ship_update); 
-      sim.remote.setScore(this.uid, this.gold);
-      other_object.cell.addSerializedUpdate('remove_treasure', other_object);
-      sim.removeObject(other_object);
+
     }
 
    this.collided_timer = this.collided_basetime;
