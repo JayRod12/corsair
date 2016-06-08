@@ -127,18 +127,13 @@ var colors = drawRandomColors();
 function drawHighScoresTable(scoreTable) {
   var maxLengthName = 14;
   var maxDisplay = 10;
-  //var currentPlayers = 0;
   var currentPlayers = Object.keys(scoreTable).length;
-
-  //for (var player in scoreTable) {currentPlayers++;}
   var i = 0;
-
-//  var displayNumber = currentPlayers < maxDisplay ? currentPlayers : maxDisplay;
-
   var displayNumber = Math.min(maxDisplay, currentPlayers);
 
   for (var uid in scoreTable) {
     if (i < displayNumber) {
+      if (sim.getShip(uid) == undefined) return;
       var shipName = sim.getShip(uid).name;
       i++;
       ctx.beginPath();
