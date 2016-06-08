@@ -322,6 +322,11 @@ function deserializeNewStates(new_cells_states) {
       serializer.deserializeArray(new_cells_states[i].state.game_obj)
                 .filter(function(x) { return x != null; });
 
+    //  Flush cell object lists
+    cell.gameObjects = [];
+    cell.drawObjects = [];
+    cell.colObjects = [];
+
     for (var j = 0; j < objects.length; j++){
       cell.addObject(objects[j]);
     }

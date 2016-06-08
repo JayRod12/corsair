@@ -177,6 +177,10 @@ function setupCompass() {
   Utils.insertionSort(sim.treasures, player);
 
   //console.log(sim.treasures.map(function(t1) {return Math.sqrt((player.state.x - t1.x) * (player.state.x - t1.x) + (player.state.y - t1.y) * (player.state.y - t1.y));}));
+  //console.log(sim.treasures.map(
+  //    function(t1) {
+  //      return Math.sqrt((player.state.x - t1.x) * (player.state.x - t1.x) +
+  //                       (player.state.y - t1.y) * (player.state.y - t1.y));}));
 
   if (sim.treasures.length > 0) {
     nearest_treasure = { x : sim.treasures[0].x, y : sim.treasures[0].y };

@@ -136,7 +136,7 @@ function Ship(sim, state, uid, name, inputFunction){
       shipUpdate = true;
       this.increaseScale(this.gold);
       other_object.cell.addSerializedUpdate('remove_treasure', other_object);
-      sim.removeObject(other_object);
+      sim.removeTreasure(other_object);
     }
 
     if (server && shipUpdate){

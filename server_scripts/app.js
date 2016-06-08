@@ -251,14 +251,12 @@ Array.prototype.intersection = function(a) {
 function send_loop_func(){
   // Replenish treasures
   var missing_treasures = treasure_number - sim.treasures.length;
-  console.log('TR: ' + treasure_number + ', len' + sim.treasures.length);
   if (missing_treasures > 0) {
     var new_treasures = ServerGame.generateTreasures(sim, gridNumber, cellWidth
         , cellHeight, missing_treasures);
     for (var i = 0; i < missing_treasures; i++) {
       new_treasures[i].cell.addSerializedUpdate('add_treasure', new_treasures[i]);
     }
-    console.log('ADD TREASURES ' + missing_treasures);
   }
   socketList.forEach(function (client) {
     if (typeof client.cells == "undefined") {
