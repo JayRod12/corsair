@@ -545,6 +545,7 @@ function playClientGame(data) {
   var our_name = (localStorage['nickname'] == "") ?  randomPirate : localStorage['nickname'];
   remote.newPlayer(our_id, our_name, data.state);
   player = sim.addShip(our_id, our_name, data.state, localShipInput);
+  player.isLocalShip = true;
   player.scale = 1;
   player.hp = player.scale * 100;
   player.onDeath = onShipDeath;

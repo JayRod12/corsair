@@ -28,6 +28,7 @@ function Ship(sim, state, uid, name, inputFunction){
   this.sim = sim;
   this.uid = uid;
   this.name = name;
+  this.isLocalShip = false;
 
   this.speed_cap = 0.8;
   this.gold = 0;
@@ -86,10 +87,15 @@ function Ship(sim, state, uid, name, inputFunction){
 
 
     //  TODO better interpolation
-    if (remoteState){
+    if (!isLocalShip && remoteState) {
+      this.state.x = remoteState.x;
+      this.state.y = remoteState.y;
+
+    } else if (isLocalShip && remoteState){
       this.state.x = (this.state.x + remoteState.x) / 2
       this.state.y = (this.state.y + remoteState.y) / 2
     }
+
     Game.updateCell(this.sim, this, this.state.x, this.state.y);
 
     this.cannon.onTick(dt);
