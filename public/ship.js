@@ -4,9 +4,9 @@ if (typeof exports === 'undefined'){
   loadGraphics = true;
   //  Browser
   var ship_image1 = new Image();
-  ship_image1.src = "../media/ship1.png";
+  ship_image1.src = "../media/ship1NU.png";
   var ship_image2 = new Image();
-  ship_image2.src = "../media/ship2.png";
+  ship_image2.src = "../media/ship2NU.png";
 }
 else{
   //  Server
@@ -30,8 +30,8 @@ function Ship(sim, state, uid, name, inputFunction){
   this.speed_cap = 0.8;
 
   //UPDATE THIS WHEN SCALE IS UPDATED.
-  this.hypotenuse = Math.sqrt(shipBaseWidth*shipBaseWidth 
-                              + shipBaseHeight*shipBaseHeight);
+  this.hypotenuse = Math.sqrt(shipHitWidth*shipHitWidth 
+                              + shipHitHeight*shipHitHeight);
  
   //  Should contain:
   //  x, y, angle, speed
@@ -136,8 +136,10 @@ function Ship(sim, state, uid, name, inputFunction){
   this.wait = 0;
 
   this.onDraw = function(ctx){
-    var width = shipBaseWidth * this.scale;
-    var height = shipBaseHeight * this.scale;
+    var drawwidth = shipDrawWidth * this.scale;
+    var drawheight = shipDrawHeight * this.scale;
+	var hitwidth = shipHitWidth * this.scale;
+	var hitheight = shipHitHeight * this.scale;
 
     //We translate to the origin of our ship
     ctx.translate(this.state.x, this.state.y);
@@ -145,25 +147,24 @@ function Ship(sim, state, uid, name, inputFunction){
     //We rotate around this origin 
     ctx.rotate(this.state.angle);
 
-      //We draw the ship, ensuring that we start drawing from the correct location 
-    //(the fillRect function draws from the topmost left corner of the rectangle 
-    if(this.collided_timer > 0) {
+	if(this.collided_timer > 0) {
         ctx.fillStyle = "red";
     } else {
       ctx.fillStyle = this.default_colour;
     }
-    // ctx.fillRect(-width/2, -height/2, width, height);
-    // ctx.strokeStyle = "#ffc0cb";
-    // ctx.strokeRect(-width/2, -height/2, width, height);
-
+     ctx.fillRect(-hitwidth/2, -hitheight/2, hitwidth, hitheight);
+      //We draw the ship, ensuring that we start drawing from the correct location 
+    //(the fillRect function draws from the topmost left corner of the rectangle 
     
     if (this.wait < 50) {
-      ctx.drawImage(ship_image1, -width/2, -height/2, width, height);
+      ctx.drawImage(ship_image1, -drawwidth/2, -drawheight/2, drawwidth, drawheight);
     } else {
-      ctx.drawImage(ship_image2, -width/2, -height/2, width, height);
+      ctx.drawImage(ship_image2, -drawwidth/2, -drawheight/2, drawwidth, drawheight);
     }
 
     this.wait = (this.wait + 1) % 100;
+
+	
 
     //We undo our transformations for the next draw/calculations
     ctx.rotate(-this.state.angle);
@@ -198,8 +199,8 @@ function Ship(sim, state, uid, name, inputFunction){
       x: this.state.x,
       y: this.state.y,
       speed: this.state.speed,
-      width: shipBaseWidth * this.scale,
-      height: shipBaseHeight * this.scale,
+      width: shipHitWidth * this.scale,
+      height: shipHitHeight * this.scale,
       hypotenuse: this.hypotenuse,
       angle: this.state.angle
     }
@@ -216,11 +217,15 @@ function Ship(sim, state, uid, name, inputFunction){
 
 }
 
-var shipBaseWidth = 144;
-var shipBaseHeight = 80;
+var shipDrawWidth = 200;
+var shipDrawHeight = 80;
+
+//Might need to improve the hitbox.
+var shipHitWidth = 100;
+var shipHitHeight = 35;
 
 exports.Class = Ship;
-exports.shipBaseWidth = shipBaseWidth;
-exports.shipBaseHeight = shipBaseHeight;
+exports.shipDrawWidth = shipDrawWidth;
+exports.shipDrawHeight = shipDrawHeight;
 
 })(typeof exports == 'undefined' ? this.Ship = {} : exports);
