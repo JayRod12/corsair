@@ -455,7 +455,7 @@ function Sim(remote, starttime, gridNumber, cellWidth, cellHeight, activeCells){
   }
   this.updateScale = function(uid, viewport, value) {
     var ship = this.getShip(uid);
-    ship.scale += value/10000;
+    ship.setScale(value * Ship.valueToScale);
     // TODO decrease scale as ship increases in size.
     //      Works weirdly.
     viewport.scale = 1/ship.scale;
