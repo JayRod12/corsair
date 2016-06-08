@@ -166,7 +166,8 @@ function client_update(player){
   //  TODO send server our local time
 
   if ((typeof socket != "undefined") && socket.connected) {
-    socket.emit('client_update', {state: player.state, updates : toSendServer});
+    socket.emit('client_update', {state: player.state, updates : toSendServer,
+        clienttime : sim.time});
     if (toSendServer.length > 0){
     }
     toSendServer = [];
@@ -252,6 +253,8 @@ function startClient() {
       var update = players[uid];
       remote.updatePlayer(uid, update);
     }
+    var server_time_diff = sim.time - data.servertime;
+
     var allBufferedUpdates = data.updates;
     for (var i = 0; i < allBufferedUpdates.length; i++){
       var num = allBufferedUpdates[i].num;
@@ -266,7 +269,8 @@ function startClient() {
           case 'object_enter_cell':
             if (update.data.type == "ship") {
               if (update.data.o.uid != our_id) {
-                var obj = serializer.deserializeObject(update.data);
+                var obj = serializer.deserializeObject(update.data,
+                    server_time_diff);
                 cell.addObject(obj);
               }
             }
@@ -275,15 +279,17 @@ function startClient() {
             //  CHECK IF OWN CANNONBALL
             if (update.data.o.uid === our_id) break;
 
-            var obj = serializer.deserializeObject(update.data);
+            var obj = serializer.deserializeObject(update.data, server_time_diff);
             obj.cell.addObject(obj);
             break;
           case 'remove_treasure':
-            var treasure = serializer.deserializeObject(update.data);
+            var treasure = serializer.deserializeObject(update.data,
+                server_time_diff);
             sim.removeTreasure(treasure);
             break;
           case 'add_treasure':
-            var treasure = serializer.deserializeObject(update.data);
+            var treasure = serializer.deserializeObject(update.data,
+                server_time_diff);
             sim.treasures.push(treasure);
             treasure.cell.addObject(treasure);
             break;
@@ -302,14 +308,14 @@ function startClient() {
     }
 
 
-    deserializeNewStates(data.new_cells);
+    deserializeNewStates(data.new_cells, server_time_diff);
     // Sim will only draw the active cells
     sim.activeCells = data.active_cells;
   });
   ping_func();
 }
 
-function deserializeNewStates(new_cells_states) {
+function deserializeNewStates(new_cells_states, server_time_diff) {
   for (var i = 0; i < new_cells_states.length; i++) {
     var cell = sim.numberToCell(new_cells_states[i].num);
     /*
@@ -318,7 +324,8 @@ function deserializeNewStates(new_cells_states) {
                 .filter(function(x) { return x != null; });
                 */
     var objects = 
-      serializer.deserializeArray(new_cells_states[i].state.game_obj)
+      serializer.deserializeArray(new_cells_states[i].state.game_obj,
+          server_time_diff)
                 .filter(function(x) { return x != null; });
 
     for (var j = 0; j < objects.length; j++){

@@ -32,8 +32,6 @@ function Serializer(sim) {
       return null;
     }
 
-    //  Temp
-    var server_time_diff = 0;
     //  TODO calculate difference in time between server and client and send
     //  along with update
 
