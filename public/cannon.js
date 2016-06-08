@@ -99,17 +99,17 @@ function CannonBall(sim, uid, state, level) {
   this.uid = uid;
   this.state = state;
   this.level = level;
-  this.life = level * 100;
+  this.despawn = 2500;
 
   this.cell = this.sim.coordinateToCell(this.state.x, this.state.y);
 
   this.onTick = function(dt) {
-    if (this.state.life == 0) {
+    if (this.despawn < 0) {
       this.sim.removeObject(this);
     }
     this.state.x += dt * this.state.xvel;
     this.state.y += dt * this.state.yvel;
-    this.life -= 1;
+    this.despawn -= dt;
     Game.updateCell(this.sim, this, this.state.x, this.state.y);
   };
 

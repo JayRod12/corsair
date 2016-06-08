@@ -357,7 +357,7 @@ function playClientGame(data) {
   meta = data.meta;
 
   our_id = data.id;
-  sim = new Sim.Class(remote, meta.gridNumber, meta.cellWidth, meta.cellHeight,
+  sim = new Sim.Class(remote, data.servertime, meta.gridNumber, meta.cellWidth, meta.cellHeight,
     meta.activeCells);
   serializer = new Serializer.Class(sim);
   sim.treasures = serializer.deserializeArray(data.treasures);

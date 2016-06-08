@@ -32,7 +32,7 @@ for (var i = 0; i < gridNumber * gridNumber; i++) {
 }
 
 var treasure_number = Math.floor(gridNumber * gridNumber / 2);
-var sim = new Sim.Class(remote,gridNumber, cellWidth, cellHeight, allCells);
+var sim = new Sim.Class(remote, Date.now(), gridNumber, cellWidth, cellHeight, allCells);
 // serialized treasures
 ServerGame.generateTreasures(sim, gridNumber, cellWidth, cellHeight, treasure_number);
 ServerGame.generateIslands(sim, gridNumber, cellWidth, cellHeight);
@@ -102,11 +102,15 @@ io.on('connection', function(client){
   ac.push(sim.coordinateToCellNumber(initState.x, initState.y));
   client.cells = ac;
 
+  //  servertime unix timestamp
+  var servertime = sim.time;
+
   var metadata = {
     gridNumber: gridNumber,
     cellWidth: cellWidth,
     cellHeight: cellHeight,
-    activeCells: ac
+    activeCells: ac,
+    servertime: servertime
   };
 
   var new_cells_states = serializeNewCells(ac);
@@ -282,7 +286,7 @@ function send_loop_func(){
     // Prepare data
     var data = { players: remote.getPlayers(), active_cells:client.cells
                , updates: allBufferedUpdates, scoresTable: remote.getUIDtoScores()
-               , new_cells: new_cells_states };
+               , new_cells: new_cells_states, servertime: sim.time};
     // Send
     client.emit('server_update', data);
   });
