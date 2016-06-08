@@ -124,7 +124,7 @@ function Cell(sim, x, y, gridNumber, width, height) {
     if (typeof object.onDraw !== "undefined"){
       for (var i = 0; i < this.drawObjects.length; i++){
         if ((!deepequals && this.drawObjects[i] == object) ||
-                (deepequals && this.drawObjects[i].equals(object))) {
+                (deepequals && object.equals(this.drawObjects[i]))) {
           this.drawObjects.splice(i,1);
           found = true;
 		      break;
@@ -135,7 +135,7 @@ function Cell(sim, x, y, gridNumber, width, height) {
     if (typeof object.getColType !== "undefined"){
       for (var i = 0; i < this.colObjects.length; i++){
         if ((!deepequals && this.colObjects[i] == object) ||
-                (deepequals && this.colObjects[i].equals(object))) {
+                (deepequals && object.equals(this.colObjects[i]))) {
           this.colObjects.splice(i,1);
           found = true;
 		      break;
