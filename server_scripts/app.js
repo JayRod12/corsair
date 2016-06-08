@@ -24,8 +24,8 @@ var socketList = [];
 // Game related data
 
 const gridNumber = 5;
-const cellWidth  = 1500;
-const cellHeight = 1500;
+const cellWidth  = 2048;
+const cellHeight = 2048;
 var allCells = [];
 for (var i = 0; i < gridNumber * gridNumber; i++) {
     allCells.push(i);
@@ -80,11 +80,20 @@ io.on('connection', function(client){
   //  Generate new client id associate with their connection
   client.userid = UUID();
 
-  //  TODO don't spawn on top of other people or in 'danger'
-  //  TODO fix initial vars
+  var initState;
+  var timeout = 1000;
+  var x, y;
+  while (timeout > 0){
+    x = Math.random()*gridNumber * cellWidth;
+    y = Math.random()*gridNumber * cellHeight;
+    if (ServerGame.checkSafeSpawn(sim, x, y)) break;
+  }
+  
+
+
   var initState = {
-    x: Math.random()*gridNumber * cellWidth,
-    y: Math.random()*gridNumber * cellHeight,
+    x: x,
+    y: y,
     angle: Math.random()*Math.PI*2,
     speed: 0
   };
@@ -156,6 +165,10 @@ io.on('connection', function(client){
 
 
 
+  client.on('corsair_ping', function(data) {
+    client.emit('corsair_pong', {});
+  });
+
 
   //  On tick
   client.on('client_update', function(data) {
@@ -166,7 +179,7 @@ io.on('connection', function(client){
       if (serial.type === "cannonball"){
         var cannonball = serializer.deserializeObject(serial);
         var cell = cannonball.cell;
-        cell.gameObjects.push(cannonball);
+        cell.addObject(cannonball);
         cell.addSerializedUpdate('create_cannonball', cannonball);
       }
     }
@@ -174,8 +187,6 @@ io.on('connection', function(client){
 
   //  On client disconnect
   client.on('disconnect', function () {
-    console.log('DISCONNECTING');
-
     //saveFinalScore in database
     var finalScore = remote.getScore(client.userid);
     Database.saveFinalScore(remote.getPlayerName(client.userid),finalScore);
@@ -265,16 +276,13 @@ function send_loop_func(){
                                 , updates: cell_updates });
       }
     }
-
     // Send all objects from the new cells (serialized)
     var new_cells_states = serializeNewCells(new_cells);
-
 
     // Prepare data
     var data = { players: remote.getPlayers(), active_cells:client.cells
                , updates: allBufferedUpdates, scoresTable: remote.getUIDtoScores()
                , new_cells: new_cells_states };
-
     // Send
     client.emit('server_update', data);
   });
@@ -291,10 +299,9 @@ function serializeNewCells(new_cells) {
   var new_cells_states = [];
   for (var i = 0; i < new_cells.length; i++) {
     var cell_game_objects = sim.numberToCell(new_cells[i]).gameObjects;
-    var cell_static_objects = sim.numberToCell(new_cells[i]).staticObjects;
-    var cell_state = { game_obj: serializer.serializeArray(cell_game_objects)
-                     , static_obj: serializer.serializeArray(cell_static_objects) };
-
+    var cell_server_objects = sim.numberToCell(new_cells[i]).serverObjects;
+    var cell_state = { game_obj:
+      serializer.serializeArray(cell_game_objects).concat(serializer.serializeArray(cell_server_objects))};
     new_cells_states.push({ num: new_cells[i]
                           , state: cell_state });
   }

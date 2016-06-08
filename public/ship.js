@@ -28,6 +28,7 @@ function Ship(sim, state, uid, name, inputFunction){
   this.sim = sim;
   this.uid = uid;
   this.name = name;
+  this.isLocalShip = false;
 
   this.speed_cap = 0.8;
   this.gold = 0;
@@ -86,10 +87,15 @@ function Ship(sim, state, uid, name, inputFunction){
 
 
     //  TODO better interpolation
-    if (remoteState){
+    if (!this.isLocalShip && remoteState) {
+      this.state.x = remoteState.x;
+      this.state.y = remoteState.y;
+
+    } else if (this.isLocalShip && remoteState){
       this.state.x = (this.state.x + remoteState.x) / 2
       this.state.y = (this.state.y + remoteState.y) / 2
     }
+
     Game.updateCell(this.sim, this, this.state.x, this.state.y);
 
     this.cannon.onTick(dt);
@@ -120,7 +126,7 @@ function Ship(sim, state, uid, name, inputFunction){
       other_object.cell.addNonSerialUpdate('ship_update', ship_update); 
       sim.remote.setScore(this.uid, this.gold);
       other_object.cell.addSerializedUpdate('remove_treasure', other_object);
-      sim.removeTreasure(other_object);
+      sim.removeObject(other_object);
     }
 
    this.collided_timer = this.collided_basetime;
@@ -184,7 +190,8 @@ function Ship(sim, state, uid, name, inputFunction){
     ctx.fillText(this.name, this.state.x - textWidth/2, this.state.y + height);
   }
 
-  this.getColType = function() {return "rectangle"};
+  this.getColType = function() {return "rectangle";};
+  this.getColCategory = function() {return "dynamic";};
   this.getColObj = function() {
     return {
       x: this.state.x,
