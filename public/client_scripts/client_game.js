@@ -143,7 +143,6 @@ function drawHighScoresTable(scoreTable) {
   var maxDisplay = 10;
   //var currentPlayers = 0;
   var currentPlayers = Object.keys(scoreTable).length;
-  debugger;
 
   //for (var player in scoreTable) {currentPlayers++;}
   var i = 0;
