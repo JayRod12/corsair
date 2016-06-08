@@ -465,7 +465,7 @@ function startClient() {
             var ship = sim.getShip(data.uid);
             ship.hp = data.hp;
             ship.gold = data.gold;
-            sim.updateScale(data.uid);
+            sim.updateScale(data.uid, viewport, data.gold);
             console.log('GOLD ' + ship.gold);
             break;
           default:

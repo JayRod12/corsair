@@ -30,7 +30,6 @@ for (var i = 0; i < gridNumber * gridNumber; i++) {
     allCells.push(i);
 }
 
-var treasure_number = Math.floor(gridNumber * gridNumber / 4);
 var treasure_number = Math.floor(gridNumber * gridNumber / 2);
 var sim = new Sim.Class(remote,gridNumber, cellWidth, cellHeight, allCells);
 // serialized treasures
