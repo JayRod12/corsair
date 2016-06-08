@@ -20,16 +20,13 @@ function Viewport(sim, x, y, baseWidth, baseHeight, scale){
   }
 
   this.draw = function(ctx, canvaswidth, canvasheight){
-    // Scale
-    ctx.scale(scale, scale);
+    ctx.scale(this.scale, this.scale);
     ctx.translate(-this.x, -this.y);
 
     sim.draw(ctx);
 
-    // Inverse scale
-    ctx.translate(this.x, this.y); 
-    ctx.scale(1/scale, 1/scale);
-
+    ctx.translate(this.x, this.y);
+    ctx.scale(1/this.scale, 1/this.scale);
   }
 }
 

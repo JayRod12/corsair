@@ -22,6 +22,8 @@ else{
 
 (function(exports){
 
+var valueToScale = 1/10000;
+
 //  Inputfunction determines updates to the ship
 //  onDraw can be null
 function Ship(sim, state, uid, name, inputFunction){
@@ -37,9 +39,9 @@ function Ship(sim, state, uid, name, inputFunction){
   this.maxhp = 100;
   this.hp = this.maxhp;
 
-  //UPDATE THIS WHEN SCALE IS UPDATED.
-  this.hypotenuse = Math.sqrt(shipBaseWidth*shipBaseWidth 
-                              + shipBaseHeight*shipBaseHeight);
+  this.scale = 1.5;
+  this.hypotenuse = Math.sqrt(this.scale*this.scale * shipBaseWidth*shipBaseWidth 
+                            + this.scale*this.scale * shipBaseHeight*shipBaseHeight);
  
   //  Should contain:
   //  x, y, angle, speed
@@ -54,8 +56,6 @@ function Ship(sim, state, uid, name, inputFunction){
     return sim.remote.getRemoteStates()[this.uid];
   };
 
-  // Scale of the ship ?
-  this.scale = 1.5;
 
   this.cannon = new Cannon.Class(this);
   this.inputFunction = inputFunction;
@@ -124,6 +124,7 @@ function Ship(sim, state, uid, name, inputFunction){
       }
       this.gold += other_object.value;
       this.hp = Math.min(this.maxhp, this.hp + other_object.hp);
+
       sim.remote.setScore(this.uid, this.gold);
       shipUpdate = true;
       other_object.cell.addSerializedUpdate('remove_treasure', other_object);
@@ -136,6 +137,7 @@ function Ship(sim, state, uid, name, inputFunction){
       , gold : this.gold
       , hp : this.hp
       };
+      this.setScale(this.gold);
       other_object.cell.addNonSerialUpdate('ship_update', ship_update); 
       sim.remote.setScore(this.uid, this.gold);
       other_object.cell.addSerializedUpdate('remove_treasure', other_object);
@@ -150,6 +152,13 @@ function Ship(sim, state, uid, name, inputFunction){
 
   this.animationFrame = 0;
   this.animationFrameElapse = 0;
+
+  this.setScale = function(scale) {
+    this.scale = scale;
+    this.hypotenuse = Math.sqrt(scale * scale * shipBaseWidth*shipBaseWidth 
+                              + scale * scale * shipBaseHeight*shipBaseHeight);
+
+  }
 
   this.onDraw = function(ctx){
     var width = shipBaseWidth * this.scale;
@@ -240,5 +249,6 @@ var shipBaseHeight = 80;
 exports.Class = Ship;
 exports.shipBaseWidth = shipBaseWidth;
 exports.shipBaseHeight = shipBaseHeight;
+exports.valueToScale = valueToScale;
 
 })(typeof exports == 'undefined' ? this.Ship = {} : exports);
