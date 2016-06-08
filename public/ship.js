@@ -8,7 +8,9 @@ if (typeof exports === 'undefined'){
   ship_image1.src = "../media/ship1.png";
   var ship_image2 = new Image();
   ship_image2.src = "../media/ship2.png";
+  var ship_frames = [ship_image1, ship_image2];
   server = false;
+  animationFrameTime = 10;
 }
 else{
   //  Server
@@ -144,7 +146,8 @@ function Ship(sim, state, uid, name, inputFunction){
 
   this.default_colour = "black";
 
-  this.wait = 0;
+  this.animationFrame = 0;
+  this.animationFrameElapse = 0;
 
   this.onDraw = function(ctx){
     var width = shipBaseWidth * this.scale;
@@ -168,13 +171,20 @@ function Ship(sim, state, uid, name, inputFunction){
     // ctx.strokeRect(-width/2, -height/2, width, height);
 
     
+
+    ctx.drawImage(ship_frames[this.animationFrame], -width/2, -height/2, width, height);
+    debugger;
+
     if (this.wait < 50) {
-      ctx.drawImage(ship_image1, -width/2, -height/2, width, height);
     } else {
       ctx.drawImage(ship_image2, -width/2, -height/2, width, height);
     }
 
-    this.wait = (this.wait + 1) % 100;
+    this.animationFrameElapse += 1;
+    if (this.animationFrameElapse > animationFrameTime){
+      this.animationFrameElapse = 0;
+      this.animationFrame = (this.animationFrame + 1 ) % ship_frames.length;
+    }
 
     //We undo our transformations for the next draw/calculations
     ctx.rotate(-this.state.angle);

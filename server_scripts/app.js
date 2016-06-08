@@ -102,11 +102,15 @@ io.on('connection', function(client){
   ac.push(sim.coordinateToCellNumber(initState.x, initState.y));
   client.cells = ac;
 
+  //  servertime unix timestamp
+  var servertime = new Date.now();
+
   var metadata = {
     gridNumber: gridNumber,
     cellWidth: cellWidth,
     cellHeight: cellHeight,
-    activeCells: ac
+    activeCells: ac,
+    servertime: servertime
   };
 
   var new_cells_states = serializeNewCells(ac);

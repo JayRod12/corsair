@@ -266,9 +266,11 @@ function updateCell(sim, object, x, y) {
 //  gridNumber is the height and width of the world in cells
 //  cellWidth, cellHeight specify cell size
 //  ActiveCells list of cells to tick and render, modified by (de)activateCell()
-function Sim(remote, gridNumber, cellWidth, cellHeight, activeCells){
+function Sim(remote, starttime, gridNumber, cellWidth, cellHeight, activeCells){
 
   console.log('Initialising sim...');
+
+  this.time = starttime;
 
   this.gridNumber = gridNumber;
   this.cellWidth  = cellWidth;
@@ -399,18 +401,11 @@ function Sim(remote, gridNumber, cellWidth, cellHeight, activeCells){
 
   }
 
-  var wait = 0;
   this.tick = function(dt){
+    this.time += dt;
     for (var i = 0; i < this.activeCells.length; i++){
       this.numberToCell(this.activeCells[i]).tick(dt);
     }
-
-    //if (wait == 0) {
-    //  for (var uid in remote.getUIDtoScores()) {
-    //    remote.setScore(uid, remote.getScore(uid) + 1);
-    //  }
-    //}
-    wait = (wait + 1) % 50;
   };
 
   this.draw = function(ctx){
