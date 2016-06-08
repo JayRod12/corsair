@@ -389,8 +389,6 @@ function playClientGame(data) {
   remote.newPlayer(our_id, our_name, data.state);
   player = sim.addShip(our_id, our_name, data.state, localShipInput);
   player.isLocalShip = true;
-  player.scale = 1;
-  player.hp = player.scale * 100;
   player.onDeath = onShipDeath;
 
   // Make compass point to nearest treasure
