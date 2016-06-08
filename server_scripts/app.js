@@ -31,7 +31,6 @@ for (var i = 0; i < gridNumber * gridNumber; i++) {
     allCells.push(i);
 }
 
-var treasure_number = Math.floor(gridNumber * gridNumber / 4);
 var treasure_number = Math.floor(gridNumber * gridNumber / 2);
 var sim = new Sim.Class(remote,gridNumber, cellWidth, cellHeight, allCells);
 // serialized treasures
@@ -118,7 +117,7 @@ io.on('connection', function(client){
 
     // Notify players in this cell that a new ship arrives
     var cell = sim.coordinateToCell(initState.x, initState.y);
-    cell.addUpdate('object_enter_cell', ship);
+    cell.addSerializedUpdate('object_enter_cell', ship);
 
     //  Add to socketList, ie. start sending client updates
     socketList.push(client);
@@ -168,7 +167,7 @@ io.on('connection', function(client){
         var cannonball = serializer.deserializeObject(serial);
         var cell = cannonball.cell;
         cell.gameObjects.push(cannonball);
-        cell.addUpdate('create_cannonball', cannonball);
+        cell.addSerializedUpdate('create_cannonball', cannonball);
       }
     }
   });
@@ -195,8 +194,8 @@ io.on('connection', function(client){
       playerCount + ' players');
     client.broadcast.emit('player_left',  {id : client.userid});
     remote.removePlayer(client.userid);
-    if (sim.UIDtoShip[client.userid]){
-      sim.removeObject(sim.UIDtoShip[client.userid]);
+    if (sim.getShip(client.userid)){
+      sim.removeObject(sim.getShip(client.userid));
     }
 
     //  Stop simulating if noone is connected
@@ -237,7 +236,7 @@ function send_loop_func(){
     var new_treasures = ServerGame.generateTreasures(sim, gridNumber, cellWidth
         , cellHeight, missing_treasures);
     for (var i = 0; i < missing_treasures; i++) {
-      new_treasures[i].cell.addUpdate('add_treasure', new_treasures[i]);
+      new_treasures[i].cell.addSerializedUpdate('add_treasure', new_treasures[i]);
     }
   }
   socketList.forEach(function (client) {

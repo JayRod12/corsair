@@ -111,7 +111,15 @@ function Ship(sim, state, uid, name, inputFunction){
       }
       this.gold += other_object.value;
       this.hp = Math.min(this.maxhp, this.hp + other_object.hp);
-      other_object.cell.addUpdate('remove_treasure', other_object);
+      var ship_update = {
+        uid : this.uid
+      , gold : this.gold
+      , hp : this.hp
+      };
+
+      other_object.cell.addNonSerialUpdate('ship_update', ship_update); 
+      sim.remote.setScore(this.uid, this.gold);
+      other_object.cell.addSerializedUpdate('remove_treasure', other_object);
       sim.removeTreasure(other_object);
     }
 
