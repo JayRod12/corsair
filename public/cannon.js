@@ -1,5 +1,13 @@
 if (typeof exports === 'undefined'){
   //  Browser
+  var cannon_frames = new Array();
+  var cannon_frame_count = 8;
+  for (var i = 0; i < cannon_frame_count; i++){
+    var cannon_frame = new Image();
+    cannon_frame.src = "../media/cannon/"+i+".png";
+    cannon_frames.push(cannon_frame);
+  }
+
 }
 else{
   Game = require ('./shared_game.js');
@@ -22,8 +30,8 @@ function Cannons(ship) {
   //cannon and cannonball params
   //this.cannons = 12;
   this.cannonNumber = initialCannons;
-  this.ballSpeed = 0.4;
-  this.spacing = 10;
+  this.ballSpeed = 0.25;
+  this.spacing = 8;
   this.delay = 200;
 
   for (var i = 0; i < initialCannons; i++) {
@@ -69,15 +77,6 @@ function Cannons(ship) {
       cannonArray[i].fire(fire_delay);
     } 
     
-
-
-
-
-
-
-
-
-
 
 
     /*
@@ -129,7 +128,14 @@ function Cannons(ship) {
     }*/
   };
 
-	
+  this.onDraw = function() {
+    for (var i = 0; i < this.leftCannons.length; i++) {
+      this.leftCannons[i].onDraw();
+    }
+    for (var i = 0; i < this.rightCannons.length; i++) {
+      this.rightCannons[i].onDraw();
+    }
+  }
 }
 
 
@@ -211,16 +217,21 @@ function CannonBall(sim, uid, state, level) {
   }
 }
 
+
 function SingleCannon(index, side, ship, handler) {
   this.index = index;
   this.side = side;
   this.ship = ship;
   this.fired = false;
   
+  //this.cur_frame = 0;
+  this.fire_delay = 0;
   this.fire_timer = 0;
+  this.cur_frame = 0; 
   
   this.fire = function(fire_delay) {
    // console.log("holy shit did that acutally work first time");
+	this.fire_delay = fire_delay;
     this.fire_timer = fire_delay;
     this.fired = true;
   }
@@ -231,8 +242,8 @@ function SingleCannon(index, side, ship, handler) {
      if (this.fire_timer > 0) {
        this.fire_timer -= dt;
      } else {
-        var offsetX = handler.spacing * (handler.cannonNumber - this.index) * Math.cos(ship.state.angle);
-        var offsetY = handler.spacing * (handler.cannonNumber - this.index) * Math.sin(ship.state.angle);
+        var offsetX = (handler.spacing * (handler.cannonNumber - this.index) * Math.cos(ship.state.angle)) -40*Math.cos(ship.state.angle) ;
+        var offsetY = (handler.spacing * (handler.cannonNumber - this.index) * Math.sin(ship.state.angle)) -40*Math.sin(ship.state.angle);
 
    //     console.log(ship.level);
         var ball = cannonBallFromLocal(ship, offsetX, offsetY, this.side, handler.ballSpeed, handler.level);
@@ -240,8 +251,45 @@ function SingleCannon(index, side, ship, handler) {
         var cell = ship.sim.coordinateToCell(ship.state.x,ship.state.y);
         cell.gameObjects.push(ball);
         this.fired = false;
+		this.cur_frame = 1;
      } 
-    }
+   }
+ }
+
+  this.onDraw = function() {
+
+	//I apologise for the magic numbers and hax, just working out the shit for the specific case.
+    var offset_x = handler.spacing * (handler.cannonNumber - this.index) * Math.cos(ship.state.angle);
+    var offset_y = handler.spacing * (handler.cannonNumber - this.index) * Math.sin(ship.state.angle);
+
+	//move the origin back by 3 so that the cannons appear further back
+	var x = ship.state.x + offset_x -40*Math.cos(ship.state.angle);
+    var y = ship.state.y + offset_y-40*Math.sin(ship.state.angle);
+
+    ctx.translate(x, y);
+    ctx.rotate(this.ship.state.angle);
+    
+
+  var frame = cannon_frames[0];
+	if (this.cur_frame > 0) {
+		frame = cannon_frames[this.cur_frame];
+		this.cur_frame = (this.cur_frame + 1) % 8
+	}
+
+/*
+	if (this.cur_frame > 0) {
+		this.cur_frame = (this.cur_frame + 1) % 8;
+	}
+*/
+
+	
+	//console.log(frame.width);
+	//console.log(frame.height);
+    ctx.drawImage(frame, -(frame.width*125)/(2*384), -(frame.height*125)/(2*384), 125, 125);
+
+    ctx.rotate(-this.ship.state.angle);
+    ctx.translate(-x, -y);
+
   }
 }
 

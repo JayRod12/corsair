@@ -136,6 +136,9 @@ function Ship(sim, state, uid, name, inputFunction){
   this.wait = 0;
 
   this.onDraw = function(ctx){
+
+	//first, draw cannons
+	this.cannon.onDraw();
     var drawwidth = shipDrawWidth * this.scale;
     var drawheight = shipDrawHeight * this.scale;
 	var hitwidth = shipHitWidth * this.scale;
@@ -147,12 +150,14 @@ function Ship(sim, state, uid, name, inputFunction){
     //We rotate around this origin 
     ctx.rotate(this.state.angle);
 
+	//draw hitbox underneath
+/*
 	if(this.collided_timer > 0) {
         ctx.fillStyle = "red";
     } else {
       ctx.fillStyle = this.default_colour;
     }
-     ctx.fillRect(-hitwidth/2, -hitheight/2, hitwidth, hitheight);
+     ctx.fillRect(-hitwidth/2, -hitheight/2, hitwidth, hitheight);*/
       //We draw the ship, ensuring that we start drawing from the correct location 
     //(the fillRect function draws from the topmost left corner of the rectangle 
     
@@ -217,11 +222,13 @@ function Ship(sim, state, uid, name, inputFunction){
 
 }
 
-var shipDrawWidth = 200;
+//200: 80
+var shipDrawWidth = 160;
 var shipDrawHeight = 80;
 
+//100:35
 //Might need to improve the hitbox.
-var shipHitWidth = 100;
+var shipHitWidth = 80;
 var shipHitHeight = 35;
 
 exports.Class = Ship;
