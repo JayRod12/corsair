@@ -22,12 +22,6 @@ function Island(sim, x, y, height, width, angle, color) {
 
   this.cell = sim.coordinateToCell(x, y);
 
-  this.onTick = function(dt) {
-    if(this.collided_timer > 0) {
-      this.collided_timer -= dt;
-    }
-  }
-
   this.collisionHandler = function(other_object) {
     //expect instanceoffing
     this.collided_timer = this.collided_basetime;
@@ -47,7 +41,7 @@ function Island(sim, x, y, height, width, angle, color) {
     } else {
       ctx.fillStyle = this.color;
     }    
-    ctx.fillRect(-this.width/2, -this.height/2, this.width, this.height);
+    ctx.fillRect(0, 0, this.width, this.height);
 
       //We undo our transformations for the next draw/calculations
       ctx.rotate(-this.angle);
@@ -55,10 +49,11 @@ function Island(sim, x, y, height, width, angle, color) {
   }
 
   this.getColType = function(){return "rectangle"};
+  this.getColCategory = function() {return "static";};
   this.getColObj = function(){
     return {
-      x: this.x,
-      y: this.y,
+      x: this.x + this.width/2,
+      y: this.y + this.height/2,
       width: this.width,
       height: this.height,
 	  hypotenuse: this.hypotenuse,
@@ -89,12 +84,6 @@ function CosmeticIsland(sim, x, y, height, width, angle, color) {
 
   this.cell = sim.coordinateToCell(x, y);
 
-  this.onTick = function(dt) {
-    if(this.collided_timer > 0) {
-      this.collided_timer -= dt;
-    }
-  }
-
   this.onDraw = function(ctx){
     //We translate to the origin of our island
       ctx.translate(this.x, this.y);
@@ -109,7 +98,7 @@ function CosmeticIsland(sim, x, y, height, width, angle, color) {
     } else {
       ctx.fillStyle = this.color;
     }    
-    ctx.fillRect(-this.width/2, -this.height/2, this.width, this.height);
+    ctx.fillRect(0, 0, this.width, this.height);
 
       //We undo our transformations for the next draw/calculations
       ctx.rotate(-this.angle);

@@ -167,11 +167,22 @@
 
     const renderWidth = 256;
     const renderMult = 2;
+
     const seaHue = 222;
     const seaSat = 49;
+
     const landHue = 94;
     const landSat = 45;
-    const sealevel = 0.55;
+
+    const beachHue = 63;
+    const beachSat = 46;
+
+    const mountainSat = 7;
+    const mountainHue = 222;
+
+    const seaLevel = 0.55;
+    const landLevel = 0.58;
+    const mountainLevel = 0.65;
 
     for (var y = 0; y < renderWidth ; y++){
       for (var x = 0; x < renderWidth ; x++){
@@ -180,8 +191,16 @@
         var l = perlin2(x/renderWidth, y/renderWidth);
         //var l = 0;
         //var l = smoothed[x][y];
-        if (l > sealevel){
+        if (l > mountainLevel){
+          var c = "hsl("+mountainHue.toString() + ", " + mountainSat.toString() +
+            "%, " + (l*100).toString() +"%)";
+        }
+        else if (l > landLevel){
           var c = "hsl("+landHue.toString() + ", " + landSat.toString() +
+            "%, " + (l*100).toString() +"%)";
+        }
+        else if (l > seaLevel){
+          var c = "hsl("+beachHue.toString() + ", " + beachSat.toString() +
             "%, " + (l*100).toString() +"%)";
         }
         else{
