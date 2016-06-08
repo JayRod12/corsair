@@ -18,7 +18,8 @@ else{
 
 (function(exports){
 
-function Cell(x, y, gridNumber, width, height) {
+function Cell(sim, x, y, gridNumber, width, height) {
+  this.sim = sim;
   this.number = gridNumber * y + x;
   this.x = x;
   this.y = y;
@@ -101,6 +102,60 @@ function Cell(x, y, gridNumber, width, height) {
 
   }
 
+
+  this.removeObject = function(object) {
+    var found = false;
+    var deepequals = false;
+    if (typeof object.equals !== "undefined"){
+      deepequals = true;
+    }
+  
+    if (typeof object.onTick !== "undefined") {
+    for (var i = 0; i < this.gameObjects.length; i++){
+        if ((!deepequals && this.gameObjects[i] == object) ||
+                (deepequals && this.gameObjects[i].equals(object))) {
+          this.gameObjects.splice(i,1);
+          found = true;
+          break;
+        }
+      }
+    }
+
+    if (typeof object.onDraw !== "undefined"){
+      for (var i = 0; i < this.drawObjects.length; i++){
+        if ((!deepequals && this.drawObjects[i] == object) ||
+                (deepequals && this.drawObjects[i].equals(object))) {
+          this.drawObjects.splice(i,1);
+          found = true;
+		      break;
+        }
+      }
+    }
+
+    if (typeof object.getColType !== "undefined"){
+      for (var i = 0; i < this.colObjects.length; i++){
+        if ((!deepequals && this.colObjects[i] == object) ||
+                (deepequals && this.colObjects[i].equals(object))) {
+          this.colObjects.splice(i,1);
+          found = true;
+		      break;
+        }
+      }
+    }
+    if (!found) {
+      console.log('Remove object didnt find object in cell');
+    }
+    
+
+    if (object instanceof Ship.Class){
+      this.sim.removeShip(object);
+    }
+
+    if (typeof object.onDeath != "undefined") {
+      object.onDeath();
+    }
+    return found;
+  };
 
 
   this.checkCollisions = function() {
@@ -249,42 +304,12 @@ function Sim(remote, gridNumber, cellWidth, cellHeight, activeCells){
     delete this.UIDtoShip[ship.uid];
   }
 
-  this.removeTreasure = function(treasure) {
-	// TODO: define isequals and use cell.removeObject
-    var cell = treasure.cell;
-    var found = false;
-    for (var i = 0; i < cell.gameObjects.length; i++) {
-      if (cell.gameObjects[i].x == treasure.x
-          && cell.gameObjects[i].y == treasure.y) {
-        cell.gameObjects.splice(i,1);
-        found = true;
-      }
-    }
-    if (!found) {
-      console.log('Treasure remove: found in cell :: ' + found);
-    }
-
-    found = false;
-    for (var i = 0; i < this.treasures.length; i++) {
-      if (this.treasures[i].cell == treasure.cell
-          && this.treasures[i].x == treasure.x
-          && this.treasures[i].y == treasure.y) {
-        this.treasures.splice(i, 1); 
-        found = true;
-        break;
-      }
-    }
-
-    if (!found) {
-      console.log('Treasure remove: found in treasures :: ' + found);
-    }
-  };
 
   this.grid = new Array(this.gridNumber)
   for (var i = 0; i < this.gridNumber; i++) {
     this.grid[i] = new Array(this.gridNumber);
     for (var j = 0; j < this.gridNumber; j++) {
-      this.grid[i][j] = new Cell(i, j, this.gridNumber, this.cellWidth, this.cellHeight);
+      this.grid[i][j] = new Cell(this, i, j, this.gridNumber, this.cellWidth, this.cellHeight);
     }
   }
 
@@ -403,48 +428,7 @@ function Sim(remote, gridNumber, cellWidth, cellHeight, activeCells){
 
   this.removeObject = function(object) {
     var cell = object.cell;
-    var found = false;
-    if (typeof object.onTick !== "undefined") {
-    for (var i = 0; i < cell.gameObjects.length; i++){
-        if (cell.gameObjects[i] == object) {
-          cell.gameObjects.splice(i,1);
-          found = true;
-          break;
-        }
-      }
-    }
-
-    if (typeof object.onDraw !== "undefined"){
-      for (var i = 0; i < cell.drawObjects.length; i++){
-        if (cell.drawObjects[i] == object) {
-          cell.drawObjects.splice(i,1);
-          found = true;
-		  break;
-        }
-      }
-    }
-
-    if (typeof object.getColType !== "undefined"){
-      for (var i = 0; i < cell.colObjects.length; i++){
-        if (cell.colObjects[i] == object) {
-          cell.colObjects.splice(i,1);
-          found = true;
-		  break;
-        }
-      }
-    }
-    if (!found) {
-      console.log('Remove object didnt find object in cell');
-    }
-    
-
-    if (object instanceof Ship.Class){
-      this.removeShip(object);
-    }
-
-    if (typeof object.onDeath != "undefined") {
-      object.onDeath();
-    }
+    return cell.removeObject(object);
   };
 
   this.addTestObject = function() {

@@ -278,7 +278,7 @@ function startClient() {
             break;
           case 'remove_treasure':
             var treasure = serializer.deserializeObject(update.data);
-            sim.removeTreasure(treasure);
+            sim.removeObject(treasure);
             break;
           case 'add_treasure':
             var treasure = serializer.deserializeObject(update.data);

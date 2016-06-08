@@ -87,11 +87,11 @@ function Ship(sim, state, uid, name, inputFunction){
 
 
     //  TODO better interpolation
-    if (!isLocalShip && remoteState) {
+    if (!this.isLocalShip && remoteState) {
       this.state.x = remoteState.x;
       this.state.y = remoteState.y;
 
-    } else if (isLocalShip && remoteState){
+    } else if (this.isLocalShip && remoteState){
       this.state.x = (this.state.x + remoteState.x) / 2
       this.state.y = (this.state.y + remoteState.y) / 2
     }
@@ -126,7 +126,7 @@ function Ship(sim, state, uid, name, inputFunction){
       other_object.cell.addNonSerialUpdate('ship_update', ship_update); 
       sim.remote.setScore(this.uid, this.gold);
       other_object.cell.addSerializedUpdate('remove_treasure', other_object);
-      sim.removeTreasure(other_object);
+      sim.removeObject(other_object);
     }
 
    this.collided_timer = this.collided_basetime;

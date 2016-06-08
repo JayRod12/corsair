@@ -127,13 +127,16 @@ var colors = drawRandomColors();
 function drawHighScoresTable(scoreTable) {
   var maxLengthName = 14;
   var maxDisplay = 10;
-  var currentPlayers = 0;
-  for (var player in scoreTable) {currentPlayers++;}
+  //var currentPlayers = 0;
+  var currentPlayers = Object.keys(scoreTable).length;
+
+  //for (var player in scoreTable) {currentPlayers++;}
   var i = 0;
 
-  var displayNumber = currentPlayers < maxDisplay ? currentPlayers : maxDisplay;
+//  var displayNumber = currentPlayers < maxDisplay ? currentPlayers : maxDisplay;
 
-    
+  var displayNumber = Math.min(maxDisplay, currentPlayers);
+
   for (var uid in scoreTable) {
     if (i < displayNumber) {
       var shipName = sim.getShip(uid).name;
@@ -170,4 +173,41 @@ function drawDebug() {
   ctx.font = "15px Josefin Sans";
   ctx.fillText("fps: "+ display_fps, (1/10)*canvas.width, (1/10)*canvas.height);
   ctx.fillText("ping: "+ ping +"ms", (1/10)*canvas.width, (2/10)*canvas.height);
+}
+
+// Sort treasures by distance (squared but its the same)
+function insertionSort(array) {
+  var i, j, d1x, d1y, d2x, d2y, d1, d2, t1, t2, temp;
+  for (i = 1; i < array.length; i++) {
+    t1 = array[i];
+    d1x = player.state.x - t1.x;
+    d1y = player.state.y - t1.y;
+    d1 = d1x * d1x + d1y * d1y;
+
+    for (j = i - 1; j >= 0; j--) {
+      t2 = array[j];
+      d2x = player.state.x - t2.x;
+      d2y = player.state.y - t2.y;
+      d2 = d2x * d2x + d2y * d2y;
+      if (d2 > d1) {
+        temp = array[j];
+        array[j] = array[j+1];
+        array[j+1] = temp;
+      } else {
+        break;
+      }
+    }
+  }
+}
+
+function setupCompass() {
+  insertionSort(sim.treasures);
+
+  //console.log(sim.treasures.map(function(t1) {return Math.sqrt((player.state.x - t1.x) * (player.state.x - t1.x) + (player.state.y - t1.y) * (player.state.y - t1.y));}));
+
+  if (sim.treasures.length > 0) {
+    nearest_treasure = { x : sim.treasures[0].x, y : sim.treasures[0].y };
+  } else {
+    nearest_treasure = { x : 0, y : 0 };
+  }
 }

@@ -18,9 +18,9 @@ const beachSat = 46;
 const mountainSat = 7;
 const mountainHue = 222;
 
-const seaLevel = 0.55;
-const landLevel = 0.58;
-const mountainLevel = 0.65;
+const seaLevel = 0.64;
+const landLevel = 0.68;
+const mountainLevel = 0.70;
 
 function makeHSL(h, s, l){
   return "hsl("+h.toString()+", "+s.toString()+"%, "+l.toString()+"%)";
