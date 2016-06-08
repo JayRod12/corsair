@@ -47,6 +47,8 @@ const s_delay = 1000/40;
 function draw(){
   viewport.x = player.state.x - canvas.width / (2 * viewport.scale);
   viewport.y = player.state.y - canvas.height / (2 * viewport.scale);
+  viewport.shipx = player.state.x;
+  viewport.shipy = player.state.y;
 
   drawBehindGrid(ctx);
   viewport.draw(ctx, canvas.width, canvas.height);
@@ -368,7 +370,7 @@ function playClientGame(data) {
 
 
   //  Using 16:9 aspect ratio
-  viewport = new Viewport(sim, 0, 0, 1.6, 0.9, 1);
+  viewport = new Viewport(sim, 0, 0, 1.6, 0.9, 0.8);
 
   console.log("Our id is " + our_id);
 
