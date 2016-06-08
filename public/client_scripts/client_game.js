@@ -278,7 +278,7 @@ function startClient() {
             break;
           case 'remove_treasure':
             var treasure = serializer.deserializeObject(update.data);
-            sim.removeObject(treasure);
+            sim.removeTreasure(treasure);
             break;
           case 'add_treasure':
             var treasure = serializer.deserializeObject(update.data);
@@ -287,11 +287,10 @@ function startClient() {
             break;
           case 'ship_update':
             console.log('ship update');
-            var data = update.data;
-            var ship = sim.getShip(data.uid);
-            ship.hp = data.hp;
-            ship.gold = data.gold;
-            sim.updateScale(data.uid, viewport, data.gold);
+            var ship = sim.getShip(update.data.uid);
+            ship.hp = update.data.hp;
+            ship.gold = update.data.gold;
+            sim.updateScale(update.data.uid, viewport, update.data.gold);
             console.log('GOLD ' + ship.gold);
             break;
           default:

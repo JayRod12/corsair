@@ -109,11 +109,11 @@ function Cell(sim, x, y, gridNumber, width, height) {
     if (typeof object.equals !== "undefined"){
       deepequals = true;
     }
-  
+
     if (typeof object.onTick !== "undefined") {
     for (var i = 0; i < this.gameObjects.length; i++){
         if ((!deepequals && this.gameObjects[i] == object) ||
-                (deepequals && this.gameObjects[i].equals(object))) {
+                (deepequals && object.equals(this.gameObjects[i]))) {
           this.gameObjects.splice(i,1);
           found = true;
           break;
@@ -156,6 +156,7 @@ function Cell(sim, x, y, gridNumber, width, height) {
     }
     return found;
   };
+
 
 
   this.checkCollisions = function() {
@@ -304,6 +305,20 @@ function Sim(remote, gridNumber, cellWidth, cellHeight, activeCells){
     delete this.UIDtoShip[ship.uid];
   }
 
+  this.removeTreasure = function(treasure) {
+    var found = false;
+    for (var i = 0; i < this.treasures.length; i++){
+      if (this.treasures[i].equals(treasure)) {
+        this.treasures.splice(i,1);
+        found = true;
+		    break;
+      }
+    }
+    if (!found) {
+      console.log('Treasure remove: not found in treasures');
+    }
+    this.removeObject(treasure);
+  }
 
   this.grid = new Array(this.gridNumber)
   for (var i = 0; i < this.gridNumber; i++) {
@@ -448,7 +463,7 @@ function Sim(remote, gridNumber, cellWidth, cellHeight, activeCells){
     ship.scale += value/10000;
     // TODO decrease scale as ship increases in size.
     //      Works weirdly.
-    //viewport.scale = 1/ship.scale;
+    viewport.scale = 1/ship.scale;
   }
 }
 

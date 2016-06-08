@@ -22,7 +22,7 @@ function Treasure(sim, x, y, value, hp) {
 
 
   this.onDraw = function(ctx) {
-    ctx.drawImage(treasure_image, this.x, this.y, 80, 80);
+    ctx.drawImage(treasure_image, this.x-40, this.y-40, 80, 80);
   };
 
   this.serialize = function() {
@@ -54,9 +54,7 @@ function Treasure(sim, x, y, value, hp) {
     if (!(o instanceof Treasure)) {
       return false;
     } else {
-      return this.cell == o.cell
-          && this.x == o.x
-          && this.y == o.y;
+      return o.cell && this.x == o.x && this.y == o.y;
     }
 
   }

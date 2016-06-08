@@ -126,7 +126,7 @@ function Ship(sim, state, uid, name, inputFunction){
       other_object.cell.addNonSerialUpdate('ship_update', ship_update); 
       sim.remote.setScore(this.uid, this.gold);
       other_object.cell.addSerializedUpdate('remove_treasure', other_object);
-      sim.removeObject(other_object);
+      sim.removeTreasure(other_object);
     }
 
    this.collided_timer = this.collided_basetime;
