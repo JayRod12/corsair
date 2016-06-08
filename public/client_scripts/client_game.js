@@ -307,6 +307,8 @@ function startClient() {
       }
     }
 
+    sim.time = data.servertime;
+
 
     deserializeNewStates(data.new_cells, server_time_diff);
     // Sim will only draw the active cells
@@ -366,7 +368,7 @@ function playClientGame(data) {
   meta = data.meta;
 
   our_id = data.id;
-  sim = new Sim.Class(remote, data.servertime, meta.gridNumber, meta.cellWidth, meta.cellHeight,
+  sim = new Sim.Class(remote, data.meta.servertime, meta.gridNumber, meta.cellWidth, meta.cellHeight,
     meta.activeCells);
   serializer = new Serializer.Class(sim);
   sim.treasures = serializer.deserializeArray(data.treasures);
