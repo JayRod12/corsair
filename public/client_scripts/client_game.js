@@ -184,10 +184,19 @@ function endClient() {
     clearInterval(server_loop);
     server_loop = 0;
   }
+  if (animation_loop == 0) {
+    animation_loop = window.requestAnimationFrame(animation);
+  }
   socket.disconnect();
 }
 
 function startClient() {
+
+  if (animation_loop) {
+    window.cancelAnimationFrame(animation_loop);
+    animation_loop = 0;
+  }
+
   // Initialize sockets
   console.log('socket status' + socket);
   if (typeof socket == "undefined" || !socket.connected) {
