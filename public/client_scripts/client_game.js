@@ -304,6 +304,17 @@ function startClient() {
             sim.treasures.push(treasure);
             treasure.cell.addObject(treasure);
             break;
+          case 'create_object':
+            var object = serializer.deserializeObject(update.data,
+                server_time_diff);
+            cell.addObject(object);
+            break;
+          case 'remove_object':
+            var object = serializer.deserializeObject(update.data,
+                server_time_diff);
+            var cell = sim.coordinateToCell(object.x, object.y);
+            cell.removeObject(object);
+            break;
           case 'ship_update':
             var ship = sim.getShip(update.data.uid);
             if (ship){

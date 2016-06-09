@@ -5,51 +5,53 @@ else{
   //  Server
   //Cannon = require('../public/cannon.js');
   Game = require('../public/shared_game.js');
+  Ship = require('../public/ship.js');
 }
 
 (function(exports){
 
-var lootSat = 33;
+var lootSat = 60;
 var lootLight = 87;
 
-//  Radius = value * const
-var lootValueRadConst = 4;
+var lootPerScale = 4;
 
-function Loot(x, y, value) {
+this.valueToRadius = 1;//32;
+
+function Loot(x, y, value, color) {
 
   this.x = x;
   this.y = y;
   this.value = value;
 
-  this.hue = Math.floor(360*Math.random());
-  this.color = "hsl("+"hue, "+lootSat+"%, "+lootLight+"%)";
+  if (typeof color === "undefined"){
+    var hue = Math.floor(360*Math.random());
+    this.color = "hsl("+hue+", "+lootSat+"%, "+lootLight+"%)";
+  }
+  else{
+    this.color = color;
+  }
   
   this.onDraw = function(ctx) {
-
     //  Temporary draw function
     ctx.fillStyle = this.color;
+    console.log(this.color);
+    //ctx.fillStyle = 'red';
     ctx.beginPath();
-    ctx.arc(this.x,this.y,lootValueRadConst*this.value,0,2*Math.PI);
+    ctx.arc(this.x,this.y,valueToRadius*this.value,0,2*Math.PI);
     ctx.closePath();
     ctx.fill();
 
   }
-  this.getColType = function(){return "circle"};
+  this.getColType = function(){return "point"};
   this.getColCategory = function(){return "static";};
   this.getColObj = function(){
     return {
       x: this.x,
       y: this.y,
-      width: this.width,
-      height: this.height,
-	    hypotenuse: this.hypotenuse,
-      angle: this.angle
     }
   };
 
   this.collisionHandler = function(other_object) {
-    //expect instanceoffing
-    this.collided_timer = this.collided_basetime;
   }
 
   this.serialize = function() {
@@ -59,7 +61,19 @@ function Loot(x, y, value) {
                , value: this.value
                , color: this.color } };
   }
+
+  this.equals = function(o) {
+    if (!(o instanceof Loot)) {
+      return false;
+    } else {
+      return this.x == o.x && this.y == o.y && this.value == o.value;
+    }
+
+  }
 }
 
+exports.lootPerScale = lootPerScale;
+
 exports.Class = Loot;
+
 })(typeof exports == 'undefined' ? this.Loot = {} : exports);

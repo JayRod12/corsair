@@ -110,14 +110,12 @@ function Cell(sim, x, y, gridNumber, width, height) {
       deepequals = true;
     }
 
-    if (typeof object.onTick !== "undefined") {
     for (var i = 0; i < this.gameObjects.length; i++){
-        if ((!deepequals && this.gameObjects[i] == object) ||
-                (deepequals && object.equals(this.gameObjects[i]))) {
-          this.gameObjects.splice(i,1);
-          found = true;
-          break;
-        }
+      if ((!deepequals && this.gameObjects[i] == object) ||
+              (deepequals && object.equals(this.gameObjects[i]))) {
+        this.gameObjects.splice(i,1);
+        found = true;
+        break;
       }
     }
 
