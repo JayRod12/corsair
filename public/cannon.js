@@ -24,8 +24,11 @@ function Cannon(ship) {
 
   this.futureShots = [];  //  List of future firing events
 
+  this.farfar = 0;
+
   this.onShoot = function(side) {
-    playCannonFire();
+    Audio.playCannonFire(this.farfar);
+    this.farfar += 0.1;
 
     //Ask server if we are allowed to shoot (MaybeTODO)
 

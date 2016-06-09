@@ -1,3 +1,5 @@
+(function(exports){
+
 var a_ctx; 
 window.addEventListener('load', audio_init, false);
 
@@ -11,7 +13,7 @@ function audio_init(){
         context = new AudioContext();
   }
   catch(e) {
-    console.log("Error: Web Audio API is unsupported in this browser");
+    console.error("Error: Web Audio API is unsupported in this browser");
     return;
   }
   a_ctx = new AudioContext();
@@ -29,7 +31,6 @@ function audio_init(){
   cannonWetLoader = new BufferLoader(a_ctx, cannon_wet_filenames, finishedLoading);
   cannonDryLoader.load();
   cannonWetLoader.load();
-  console.log('doneloading');
 }
 
 var cannon_sfx;
@@ -37,30 +38,37 @@ var cannon_sfx;
 //function finishedLoading(){
 //}
 function finishedLoading(bufferList) {
-  /*
-  // Create two sources and play them both together.
-  var source1 = context.createBufferSource();
-  source1.buffer = bufferList[0];
-
-  source1.connect(context.destination);
-  source1.start(0);
-  */
-  //playCannonFire();
 }
 
 
+var cannonBallVolume = 0.8;
+
+//  Dist is a value from 0 to 1
 function playCannonFire(dist) {
-  
   var n = Math.floor(Math.random() * cannonDryLoader.bufferList.length);
-  var source = a_ctx.createBufferSource();
+  var dist_2 = dist * dist;
 
-  source.buffer = cannonDryLoader.bufferList[n];
-  //convoler.buffer = cannonLoader.bufferList[n];
+  var sourceDry = a_ctx.createBufferSource();
+  var sourceWet = a_ctx.createBufferSource();
 
-  //source.buffer = reverbBuffer;
-  source.connect(a_ctx.destination);
+  var gainDry = a_ctx.createGain();
+  var gainWet = a_ctx.createGain();
+  gainDry.gain.value = (1-dist_2) * cannonBallVolume;
+  console.log(gainDry.gain.value);
+  gainWet.gain.value = dist_2 * cannonBallVolume;
 
-  //source.connect(convoler);
-  //convoler.connect(a_ctx.destination);
-  source.start(0);
+  sourceDry.buffer = cannonDryLoader.bufferList[n];
+  sourceWet.buffer = cannonWetLoader.bufferList[n];
+
+  sourceDry.connect(gainDry);
+  sourceWet.connect(gainWet);
+
+  gainDry.connect(a_ctx.destination);
+  gainWet.connect(a_ctx.destination);
+
+  //sourceDry.start(0);
+  sourceWet.start(0);
 }
+exports.playCannonFire = playCannonFire;
+
+})(this.Audio = {});
