@@ -144,12 +144,16 @@ function Cell(sim, x, y, gridNumber, width, height) {
     }
     if (!found) {
       console.log('Remove object didnt find object in cell');
+      //debugger;
     }
     
     if (typeof object.onDeath != "undefined") {
       object.onDeath();
     }
 
+    if (object instanceof Cannon.CannonBall) {
+      console.log('remove cannonball');
+    }
     if (object instanceof Ship.Class){
       this.sim.removeShip(object);
     }
@@ -249,6 +253,7 @@ function updateCell(sim, object, x, y) {
 
       if (!found) {
         console.log('updateCell::Could not remove object from previous current cell');
+        //debugger;
       }
 
       if (server) {

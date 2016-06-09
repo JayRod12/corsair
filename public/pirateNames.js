@@ -12,7 +12,8 @@ var pirateNames = [
 "Barbarossa",
 "Thomas Griggs",
 "Ignatius VII",
-"Lord Slocombe"
+"Lord Slocombe",
+"First Mate Jaime"
 ];
 
 exports.generate = function(){

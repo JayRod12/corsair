@@ -143,7 +143,10 @@ function CannonBall(sim, uid, state, level) {
 
   this.onTick = function(dt) {
     if (this.despawn < 0) {
-      this.sim.removeObject(this);
+      if (this.cell){
+        this.sim.removeObject(this);
+      }
+      return;
     }
     this.state.x += dt * this.state.xvel;
     this.state.y += dt * this.state.yvel;
@@ -225,7 +228,8 @@ function SingleCannon(index, side, ship, handler) {
      } else {
         var ball = cannonBallFromLocal(ship, this.offset_x, this.offset_y, this.side, handler.ballSpeed, handler.level);
          toSendServer.push(ball.serialize());
-        var cell = ship.sim.coordinateToCell(ship.state.x,ship.state.y);
+        var cell = ship.sim.coordinateToCell(ship.state.x + this.offset_x,
+                                             ship.state.y + this.offset_y);
         cell.addObject(ball);
         this.fired = false;
 		this.cur_frame = 1;

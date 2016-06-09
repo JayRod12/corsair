@@ -22,7 +22,7 @@ function Serializer(sim) {
   this.deserializeArray = function(array, server_time_diff) {
     var ret = [];
     for (var i = 0; i < array.length; i++){
-      ret.push(this.deserializeObject(array[i]));
+      ret.push(this.deserializeObject(array[i], server_time_diff));
     }
     return ret;
   }

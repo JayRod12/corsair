@@ -387,7 +387,7 @@ function playClientGame(data) {
   serializer = new Serializer.Class(sim);
   sim.treasures = serializer.deserializeArray(data.treasures);
 
-  deserializeNewStates(data.new_cells_states);
+  deserializeNewStates(data.new_cells_states, 0);
   updateHighScoresTable(data.scoresTable);
 
   console.log("Our id is " + our_id);
