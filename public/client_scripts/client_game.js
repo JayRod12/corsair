@@ -306,9 +306,11 @@ function startClient() {
             break;
           case 'ship_update':
             var ship = sim.getShip(update.data.uid);
-            ship.hp = update.data.hp;
-            ship.gold = update.data.gold;
-            sim.increaseScale(update.data.uid, update.data.gold);
+            if (ship){
+              ship.hp = update.data.hp;
+              ship.gold = update.data.gold;
+              sim.increaseScale(update.data.uid, update.data.gold);
+            }
             break;
           default:
             console.log("Unrecognised command from server " + update.name);

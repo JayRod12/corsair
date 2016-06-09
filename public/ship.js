@@ -252,8 +252,8 @@ function Ship(sim, state, uid, name, inputFunction){
   this.equals = function(o) {
     if (!(o instanceof Ship)){
       return false;
-    return this.uid == o.uid;
     }
+    return this.uid == o.uid;
 
   }
 

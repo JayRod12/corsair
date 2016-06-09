@@ -144,7 +144,6 @@ function Cell(sim, x, y, gridNumber, width, height) {
     }
     if (!found) {
       console.log('Remove object didnt find object in cell');
-      //debugger;
     }
     
     if (typeof object.onDeath != "undefined") {
