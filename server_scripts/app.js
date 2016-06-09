@@ -334,8 +334,6 @@ function calculateCellsToSend(uid){
 
     var num_viewed_cells_h = Math.ceil(horiz_resolution * s.scale / cellWidth);
     var num_viewed_cells_v = Math.ceil(vert_resolution * s.scale / cellHeight);
-    console.log('num viewed cells_h '+ num_viewed_cells_h);
-    console.log('num viewed cells_v ' + num_viewed_cells_v);
 
     for (var i = base.x - Math.ceil(num_viewed_cells_h);
              i <= base.x + Math.ceil(num_viewed_cells_h);
