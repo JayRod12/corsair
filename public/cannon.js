@@ -15,7 +15,7 @@ function Cannon(ship) {
   this.ballSpeed = 0.2;
   this.cannons = 12;
   this.spacing = 10;
-  this.delay = 10;
+  this.delay = 50;
   this.ship = ship;
   this.level = 2;
 
@@ -25,6 +25,7 @@ function Cannon(ship) {
   this.futureShots = [];  //  List of future firing events
 
   this.onShoot = function(side) {
+    playCannonFire();
 
     //Ask server if we are allowed to shoot (MaybeTODO)
 
@@ -89,6 +90,9 @@ function cannonBallFromLocal(ship, offsetX, offsetY, side, ballSpeed, level){
                , yvel: (ship.state.speed * Math.sin(ship.state.angle))/4 +
                ballSpeed * Math.sin(angle)
   };
+  //if (Math.floor(Math.random()*7) % 1 === 0){
+    //playCannonFire();
+  //}
   return new CannonBall(sim, ship.uid, state, level);
   
 }
