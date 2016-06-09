@@ -174,6 +174,7 @@ function Ship(sim, state, uid, name, inputFunction){
   }
 
   this.onDraw = function(ctx){
+	this.cannon.onDraw();
 	var drawWidth = shipDrawWidth * this.scale;
     var drawHeight = shipDrawHeight * this.scale;
 	var hitWidth = shipHitWidth * this.scale;
