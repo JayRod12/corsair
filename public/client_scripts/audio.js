@@ -93,4 +93,4 @@ exports.broadside = broadside;
 exports.playCannonFire = playCannonFire;
 exports.loaded = loaded;
 
-})(this.Audio = {});
+})(this.SFX = {});

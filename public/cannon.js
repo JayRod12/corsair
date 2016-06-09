@@ -47,6 +47,7 @@ function Cannon(ship) {
   
   this.onShoot = function(side) {
 
+    SFX.broadside(this.cannons, this.delay, 0.2);
     //Ask server if we are allowed to shoot (MaybeTODO)
     var index = ((side == 1) ? 0 : 1);
     

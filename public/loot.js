@@ -34,7 +34,6 @@ function Loot(x, y, value, color) {
   this.onDraw = function(ctx) {
     //  Temporary draw function
     ctx.fillStyle = this.color;
-    console.log(this.color);
     //ctx.fillStyle = 'red';
     ctx.beginPath();
     ctx.arc(this.x,this.y,valueToRadius*this.value,0,2*Math.PI);

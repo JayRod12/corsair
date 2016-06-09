@@ -80,7 +80,7 @@ function Ship(sim, state, uid, name, inputFunction){
     //  but stille exists on server
     if (typeof remoteState == "undefined" || this.hp < 0){
       sim.removeObject(this);
-      if (server && hp < 0){
+      if (server && this.hp < 0){
         this.spawnLoot();
       }
       return;
@@ -241,8 +241,8 @@ function Ship(sim, state, uid, name, inputFunction){
   this.spawnLoot = function() {
     var lootValueMin = this.scale*10;
     var lootValueMax = this.scale*10;
-    var lootDisperseRadMax = shipBaseWidth * this.scale;
-    var lootDisperseRadMin = shipBaseWidth * this.scale / 2;
+    var lootDisperseRadMax = shipDrawWidth * this.scale;
+    var lootDisperseRadMin = shipDrawWidth * this.scale / 2;
     for (var i = 0; i < Loot.lootPerScale * this.scale; i++) {
       var rad = lootDisperseRadMin + (lootDisperseRadMax - 
           lootDisperseRadMin) *
