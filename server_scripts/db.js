@@ -30,8 +30,6 @@ function getTopTenOverall(res) {
   });
   query.on('end', function() {
     res.send(rows);
-    console.log('results sent to highscores overall table');
-    console.log(rows);
   });
   return;
 }
@@ -43,13 +41,10 @@ function getTopTenToday(res){
           console.error('Error with table query', err);
       } else {
           rows = JSON.stringify(result.rows, null, " ");
-          //console.log(rows);
       }
   });
   query.on('end', function() {
     res.send(rows);
-    console.log('results sent to highscores today table');
-    console.log(rows);
   });
   return;
 }
