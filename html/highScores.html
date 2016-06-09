@@ -1,26 +1,97 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
 <head>
-	<meta charset="UTF-8">
+	<meta charset="UTF-8" http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	<title>High Scores</title>
 	<link rel="stylesheet" href="style/highScores.css">
 	<link href='https://fonts.googleapis.com/css?family=Josefin+Sans' rel='stylesheet' type='text/css'>
-</head>
-<body>
-	<form action="/" method="get">
-    	<button id="goBackButton"><img id="goBackImage"
-      		src="media/goBack.png" alt="Go Back"></button>
-  	</form>
-	<h1>Hall of Fame</h1>
 	<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
-  <script src="top_scores.js"></script>
-  <div id= "tableContainer" ng-app="app" ng-controller="controller">
-			<table>
-				<tr ng-repeat="o in data track by $index">
-				<td>{{o.name}}</td>
-				<td>{{o.score}}</td>
-			</td>
-		</table>
-  </div>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+	<script src="top_scores.js"></script>
+</head>
+
+<body ng-app="app">
+	<form action="/" method="get">
+    	<button id="goBackButton"><img id="goBackImage"src="media/goBack.png" alt="Go Back"></button>
+  	</form>
+ 	<h1>Hall of Fame</h1>
+
+<div>
+	<div id='overallTable' style=' position:relative; left: 50; text-align:center; top: 100px; border: 1px solid black; white-space: nowrap'>
+		<div id="table" ng-controller="controller">
+				 <table>
+					 <h2>ALL TIME</h2>
+					 <tr ng-repeat="object in data track by $index">
+					 <td>{{object.name}}</td>
+					 <td>{{object.score}}</td>
+			 </table>
+		 </div>
+	</div>
+</div>
+
+<div>
+	<div id='TodayTable' style='display:none; position:relative; left: 50; text-align:center; top: 100px; border: 1px solid black; white-space: nowrap'>
+		<div ng-controller="controllerToday">
+				 <table>
+					 <h2>TODAY</h2>
+					 <tr ng-repeat="o in data track by $index">
+					 <td>{{o.name}}</td>
+					 <td>{{o.score}}</td>
+			 </table>
+		 </div>
+	</div>
+</div>
+
+
+<div >
+	<button id='prev'><img id="goBackImage"src="media/goBack.png" alt="Go Back"></button>
+	<script>$('#prev').hide();</script>
+
+</div>
+
+<div align='center'>
+	<button id='next'><img id="goBackImage"src="media/forward.png" alt="Go Back"></button>
+</div>
+
+  <script>
+
+
+    $('#next').click(function(){
+			//	$('#overallTable').animate({width:'toggle'},1000);
+			$('#next').fadeOut();
+
+	      $('#overallTable').fadeOut(function(){
+	    		$('#TodayTable').fadeIn();
+				});
+
+				console.log("Gets here");
+				$('#prev').show();
+
+		});
+
+
+		$('#prev').click(function(){
+			  $('#prev').fadeOut();
+				$('#next').fadeIn();
+
+				$('#TodayTable').fadeOut(function(){
+	      $('#overallTable').fadeIn();
+			});
+
+    });
+
+
+
+	</script>
+
+
+
+
+
+
+
+
+
+
 </body>
 </html>
