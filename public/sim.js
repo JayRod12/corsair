@@ -432,7 +432,7 @@ function Sim(remote, starttime, gridNumber, cellWidth, cellHeight, activeCells){
     for (var i = 0; i < this.activeCells.length; i++){
       var tuple = this.cellNumberToTuple(this.activeCells[i]);
       this.numberToCell(this.activeCells[i]).drawBackground(ctx);
-      //drawCellBackground(tuple.x, tuple.y, ctx);
+     //drawCellBackground(tuple.x, tuple.y, ctx);
     }
     for (var i = 0; i < this.activeCells.length; i++){
       this.numberToCell(this.activeCells[i]).draw(ctx);

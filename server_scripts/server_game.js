@@ -100,8 +100,8 @@ function generateIslands(sim, gridNumber, cellWidth, cellHeight){
       }
       else{
         
-        //var i = new CosmeticIsland(sim, x, y, island_size, island_size, 0, color);
-        //sim.coordinateToCell(x,y).addObject(i);
+        var i = new CosmeticIsland(sim, x, y, island_size, island_size, 0, color);
+        sim.coordinateToCell(x,y).addObject(i);
 
         
       }
@@ -135,9 +135,9 @@ function generateIslands(sim, gridNumber, cellWidth, cellHeight){
         if (i == neighbours.length - 1 && (typeof islands[x][y].cell !==
               "undefined")){
           var color = islands[x][y].color;
-          //jvar i = new CosmeticIsland(sim, islands[x][y].x, islands[x][y].y, 
-              //jisland_size, island_size, 0, color);
-          //i.cell.addObject(i);
+          var i = new CosmeticIsland(sim, islands[x][y].x, islands[x][y].y, 
+              island_size, island_size, 0, color);
+          i.cell.addObject(i);
 
           sim.removeObject(islands[x][y]);
           islands[x][y] = true;

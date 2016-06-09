@@ -277,9 +277,11 @@ function startClient() {
             break;
           case 'object_enter_cell':
             if (update.data.type == "ship") {
+              //  Check first?
               if (update.data.o.uid != our_id) {
                 var obj = serializer.deserializeObject(update.data,
                     server_time_diff);
+                //sim.removeObject(obj);
                 cell.addObject(obj);
               }
             }
@@ -303,12 +305,10 @@ function startClient() {
             treasure.cell.addObject(treasure);
             break;
           case 'ship_update':
-            console.log('ship update');
             var ship = sim.getShip(update.data.uid);
             ship.hp = update.data.hp;
             ship.gold = update.data.gold;
             sim.increaseScale(update.data.uid, update.data.gold);
-            console.log('GOLD ' + ship.gold);
             break;
           default:
             console.log("Unrecognised command from server " + update.name);
@@ -349,7 +349,7 @@ function deserializeNewStates(new_cells_states, server_time_diff) {
     }
 
     if (typeof cell.prerenderBackground == "undefined") {
-      cell.prerenderedBackground = prerenderHeightmap(cell);
+      cell.prerenderedBackground = prerenderBackground(cell);
     }
   }
 }
@@ -389,11 +389,13 @@ function playClientGame(data) {
   serializer = new Serializer.Class(sim);
 
   sim.treasures = serializer.deserializeArray(data.treasures);
+  /*
   for (var i = 0; i < data.height_maps.length; i++){
     var cell = sim.numberToCell(i);
     cell.height_map = data.height_maps[i];
 
   }
+  */
 
   deserializeNewStates(data.new_cells_states, 0);
   updateHighScoresTable(data.scoresTable);

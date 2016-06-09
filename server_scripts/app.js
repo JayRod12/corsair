@@ -27,7 +27,7 @@ var socketList = [];
 
 // Game related data
 
-const gridNumber = 7;
+const gridNumber = 2;
 const cellWidth  = 2048;
 const cellHeight = 2048;
 const vert_resolution = 1080;
@@ -42,8 +42,8 @@ var sim = new Sim.Class(remote, Date.now(), gridNumber, cellWidth, cellHeight, a
 // serialized treasures
 ServerGame.generateTreasures(sim, gridNumber, cellWidth, cellHeight, treasure_number);
 ServerGame.generateIslands(sim, gridNumber, cellWidth, cellHeight);
-var height_maps = ServerGame.generateIslands2(sim, gridNumber, cellWidth, cellHeight);
-console.log('Height map size: ' + height_maps.length * height_maps[0].length * height_maps[0][0].length);
+//var height_maps = ServerGame.generateIslands2(sim, gridNumber, cellWidth, cellHeight);
+//console.log('Height map size: ' + height_maps.length * height_maps[0].length * height_maps[0][0].length);
 
 //var island = new Island(100, 100, 100, 100, Math.PI/4, "black");
 
@@ -129,7 +129,7 @@ io.on('connection', function(client){
   var data = { id : client.userid, names : remote.getPlayerNames()
              , players : remote.getPlayers(), state: initState, meta: metadata
              , new_cells_states: new_cells_states, treasures: serializer.serializeArray(sim.treasures)
-             , height_maps : height_maps };
+  };//height_maps : height_maps };
   client.emit('on_connect', data);
 
 

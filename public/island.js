@@ -61,14 +61,14 @@ function Island(sim, x, y, height, width, angle, color) {
     }
   };
   this.serialize = function() {
-    return null;
-    //return {type: "island",
-    //        o: { x: this.x
-    //           , y: this.y
-    //           , w: this.width
-    //           , h: this.height
-    //           , angle: this.angle
-    //           , color: this.color } };
+    //return null;
+    return {type: "island",
+            o: { x: this.x
+               , y: this.y
+               , w: this.width
+               , h: this.height
+               , angle: this.angle
+               , color: this.color } };
   }
 
 

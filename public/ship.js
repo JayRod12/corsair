@@ -249,6 +249,14 @@ function Ship(sim, state, uid, name, inputFunction){
                  , scale: this.scale}};
   };
 
+  this.equals = function(o) {
+    if (!(o instanceof Ship)){
+      return false;
+    return this.uid == o.uid;
+    }
+
+  }
+
 }
 
 var shipDrawWidth = 112.5;
