@@ -5,6 +5,7 @@ else{
   //  Server
   //Cannon = require('../public/cannon.js');
   Game = require('../public/shared_game.js');
+  Ship = require('../public/ship.js');
 }
 
 (function(exports){
@@ -12,8 +13,9 @@ else{
 var lootSat = 33;
 var lootLight = 87;
 
-//  Radius = value * const
-var lootValueRadConst = 4;
+var lootPerScale = 4;
+
+this.valueToRadius = 1/64;
 
 function Loot(x, y, value) {
 
@@ -29,7 +31,7 @@ function Loot(x, y, value) {
     //  Temporary draw function
     ctx.fillStyle = this.color;
     ctx.beginPath();
-    ctx.arc(this.x,this.y,lootValueRadConst*this.value,0,2*Math.PI);
+    ctx.arc(this.x,this.y,valueToRadius*this.value,0,2*Math.PI);
     ctx.closePath();
     ctx.fill();
 
@@ -48,8 +50,9 @@ function Loot(x, y, value) {
   };
 
   this.collisionHandler = function(other_object) {
-    //expect instanceoffing
-    this.collided_timer = this.collided_basetime;
+    if (other_object instanceof Ship.Class){
+      sim.removeObject(this);
+    }
   }
 
   this.serialize = function() {
@@ -59,7 +62,19 @@ function Loot(x, y, value) {
                , value: this.value
                , color: this.color } };
   }
+
+  this.equals = function(o) {
+    if (!(o instanceof Loot)) {
+      return false;
+    } else {
+      return this.x == o.x && this.y == o.y && this.value == other.value;
+    }
+
+  }
 }
 
+exports.lootPerScale = lootPerScale;
+
 exports.Class = Loot;
+
 })(typeof exports == 'undefined' ? this.Loot = {} : exports);

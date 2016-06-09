@@ -17,6 +17,7 @@ else{
   Cannon = require('../public/cannon.js');
   Game = require('../public/shared_game.js');
   Treasure = require('../public/treasure.js');
+  Loot = require('../public/loot.js');
   server = true;
 }
 
@@ -125,10 +126,7 @@ function Ship(sim, state, uid, name, inputFunction){
           shipUpdate = true;
         }
       }
-    } else if (other_object instanceof Treasure.Class) {
-      if (!server) {
-        return;
-      }
+    } else if (server && other_object instanceof Treasure.Class) {
       this.gold += other_object.value;
       this.hp = Math.min(this.maxhp, this.hp + other_object.hp);
 
@@ -137,6 +135,14 @@ function Ship(sim, state, uid, name, inputFunction){
       this.increaseScale(this.gold);
       other_object.cell.addSerializedUpdate('remove_treasure', other_object);
       sim.removeTreasure(other_object);
+    }
+    else if (server && other_object instanceof Loot.Class) {
+      this.gold += other_object.value;
+      sim.remote.setScore(this.uid, this.gold);
+      shipUpdate = true;
+      this.increaseScale(this.gold);
+      other_object.cell.addSerializedUpdate('remove_object', other_object);
+      
     }
 
     if (server && shipUpdate){
@@ -227,6 +233,30 @@ function Ship(sim, state, uid, name, inputFunction){
     var textWidth = metrics.width;
     ctx.fillText(this.name, this.state.x - textWidth/2, this.state.y + height);
   }
+
+  if (server){
+  this.onDeath = function() {
+    var lootValueMin = this.scale*100;
+    var lootValueMax = this.scale*100;
+    var lootDisperseRadMax = shipBaseWidth * this.scale;
+    var lootDisperseRadMin = shipBaseWidth * this.scale / 2;
+    for (var i = 0; i < Loot.lootPerScale * this.scale; i++) {
+      var rad = lootDisperseRadMin + (lootDisperseRadMax - 
+          lootDisperseRadMin) *
+        Math.random();
+      var value = Loot.lootValueMax + (Loot.lootValueMax - Loot.lootValueMin) *
+        Math.random();
+      var angle = 2 * Math.PI * Math.random();
+
+      var x = this.state.x + rad * Math.cos(angle);
+      var y = this.state.y + rad * Math.sin(angle);
+
+      var loot = new Loot.Class(x, y, value);
+      var cell = this.sim.coordinateToCell(loot.x, loot.y);
+      cell.addObject(loot);
+      cell.addSerializedUpdate('create_object', loot);
+    }
+  }}
 
   this.getColType = function() {return "rectangle";};
   this.getColCategory = function() {return "dynamic";};

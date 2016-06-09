@@ -293,6 +293,15 @@ function startClient() {
             sim.treasures.push(treasure);
             treasure.cell.addObject(treasure);
             break;
+          case 'add_object':
+            var object = serializer.deserializeObject(update.data,
+                server_time_diff);
+            cell.addObject(object);
+            break;
+          case 'remove_object':
+            var object = serializer.deserializeObject(update.data,
+                server_time_diff);
+            sim.removeObject(object);
           case 'ship_update':
             console.log('ship update');
             var ship = sim.getShip(update.data.uid);
