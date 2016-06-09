@@ -70,7 +70,11 @@ app.get('/highScores', function(req, res) {
 });
 
 app.get('/top10', function(req, res) {
-  Database.getTopTen(res);
+  Database.getTopTenOverall(res);
+});
+
+app.get('/top10Today',function(req,res){
+  Database.getTopTenToday(res);
 });
 
 http.listen(process.env.PORT || port, function() {

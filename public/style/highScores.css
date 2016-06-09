@@ -15,16 +15,66 @@ body {
 	background: none;
 }
 
+
+#goBackButton:focus {
+	outline-style: none;
+}
+
 #goBackImage {
-  height: 33px;  
+  height: 33px;
   width: 33px;
   opacity: 0.4;
 }
- 
- 
-#goBackImage:hover {  
+
+#goBackImage:focus {
+	outline-style: none;
+}
+
+
+#goBackImage:hover {
    opacity: 1;
-}  
+}
+
+
+#prev {
+	position:fixed;
+	top:50%;
+	left:40%;
+	padding: 0;
+	border: 12px solid black;
+	background: none;
+}
+
+#prev:focus {
+	outline-style: none;
+}
+
+
+#next {
+	position:fixed;
+	top:50%;
+	right:40%;
+	padding: 0;
+	border: 12px solid black;
+	background: none;
+}
+
+#next:focus {
+	outline-style: none;
+}
+
+h2 {
+	align:'center';
+	font-family: 'Josefin Sans';
+	position: relative;
+	/*display: inline-block;*/
+	/*padding:.8em 0 1em 0;*/
+	font-size:20px;
+	font-weight: bold;
+}
+
+
+
 
 h1 {
 	font-family: 'Josefin Sans';
@@ -37,6 +87,13 @@ h1 {
 	font-size:55px;
 	font-weight: bold;
 }
+
+
+
+
+
+
+
 /* style
 ------------------------------------*/
 /* bones */
@@ -120,27 +177,3 @@ td:first-child {
 td:nth-child(2) {
 	text-align: left;
 }
-
-#first {
-	color:#FFD700;
-}
-
-#second {
-	color:gray;
-}
-
-#third {
-	color:#cd7f32;
-}
-
-
-
-
-
-
-
-
-
-
-
-

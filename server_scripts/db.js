@@ -2,7 +2,7 @@ var pg = require("pg");
 pg.defaults.ssl = true;
 var conString = process.env.CORSAIR_DB_URL;
 var client = new pg.Client(conString);
-var query = client.query("CREATE TABLE IF NOT EXISTS scores(name varchar(64), score integer, ts timestamp)");
+var query = client.query("CREATE TABLE IF NOT EXISTS scores(name varchar(64), score integer, date date)");
 
 client.connect(function(err) {
     if (err) {
@@ -15,11 +15,11 @@ client.connect(function(err) {
 
 function saveFinalScore(name,score){
   console.log('final score for ' + name + ': ' + score);
-  var query = client.query("INSERT INTO scores(name,score,ts) values($1,$2,now())", [name,score]);
+  var query = client.query("INSERT INTO scores(name,score,date) values($1,$2,current_date)", [name,score]);
 }
 
 
-function getTopTen(res) {
+function getTopTenOverall(res) {
   var rows = [];
   var query = client.query("SELECT name,score FROM scores ORDER BY score DESC limit 10 ", function(err, result) {
       if (err) {
@@ -30,9 +30,32 @@ function getTopTen(res) {
   });
   query.on('end', function() {
     res.send(rows);
+    console.log('results sent to highscores overall table');
+    console.log(rows);
   });
   return;
 }
 
+function getTopTenToday(res){
+  var rows = [];
+  var query = client.query("SELECT name,score from scores where date=current_date order by score DESC limit 10;", function(err, result) {
+      if (err) {
+          console.error('Error with table query', err);
+      } else {
+          rows = JSON.stringify(result.rows, null, " ");
+          //console.log(rows);
+      }
+  });
+  query.on('end', function() {
+    res.send(rows);
+    console.log('results sent to highscores today table');
+    console.log(rows);
+  });
+  return;
+}
+
+
+
 exports.saveFinalScore = saveFinalScore;
-exports.getTopTen = getTopTen;
+exports.getTopTenOverall = getTopTenOverall;
+exports.getTopTenToday = getTopTenToday;
