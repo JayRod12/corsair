@@ -339,7 +339,9 @@ function deserializeNewStates(new_cells_states, server_time_diff) {
       cell.addObject(objects[j]);
     }
 
-    cell.prerenderedBackground = prerenderBackground(cell);
+    if (typeof cell.prerenderBackground == "undefined") {
+      cell.prerenderedBackground = prerenderHeightmap(cell);
+    }
   }
 }
 
@@ -376,7 +378,13 @@ function playClientGame(data) {
   sim = new Sim.Class(remote, data.meta.servertime, meta.gridNumber, meta.cellWidth, meta.cellHeight,
     meta.activeCells);
   serializer = new Serializer.Class(sim);
+
   sim.treasures = serializer.deserializeArray(data.treasures);
+  for (var i = 0; i < data.height_maps.length; i++){
+    var cell = sim.numberToCell(i);
+    cell.height_map = data.height_maps[i];
+
+  }
 
   deserializeNewStates(data.new_cells_states);
   updateHighScoresTable(data.scoresTable);

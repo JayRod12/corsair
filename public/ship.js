@@ -74,10 +74,6 @@ function Ship(sim, state, uid, name, inputFunction){
     //  TODO might cause 'ghost ships', player removed on local simulation
     //  but stille exists on server
     if (typeof remoteState == "undefined" || this.hp < 0){
-      if (this.name == "tom"){
-        this.hp = 100;
-        return;
-      }
       sim.removeObject(this);
       return;
     }

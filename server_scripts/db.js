@@ -14,6 +14,7 @@ client.connect(function(err) {
 });
 
 function saveFinalScore(name,score){
+  console.log('final score for ' + name + ': ' + score);
   var query = client.query("INSERT INTO scores(name,score,ts) values($1,$2,now())", [name,score]);
 }
 
@@ -25,13 +26,10 @@ function getTopTen(res) {
           console.error('Error with table query', err);
       } else {
           rows = JSON.stringify(result.rows, null, " ");
-          //console.log(rows);
       }
   });
   query.on('end', function() {
     res.send(rows);
-    console.log('results sent to highscores table');
-
   });
   return;
 }

@@ -13,11 +13,11 @@ function Viewport(sim, ship, x, y, baseWidth, baseHeight){
   this.scale = 1/this.ship.scale;
 
   this.getWidth = function(){
-    return this.baseWidth * scale;
+    return this.baseWidth * this.scale;
   }
 
   this.getHeight = function(){
-    return this.baseWidth * scale;
+    return this.baseWidth * this.scale;
   }
 
   this.draw = function(ctx, canvaswidth, canvasheight){
@@ -32,6 +32,62 @@ function Viewport(sim, ship, x, y, baseWidth, baseHeight){
     ctx.scale(1/this.scale, 1/this.scale);
   }
 
+}
+
+const seaHue = 222;
+const seaSat = 49;
+
+const landHue = 94;
+const landSat = 45;
+
+const beachHue = 63;
+const beachSat = 46;
+
+const mountainSat = 7;
+const mountainHue = 222;
+
+const seaLevel = 0.64;
+const landLevel = 0.68;
+const mountainLevel = 0.70;
+
+function makeHSL(h, s, l){
+  return "hsl("+h.toString()+", "+s.toString()+"%, "+l.toString()+"%)";
+}
+function islandColor(height){
+  if (height > mountainLevel){
+    return makeHSL(mountainHue, mountainSat, height*100);
+  }
+  else if (height > landLevel){
+    return makeHSL(landHue, landSat, height*100);
+  }
+  else if (height > seaLevel){
+    return makeHSL(beachHue, beachSat, height*100);
+  }
+  else {
+    return makeHSL(seaHue, seaSat, height*100);
+  }
+}
+//  TODO get this from somewhere (meta)
+var island_size = 32;
+function prerenderHeightmap(cell) {
+  var canvas = document.createElement('canvas');
+  canvas.width = meta.cellWidth;
+  canvas.height = meta.cellHeight;
+  var render_target = canvas.getContext('2d');
+  //jjjjjjrender_target.translate(-cell.x * meta.cellWidth, -cell.y * meta.cellHeight);
+  for (var x = 0; x < cell.height_map.length; x++){
+    for (var y = 0; y < cell.height_map.length; y++){
+      render_target.fillStyle = islandColor(cell.height_map[x][y]);     
+      render_target.fillRect(0, 0, island_size, island_size);
+      render_target.translate(0, island_size);
+    }
+    render_target.translate(island_size, - cell.height);
+  }
+  render_target.translate(-cell.width, 0);
+  //debugger;
+
+  //render_target.translate(cell.x * meta.cellWidth, cell.y * meta.cellHeight);
+  return canvas;
 }
 
 var prerenderClasses = [
@@ -112,16 +168,6 @@ function drawCellBackground(cx, cy, ctx){
 }
 
 
-var treasureX = 300;
-var treasureY = 300;
-
-function drawTreasure() {
-    ctx.beginPath();
-    ctx.arc(treasureX, treasureY, 10, 2 * Math.PI, false);
-    ctx.fillStyle = "yellow";
-    ctx.fill();
-    ctx.closePath();
-}
 
 var colors = drawRandomColors();
 

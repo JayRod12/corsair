@@ -31,9 +31,6 @@ function Cell(sim, x, y, gridNumber, width, height) {
   this.prerenderObjects = [];
   this.colObjects = [];
   this.bufferedUpdates = [];
-  if (server){
-    this.serverObjects = [];
-  }
 
   this.tick = function(dt){
     //Check collisions first, important so that collisionHandler can do 
@@ -46,11 +43,13 @@ function Cell(sim, x, y, gridNumber, width, height) {
     }
   }
 
-  this.draw = function(ctx){
+  this.drawBackground = function(ctx) {
+
     ctx.drawImage(this.prerenderedBackground, this.x * this.width, this.y *
         this.height, this.width, this.height);
+  }
 
-    
+  this.draw = function(ctx){
     /*
       if (typeof this.gameObjects[i].onDraw != "undefined"){
         var toDraw = true;
@@ -426,7 +425,8 @@ function Sim(remote, starttime, gridNumber, cellWidth, cellHeight, activeCells){
   this.draw = function(ctx){
     for (var i = 0; i < this.activeCells.length; i++){
       var tuple = this.cellNumberToTuple(this.activeCells[i]);
-      drawCellBackground(tuple.x, tuple.y, ctx);
+      this.numberToCell(this.activeCells[i]).drawBackground(ctx);
+      //drawCellBackground(tuple.x, tuple.y, ctx);
     }
     for (var i = 0; i < this.activeCells.length; i++){
       this.numberToCell(this.activeCells[i]).draw(ctx);
