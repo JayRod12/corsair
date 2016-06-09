@@ -1,5 +1,9 @@
 console.log("Starting...");
 
+// dotenv config
+require('dotenv').config();
+console.log('dotenv: ' + process.env.CORSAIR_DB_URL);
+
 const port = 3000;
 const server = true;
 
@@ -23,17 +27,16 @@ var socketList = [];
 
 // Game related data
 
-const gridNumber = 1;
-const cellWidth  = 1500;
-const cellHeight = 1500;
+const gridNumber = 2;
+const cellWidth  = 2048;
+const cellHeight = 2048;
 var allCells = [];
 for (var i = 0; i < gridNumber * gridNumber; i++) {
     allCells.push(i);
 }
 
-var treasure_number = Math.floor(gridNumber * gridNumber / 4);
 var treasure_number = Math.floor(gridNumber * gridNumber / 2);
-var sim = new Sim.Class(remote,gridNumber, cellWidth, cellHeight, allCells);
+var sim = new Sim.Class(remote, Date.now(), gridNumber, cellWidth, cellHeight, allCells);
 // serialized treasures
 ServerGame.generateTreasures(sim, gridNumber, cellWidth, cellHeight, treasure_number);
 ServerGame.generateIslands(sim, gridNumber, cellWidth, cellHeight);
@@ -85,11 +88,20 @@ io.on('connection', function(client){
   //  Generate new client id associate with their connection
   client.userid = UUID();
 
-  //  TODO don't spawn on top of other people or in 'danger'
-  //  TODO fix initial vars
+  var initState;
+  var timeout = 1000;
+  var x, y;
+  while (timeout > 0){
+    x = Math.random()*gridNumber * cellWidth;
+    y = Math.random()*gridNumber * cellHeight;
+    if (ServerGame.checkSafeSpawn(sim, x, y)) break;
+  }
+  
+
+
   var initState = {
-    x: Math.random()*gridNumber * cellWidth,
-    y: Math.random()*gridNumber * cellHeight,
+    x: x,
+    y: y,
     angle: Math.random()*Math.PI*2,
     speed: 0
   };
@@ -98,11 +110,15 @@ io.on('connection', function(client){
   ac.push(sim.coordinateToCellNumber(initState.x, initState.y));
   client.cells = ac;
 
+  //  servertime unix timestamp
+  var servertime = sim.time;
+
   var metadata = {
     gridNumber: gridNumber,
     cellWidth: cellWidth,
     cellHeight: cellHeight,
-    activeCells: ac
+    activeCells: ac,
+    servertime: servertime
   };
 
   var new_cells_states = serializeNewCells(ac);
@@ -122,7 +138,7 @@ io.on('connection', function(client){
 
     // Notify players in this cell that a new ship arrives
     var cell = sim.coordinateToCell(initState.x, initState.y);
-    cell.addUpdate('object_enter_cell', ship);
+    cell.addSerializedUpdate('object_enter_cell', ship);
 
     //  Add to socketList, ie. start sending client updates
     socketList.push(client);
@@ -161,26 +177,29 @@ io.on('connection', function(client){
 
 
 
+  client.on('corsair_ping', function(data) {
+    client.emit('corsair_pong', {});
+  });
+
 
   //  On tick
   client.on('client_update', function(data) {
     remote.updatePlayer(client.userid, data.state);
+    var time_diff = sim.time - data.clienttime;
     for (var i = 0; i < data.updates.length; i++){
       //  Only allow deserialization of certain objects
       var serial = data.updates[i];
       if (serial.type === "cannonball"){
-        var cannonball = serializer.deserializeObject(serial);
+        var cannonball = serializer.deserializeObject(serial, time_diff);
         var cell = cannonball.cell;
-        cell.gameObjects.push(cannonball);
-        cell.addUpdate('create_cannonball', cannonball);
+        cell.addObject(cannonball);
+        cell.addSerializedUpdate('create_cannonball', cannonball);
       }
     }
   });
 
   //  On client disconnect
   client.on('disconnect', function () {
-    console.log('DISCONNECTING');
-
     //saveFinalScore in database
     var finalScore = remote.getScore(client.userid);
     Database.saveFinalScore(remote.getPlayerName(client.userid),finalScore);
@@ -199,8 +218,8 @@ io.on('connection', function(client){
       playerCount + ' players');
     client.broadcast.emit('player_left',  {id : client.userid});
     remote.removePlayer(client.userid);
-    if (sim.UIDtoShip[client.userid]){
-      sim.removeObject(sim.UIDtoShip[client.userid]);
+    if (sim.getShip(client.userid)){
+      sim.removeObject(sim.getShip(client.userid));
     }
 
     //  Stop simulating if noone is connected
@@ -241,7 +260,7 @@ function send_loop_func(){
     var new_treasures = ServerGame.generateTreasures(sim, gridNumber, cellWidth
         , cellHeight, missing_treasures);
     for (var i = 0; i < missing_treasures; i++) {
-      new_treasures[i].cell.addUpdate('add_treasure', new_treasures[i]);
+      new_treasures[i].cell.addSerializedUpdate('add_treasure', new_treasures[i]);
     }
   }
   socketList.forEach(function (client) {
@@ -270,16 +289,13 @@ function send_loop_func(){
                                 , updates: cell_updates });
       }
     }
-
     // Send all objects from the new cells (serialized)
     var new_cells_states = serializeNewCells(new_cells);
-
 
     // Prepare data
     var data = { players: remote.getPlayers(), active_cells:client.cells
                , updates: allBufferedUpdates, scoresTable: remote.getUIDtoScores()
-               , new_cells: new_cells_states };
-
+               , new_cells: new_cells_states, servertime: sim.time};
     // Send
     client.emit('server_update', data);
   });
@@ -296,10 +312,9 @@ function serializeNewCells(new_cells) {
   var new_cells_states = [];
   for (var i = 0; i < new_cells.length; i++) {
     var cell_game_objects = sim.numberToCell(new_cells[i]).gameObjects;
-    var cell_static_objects = sim.numberToCell(new_cells[i]).staticObjects;
-    var cell_state = { game_obj: serializer.serializeArray(cell_game_objects)
-                     , static_obj: serializer.serializeArray(cell_static_objects) };
-
+    var cell_server_objects = sim.numberToCell(new_cells[i]).serverObjects;
+    var cell_state = { game_obj:
+      serializer.serializeArray(cell_game_objects).concat(serializer.serializeArray(cell_server_objects))};
     new_cells_states.push({ num: new_cells[i]
                           , state: cell_state });
   }

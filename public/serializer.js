@@ -19,7 +19,7 @@ function Serializer(sim) {
   //  It feels wrong for the below to be commented but it is correct
   //this.sim = sim;
 
-  this.deserializeArray = function(array) {
+  this.deserializeArray = function(array, server_time_diff) {
     var ret = [];
     for (var i = 0; i < array.length; i++){
       ret.push(this.deserializeObject(array[i]));
@@ -27,13 +27,11 @@ function Serializer(sim) {
     return ret;
   }
 
-  this.deserializeObject = function(serial) {
+  this.deserializeObject = function(serial, server_time_diff) {
     if (serial == null) {
       return null;
     }
 
-    //  Temp
-    var server_time_diff = 0;
     //  TODO calculate difference in time between server and client and send
     //  along with update
 
@@ -114,7 +112,7 @@ function Serializer(sim) {
       return ship;
     },
 
-    deserializeTestObj : function(state) {
+    test_obj : function(state) {
       return new Sim.TestObj(sim, state);
     }
 

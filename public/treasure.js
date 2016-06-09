@@ -13,42 +13,52 @@ else{
 (function(exports){
 
 function Treasure(sim, x, y, value, hp) {
-    this.sim = sim;
-    this.x = x;
-    this.y = y;
-    this.cell = sim.coordinateToCell(x, y);
-    this.value = value;
-    this.hp = hp;
+  this.sim = sim;
+  this.x = x;
+  this.y = y;
+  this.cell = sim.coordinateToCell(x, y);
+  this.value = value;
+  this.hp = hp;
 
 
-    this.onDraw = function(ctx) {
-      ctx.drawImage(treasure_image, this.x, this.y, 80, 80);
-    };
+  this.onDraw = function(ctx) {
+    ctx.drawImage(treasure_image, this.x-40, this.y-40, 80, 80);
+  };
 
-    this.serialize = function() {
-      return { type : "treasure"
-             , o : { x : this.x
-                   , y : this.y
-                   , value : this.value
-                   , hp : this.hp } };
-    };
+  this.serialize = function() {
+    return { type : "treasure"
+           , o : { x : this.x
+                 , y : this.y
+                 , value : this.value
+                 , hp : this.hp } };
+  };
 
-    // No changes on tick
-    this.onTick = function(dt) {
-      return;
-    };
+  // No changes on tick
+  this.onTick = function(dt) {
+    return;
+  };
 
-    // Let ship handle this collision
-    this.collisionHandler = function() {
-      return;
-    }
+  // Let ship handle this collision
+  this.collisionHandler = function() {
+    return;
+  }
   this.getColType = function() {return "point"};
+  this.getColCategory = function() {return "static";};
   this.getColObj = function() {
     return {
       x: this.x,
       y: this.y,
     }
   };
+  this.equals = function(o) {
+    if (!(o instanceof Treasure)) {
+      return false;
+    } else {
+      return o.cell && this.x == o.x && this.y == o.y;
+    }
+
+  }
+  
 }
 
 exports.Class = Treasure;

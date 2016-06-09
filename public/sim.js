@@ -18,27 +18,50 @@ else{
 
 (function(exports){
 
-function Cell(x, y, gridNumber) {
+function Cell(sim, x, y, gridNumber, width, height) {
+  this.sim = sim;
   this.number = gridNumber * y + x;
   this.x = x;
   this.y = y;
+  this.width = width;
+  this.height = height;
   this.gameObjects = [];
   this.staticObjects = [];
+  this.drawObjects = [];
+  this.prerenderObjects = [];
+  this.colObjects = [];
   this.bufferedUpdates = [];
+  if (server){
+    this.serverObjects = [];
+  }
 
   this.tick = function(dt){
     //Check collisions first, important so that collisionHandler can do 
     //its work!
     this.checkCollisions();
     for (var i = 0; i < this.gameObjects.length; i++){
-      this.gameObjects[i].onTick(dt);
+      if (typeof this.gameObjects[i].onTick !== "undefined"){
+        this.gameObjects[i].onTick(dt);
+      }
     }
   }
 
   this.draw = function(ctx){
-    for (var i = 0; i < this.gameObjects.length; i++){
+    ctx.drawImage(this.prerenderedBackground, this.x * this.width, this.y *
+        this.height, this.width, this.height);
+
+    
+    /*
       if (typeof this.gameObjects[i].onDraw != "undefined"){
-        this.gameObjects[i].onDraw(ctx);
+        var toDraw = true;
+        for (var j = 0; j < prerenderClasses.length; j++){
+          if (this.gameObjects[i] instanceof prerenderClasses[j]){
+            toDraw = false;
+            console.log("AFWA");
+            break;
+          }
+        if (toDraw) this.gameObjects[i].onDraw(ctx);
+        }
       } 
     }
     for (var i = 0; i < this.staticObjects.length; i++){
@@ -46,36 +69,140 @@ function Cell(x, y, gridNumber) {
         this.staticObjects[i].onDraw(ctx);
       } 
     }
+    */
+    for (var i = 0; i < this.drawObjects.length; i++){
+      this.drawObjects[i].onDraw(ctx);
+    }
+    
   }
 
-  this.checkCollisions = function() {
-    for (var i = 0; i < this.gameObjects.length; i++) {
-      for (var j = i + 1; j <= this.gameObjects.length; j++) {
-        if (!this.gameObjects[i]){
-          //  TODO what is going on here?
-          //console.log("undefined gameObject");
-          //this.gameObjects.splice(i, 1);
-          continue;
+  this.addObject = function(object) {
+
+    if (typeof object.onTick !== "undefined" || server){
+      this.gameObjects.push(object);
+    }
+
+    if (!server){
+      if (typeof object.onDraw !== "undefined"){
+        var pre = false;
+        for (var i = 0; i < prerenderClasses.length; i++){
+          if (object instanceof prerenderClasses[i]){
+            pre = true;
+            break;
+          }
         }
-        if (!this.gameObjects[j]){
+        if (!pre) this.drawObjects.push(object);
+        else this.prerenderObjects.push(object);
+      }
+    }
+
+    if (typeof object.getColType !== "undefined"){
+      this.colObjects.push(object);
+    }
+
+  }
+
+
+  this.removeObject = function(object) {
+    var found = false;
+    var deepequals = false;
+    if (typeof object.equals !== "undefined"){
+      deepequals = true;
+    }
+
+    if (typeof object.onTick !== "undefined") {
+    for (var i = 0; i < this.gameObjects.length; i++){
+        if ((!deepequals && this.gameObjects[i] == object) ||
+                (deepequals && object.equals(this.gameObjects[i]))) {
+          this.gameObjects.splice(i,1);
+          found = true;
+          break;
+        }
+      }
+    }
+
+    if (typeof object.onDraw !== "undefined"){
+      for (var i = 0; i < this.drawObjects.length; i++){
+        if ((!deepequals && this.drawObjects[i] == object) ||
+                (deepequals && object.equals(this.drawObjects[i]))) {
+          this.drawObjects.splice(i,1);
+          found = true;
+		      break;
+        }
+      }
+    }
+
+    if (typeof object.getColType !== "undefined"){
+      for (var i = 0; i < this.colObjects.length; i++){
+        if ((!deepequals && this.colObjects[i] == object) ||
+                (deepequals && object.equals(this.colObjects[i]))) {
+          this.colObjects.splice(i,1);
+          found = true;
+		      break;
+        }
+      }
+    }
+    if (!found) {
+      console.log('Remove object didnt find object in cell');
+    }
+    
+    if (typeof object.onDeath != "undefined") {
+      object.onDeath();
+    }
+
+    if (object instanceof Ship.Class){
+      this.sim.removeShip(object);
+    }
+
+    return found;
+  };
+
+
+
+  this.checkCollisions = function() {
+    for (var i = 0; i < this.colObjects.length; i++) {
+      if (!this.colObjects[i]){
+        //  TODO what is going on here?
+        //console.log("undefined colObject");
+        //this.colObjects.splice(i, 1);
+        continue;
+      }
+      if (!this.colObjects[i].getColType) continue;
+
+      var static_obj = (this.colObjects[i].getColCategory() === "static");
+
+      for (var j = i + 1; j < this.colObjects.length; j++) {
+        if (!this.colObjects[j]){
           //  TODO what is going on here?
-          //console.log("undefined gameObject");
-          //this.gameObjects.splice(i, 1);
+          //console.log("undefined colObject");
+          //this.colObjects.splice(i, 1);
           continue;
         }
 
-        if(checkCollision(this.gameObjects[i], this.gameObjects[j])) {
-          this.gameObjects[i].collisionHandler(this.gameObjects[j]);
+        if (!this.colObjects[j].getColType) continue;
+
+        //  Do not check two static objects against each other
+        if (static_obj && this.colObjects[j].getColCategory() === "static") {
+          continue;
+        }
+
+        if(checkCollision(this.colObjects[i], this.colObjects[j])) {
+          this.colObjects[i].collisionHandler(this.colObjects[j]);
           //  Avoid the case where object j is deleted
-          if (this.gameObjects[j]) this.gameObjects[j].collisionHandler(this.gameObjects[i]);
+          if (this.colObjects[j]) this.colObjects[j].collisionHandler(this.colObjects[i]);
         };
       }
     }
   }
 
-  this.addUpdate = function(name, object) {
+  this.addSerializedUpdate = function(name, object) {
     this.bufferedUpdates.push({ name: name
                               , data: object.serialize()});
+  }
+  
+  this.addNonSerialUpdate = function(name, object) {
+    this.bufferedUpdates.push({ name: name
+                              , data: object });
   }
 
   this.getUpdates = function() {
@@ -84,10 +211,6 @@ function Cell(x, y, gridNumber) {
 
   this.clearUpdates = function() {
     this.bufferedUpdates = [];
-  }
-  
-  this.addObject = function(object) {
-    this.gameObjects.push(object);
   }
 }
 
@@ -99,28 +222,39 @@ function updateCell(sim, object, x, y) {
     console.log('updateCell::Invalid cells ' + curCell + '.');
     return;
   }
-
   if (curCell != realCell) {
     if (realCell == null) {
       sim.removeObject(object);
       object.cell = null;
     } else {
-      var found = false;
-      for (var i = 0; i < curCell.gameObjects.length; i++){
-        if (curCell.gameObjects[i] == object) {
-          curCell.gameObjects.splice(i,1);
-          found = true;
-        }
-      }
+    	var found = false;
+		for (var i = 0; i < curCell.gameObjects.length; i++){
+		  if (curCell.gameObjects[i] == object) {
+		    curCell.gameObjects.splice(i,1);
+		    found = true;
+		  }
+		}
+		for (var i = 0; i < curCell.drawObjects.length; i++){
+		  if (curCell.drawObjects[i] == object) {
+		    curCell.drawObjects.splice(i,1);
+		    found = true;
+		  }
+		}
+		for (var i = 0; i < curCell.colObjects.length; i++){
+		  if (curCell.colObjects[i] == object) {
+		    curCell.colObjects.splice(i,1);
+		    found = true;
+		  }
+		}
 
       if (!found) {
         console.log('updateCell::Could not remove object from previous current cell');
       }
 
       if (server) {
-        realCell.addUpdate('object_enter_cell', object);
+        realCell.addSerializedUpdate('object_enter_cell', object);
       }
-      realCell.gameObjects.push(object);
+      realCell.addObject(object);
       object.cell = realCell;
 
     }
@@ -133,9 +267,11 @@ function updateCell(sim, object, x, y) {
 //  gridNumber is the height and width of the world in cells
 //  cellWidth, cellHeight specify cell size
 //  ActiveCells list of cells to tick and render, modified by (de)activateCell()
-function Sim(remote, gridNumber, cellWidth, cellHeight, activeCells){
+function Sim(remote, starttime, gridNumber, cellWidth, cellHeight, activeCells){
 
   console.log('Initialising sim...');
+
+  this.time = starttime;
 
   this.gridNumber = gridNumber;
   this.cellWidth  = cellWidth;
@@ -157,7 +293,7 @@ function Sim(remote, gridNumber, cellWidth, cellHeight, activeCells){
     if (!this.UIDtoShip[uid]) {
       var cell = this.coordinateToCell(state.x, state.y);
       var ship = new Ship.Class(this, state, uid, name, inputFunction);
-      cell.gameObjects.push(ship);
+      cell.addObject(ship);
       remote.setScore(uid, 0);
       //remote.getUIDtoScores()[uid] = {shipName: remote.getPlayerName(uid), score: 0};
       this.UIDtoShip[uid] = ship;
@@ -172,40 +308,25 @@ function Sim(remote, gridNumber, cellWidth, cellHeight, activeCells){
   }
 
   this.removeTreasure = function(treasure) {
-    var cell = treasure.cell;
     var found = false;
-    for (var i = 0; i < cell.gameObjects.length; i++) {
-      if (cell.gameObjects[i].x == treasure.x
-          && cell.gameObjects[i].y == treasure.y) {
-        cell.gameObjects.splice(i,1);
+    for (var i = 0; i < this.treasures.length; i++){
+      if (this.treasures[i].equals(treasure)) {
+        this.treasures.splice(i,1);
         found = true;
+		    break;
       }
     }
     if (!found) {
-      console.log('Treasure remove: found in cell :: ' + found);
+      console.log('Treasure remove: not found in treasures');
     }
-
-    found = false;
-    for (var i = 0; i < this.treasures.length; i++) {
-      if (this.treasures[i].cell == treasure.cell
-          && this.treasures[i].x == treasure.x
-          && this.treasures[i].y == treasure.y) {
-        this.treasures.splice(i, 1); 
-        found = true;
-        break;
-      }
-    }
-
-    if (!found) {
-      console.log('Treasure remove: found in treasures :: ' + found);
-    }
-  };
+    this.removeObject(treasure);
+  }
 
   this.grid = new Array(this.gridNumber)
   for (var i = 0; i < this.gridNumber; i++) {
     this.grid[i] = new Array(this.gridNumber);
     for (var j = 0; j < this.gridNumber; j++) {
-      this.grid[i][j] = new Cell(i, j, this.gridNumber);
+      this.grid[i][j] = new Cell(this, i, j, this.gridNumber, this.cellWidth, this.cellHeight);
     }
   }
 
@@ -225,16 +346,22 @@ function Sim(remote, gridNumber, cellWidth, cellHeight, activeCells){
 
   //  Given a function f of a cell and some auxilary data,
   //  apply that function to all cells in a given area
-  this.applyToCells = function(f, aux, x, y, width, height){
+  //  Returns list of tuples, {cell: cellnum, ret: returnresult}
+  this.applyToCells = function(x, y, width, height, f, aux){
     var x_coord = Math.floor(x / this.cellWidth);
     var y_coord = Math.floor(y / this.cellHeight);
-    var x_cellcount = Math.floor(width / this.cellWidth);
-    var y_cellcount = Math.floor(height / this.cellWidth);
-    for (var y = y_coord; y < y_cellcount; y++){
-      for (var x = x_coord; x < x_cellcount; x++){
-        f(this.grid[x_coord][y_coord], aux);
+    var x_max = Math.floor((x + width) / this.cellWidth);
+    x_max = Math.min(gridNumber-1, x_max);
+    var y_max = Math.floor((y + height) / this.cellWidth);
+    y_max = Math.min(gridNumber-1, y_max);
+    var ret = [];
+    for (var y = y_coord; y <= y_max; y++){
+      for (var x = x_coord; x <= x_max; x++){
+        ret.push({cell: this.cellTupleToNumber({x:x, y:y}),
+                  ret: f(this.grid[x][y], aux)});
       }
     }
+    return ret;
   };
 
   // Tuple to number
@@ -289,27 +416,14 @@ function Sim(remote, gridNumber, cellWidth, cellHeight, activeCells){
 
   }
 
-  var wait = 0;
   this.tick = function(dt){
+    this.time += dt;
     for (var i = 0; i < this.activeCells.length; i++){
       this.numberToCell(this.activeCells[i]).tick(dt);
     }
-
-    if (wait == 0) {
-      for (var uid in remote.getUIDtoScores()) {
-        remote.setScore(uid, remote.getScore(uid) + 1);
-      }
-    }
-    wait = (wait + 1) % 50;
   };
 
   this.draw = function(ctx){
-    ctx.fillStyle = "green";
-    ctx.fillRect(10, 10, 20, 20);
-    ctx.fillRect(610, 10, 20, 20);
-    ctx.fillRect(410, 210, 20, 20);
-    ctx.fillRect(110, 610, 20, 20);
-    ctx.fillRect(810, 510, 20, 20);
     for (var i = 0; i < this.activeCells.length; i++){
       var tuple = this.cellNumberToTuple(this.activeCells[i]);
       drawCellBackground(tuple.x, tuple.y, ctx);
@@ -324,25 +438,7 @@ function Sim(remote, gridNumber, cellWidth, cellHeight, activeCells){
 
   this.removeObject = function(object) {
     var cell = object.cell;
-    var found = false;
-    for (var i = 0; i < cell.gameObjects.length; i++){
-      if (cell.gameObjects[i] == object) {
-        cell.gameObjects.splice(i,1);
-        found = true;
-      }
-    }
-
-    if (!found) {
-      console.log('Remove object didnt find object in cell');
-    }
-
-    if (object instanceof Ship.Class){
-      this.removeShip(object);
-    }
-
-    if (typeof object.onDeath != "undefined") {
-      object.onDeath();
-    }
+    return cell.removeObject(object);
   };
 
   this.addTestObject = function() {
@@ -354,8 +450,12 @@ function Sim(remote, gridNumber, cellWidth, cellHeight, activeCells){
     var state = {x: x, y: y, w: w, h: h};
     var obj = new TestObj(this, state);
     var cell = this.coordinateToCell(state.x, state.y);
-    cell.gameObjects.push(obj);
-    cell.addUpdate('create_testObj', obj);
+    cell.addObject(obj);
+    cell.addSerializedUpdate('create_testObj', obj);
+  }
+
+  this.increaseScale = function(uid, value) {
+    this.getShip(uid).increaseScale(value);
   }
 }
 
@@ -438,6 +538,8 @@ function parseColObjectsFailure(t1, t2, o1, o2){
 function TestObj(sim, state) {
   this.sim = sim;
   this.state = state;
+  this.hypotenuse = Math.sqrt(this.state.w * this.state.w + this.state.h *
+      this.state.h);
   this.onTick = function(){return true;};
   this.onDraw = function(ctx) {
     ctx.translate(this.state.x, this.state.y);
@@ -447,6 +549,19 @@ function TestObj(sim, state) {
   };
   this.serialize = function() {
     return {type: "test_obj", o: this.state};
+  };
+
+  this.getColType = function() {return "rectangle"};
+  this.getColCategory = function() {return "dynamic";};
+  this.getColObj = function() {
+    return {
+      x: this.state.x,
+      y: this.state.y,
+      width: this.state.w,
+      height: this.state.h,
+      hypotenuse: this.hypotenuse,
+      angle: this.state.a
+    }
   };
 }
 

@@ -11,6 +11,7 @@ var viewport;
 // Client tick
 var fps;
 var display_fps;
+var ping;
 var lastTime;
 var currentTime;
 var delta;
@@ -27,6 +28,9 @@ var nearest_treasure = { x : -1, y : -1 };
 // Game loops
 var server_loop = 0;
 var client_loop = 0;
+var ping_loop = 0;
+var ping_timeout = 1000;
+var ping_sent_time;
 var localHighScoreTable = {};
 const MAXIMUM_SPEED = 4;
 
@@ -38,200 +42,20 @@ const seaColor = "rgb(92, 184, 235)";
 const seaHighlightColor = "rgb(102, 204, 255)";
 const s_delay = 1000/40;
 
-///////////////// DRAW METHODS ////////////////////////////
-
-//  Viewport maps world area to canvas for printing
-function Viewport(sim, x, y, baseWidth, baseHeight, scale){
-
-  this.sim = sim;
-  this.x = x;
-  this.y = y;
-  this.baseHeight = baseHeight / baseWidth;
-  this.baseWidth = 1;
-  this.scale = scale;
-
-  this.getWidth = function(){
-    return this.baseWidth * scale;
-  }
-
-  this.getHeight = function(){
-    return this.baseWidth * scale;
-  }
-
-  this.draw = function(ctx, canvaswidth, canvasheight){
-    // Scale
-    ctx.scale(scale, scale);
-    ctx.translate(-this.x, -this.y);
-
-    sim.draw(ctx);
-
-    // Inverse scale
-    ctx.translate(this.x, this.y);
-    ctx.scale(1/scale, 1/scale);
-
-  }
-}
-
-function drawRandomColors() {
-    var colors = [];
-    var letters = '0123456789ABCDEF'.split('');
-    for (var j = 0; j < 10; j++) {
-      var color = '#';
-      for (var i = 0; i < 6; i++) {
-        color += letters[Math.floor(Math.random() * 16)];
-      }
-      colors[j] = color;
-    }
-    return colors;
-}
-
-function drawBehindGrid(ctx){
-  ctx.fillStyle = backColor;
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-}
-
-var bg_frames = [];
-var bg_frame_count = 14;
-var bg_frame_wait = 0;
-var bg_frame_wait_time = 8;
-for (var i = 0; i < bg_frame_count; i++){
-  var bg_frame = new Image();
-  bg_frame.src = "../media/bg/"+i+".jpeg";
-  bg_frames.push(bg_frame);
-}
-var bg_frame_num = 0;
-
-function drawCellBackground(cx, cy, ctx){
-  bg_frame_wait++
-  if (bg_frame_wait > bg_frame_wait_time){
-    bg_frame_num = (bg_frame_num + 1) % bg_frame_count;
-    bg_frame_wait = 0;
-  }
-  ctx.drawImage(bg_frames[bg_frame_num], cx * meta.cellWidth, cy * meta.cellHeight,
-    meta.cellWidth, meta.cellHeight);
-//  ctx.fillStyle = seaColor;
-//  ctx.fillRect(cx*meta.cellWidth, cy*meta.cellHeight, meta.cellWidth+2,
-//      meta.cellHeight+2);
-}
-
-/*
-function drawCellBackground(cx, cy, ctx){
-  //  If this cell is in activeCells
-  var playerCell = sim.coordinateToCellIndex(player.state.x, player.state.y);
-  if (playerCell == null) {
-    return;
-  }
-
-  if (cx == playerCell.x && cy == playerCell.y){
-    ctx.fillStyle = seaHighlightColor;
-  }
-  else{
-    ctx.fillStyle = seaColor;
-  }
-
-  ctx.fillRect(cx*meta.cellWidth, cy*meta.cellHeight, meta.cellWidth+2,
-      meta.cellHeight+2);
-}
-*/
-
-
-
-var colors = drawRandomColors();
-
-function drawHighScoresTable(scoreTable) {
-  var maxLengthName = 14;
-  var maxDisplay = 10;
-  var currentPlayers = 0;
-  for (var player in scoreTable) {currentPlayers++;}
-  var i = 0;
-
-  var displayNumber = currentPlayers < maxDisplay ? currentPlayers : maxDisplay;
-
-
-  for (var uid in scoreTable) {
-    if (i < displayNumber) {
-      var shipName = sim.getShip(uid).name;
-      i++;
-      ctx.beginPath();
-      ctx.font = "italic 15px Josefin Sans";
-      ctx.lineWidth = 2;
-      ctx.fillStyle = colors[i - 1];
-      ctx.textAlign="left";
-      ctx.fillText("#" + i, (7/8)*canvas.width, (1/20)*canvas.height + i * 20);
-      ctx.fillText(shipName, (7.14/8)*canvas.width, (1/20)*canvas.height + i * 20);
-      ctx.fillText(scoreTable[uid], (7.8/8)*canvas.width, (1/20)*canvas.height + i * 20);
-      ctx.fill();
-      ctx.closePath();
-    } else {
-      break;
-    }
-  }
-}
-
-function drawScore() {
-  ctx.fillStyle = "black";
-  ctx.font = "50px Josefin Sans";
-  ctx.fillText(localHighScoreTable[player.uid], (1/15)*canvas.width, (9.5/10)*canvas.height);
-}
-
-
-function drawCompass() {
-  drawCompassScaled(player.state.x, player.state.y, nearest_treasure.x, nearest_treasure.y, 50);
-}
-
-// Sort treasures by distance (squared but its the same)
-function insertionSort(array) {
-  var i, j, d1x, d1y, d2x, d2y, d1, d2, t1, t2, temp;
-  for (i = 1; i < array.length; i++) {
-    t1 = array[i];
-    d1x = player.state.x - t1.x;
-    d1y = player.state.y - t1.y;
-    d1 = d1x * d1x + d1y * d1y;
-
-    for (j = i - 1; j >= 0; j--) {
-      t2 = array[j];
-      d2x = player.state.x - t2.x;
-      d2y = player.state.y - t2.y;
-      d2 = d2x * d2x + d2y * d2y;
-      if (d2 > d1) {
-        temp = array[j];
-        array[j] = array[j+1];
-        array[j+1] = temp;
-      } else {
-        break;
-      }
-    }
-  }
-}
-function setupCompass() {
-  insertionSort(sim.treasures);
-
-  //console.log(sim.treasures.map(function(t1) {return Math.sqrt((player.state.x - t1.x) * (player.state.x - t1.x) + (player.state.y - t1.y) * (player.state.y - t1.y));}));
-
-  if (sim.treasures.length > 0) {
-    nearest_treasure = { x : sim.treasures[0].x, y : sim.treasures[0].y };
-  } else {
-    nearest_treasure = { x : 0, y : 0 };
-  }
-}
-
-function drawFps() {
-  ctx.fillStyle = "black";
-  ctx.font = "15px Josefin Sans";
-  ctx.fillText("fps: "+ display_fps, (1/10)*canvas.width, (1/10)*canvas.height);
-}
 
 //  Draws all objects
 function draw(){
   viewport.x = player.state.x - canvas.width / (2 * viewport.scale);
   viewport.y = player.state.y - canvas.height / (2 * viewport.scale);
+  viewport.shipx = player.state.x;
+  viewport.shipy = player.state.y;
 
   drawBehindGrid(ctx);
   viewport.draw(ctx, canvas.width, canvas.height);
   drawCompass();
   drawScore();
   drawHighScoresTable(localHighScoreTable);
-  drawFps();
+  drawDebug();
 }
 
 
@@ -342,16 +166,15 @@ function client_update(player){
   //  TODO send server our local time
 
   if ((typeof socket != "undefined") && socket.connected) {
-    socket.emit('client_update', {state: player.state, updates : toSendServer});
+    socket.emit('client_update', {state: player.state, updates : toSendServer,
+        clienttime : sim.time});
     if (toSendServer.length > 0){
     }
     toSendServer = [];
   }
-
 }
 
 function endClient() {
-  socket.disconnect();
 
   if (client_loop) {
     window.cancelAnimationFrame(client_loop);
@@ -361,9 +184,19 @@ function endClient() {
     clearInterval(server_loop);
     server_loop = 0;
   }
+  if (animation_loop == 0) {
+    animation_loop = window.requestAnimationFrame(animation);
+  }
+  socket.disconnect();
 }
 
 function startClient() {
+
+  if (animation_loop) {
+    window.cancelAnimationFrame(animation_loop);
+    animation_loop = 0;
+  }
+
   // Initialize sockets
   console.log('socket status' + socket);
   if (typeof socket == "undefined" || !socket.connected) {
@@ -374,7 +207,16 @@ function startClient() {
     console.log('New connection');
     playClientGame(data);
   });
+  function ping_func(){
+    ping_sent_time = (new Date).getTime();
+    socket.emit('corsair_ping', {}); 
+  }
 
+  socket.on('corsair_pong', function(){
+    ping = Math.floor((new Date).getTime() - ping_sent_time);
+    setTimeout(ping_func, ping_timeout);
+  });
+  
   socket.on('start_game', function(data){
 
     lastTime = Date.now();
@@ -420,6 +262,8 @@ function startClient() {
       var update = players[uid];
       remote.updatePlayer(uid, update);
     }
+    var server_time_diff = sim.time - data.servertime;
+
     var allBufferedUpdates = data.updates;
     for (var i = 0; i < allBufferedUpdates.length; i++){
       var num = allBufferedUpdates[i].num;
@@ -429,13 +273,14 @@ function startClient() {
         var update = updates[j];
         switch(update.name){
           case 'create_testObj':
-            cell.gameObjects.push(new Sim.TestObj(sim, update.data));
+            cell.addObject(new Sim.TestObj(sim, update.data));
             break;
           case 'object_enter_cell':
             if (update.data.type == "ship") {
               if (update.data.o.uid != our_id) {
-                var obj = serializer.deserializeObject(update.data);
-                cell.gameObjects.push(obj);
+                var obj = serializer.deserializeObject(update.data,
+                    server_time_diff);
+                cell.addObject(obj);
               }
             }
             break;
@@ -443,17 +288,27 @@ function startClient() {
             //  CHECK IF OWN CANNONBALL
             if (update.data.o.uid === our_id) break;
 
-            var obj = serializer.deserializeObject(update.data);
-            obj.cell.gameObjects.push(obj);
+            var obj = serializer.deserializeObject(update.data, server_time_diff);
+            obj.cell.addObject(obj);
             break;
           case 'remove_treasure':
-            var treasure = serializer.deserializeObject(update.data);
+            var treasure = serializer.deserializeObject(update.data,
+                server_time_diff);
             sim.removeTreasure(treasure);
             break;
           case 'add_treasure':
-            var treasure = serializer.deserializeObject(update.data);
+            var treasure = serializer.deserializeObject(update.data,
+                server_time_diff);
             sim.treasures.push(treasure);
-            treasure.cell.gameObjects.push(treasure);
+            treasure.cell.addObject(treasure);
+            break;
+          case 'ship_update':
+            console.log('ship update');
+            var ship = sim.getShip(update.data.uid);
+            ship.hp = update.data.hp;
+            ship.gold = update.data.gold;
+            sim.increaseScale(update.data.uid, update.data.gold);
+            console.log('GOLD ' + ship.gold);
             break;
           default:
             console.log("Unrecognised command from server " + update.name);
@@ -461,24 +316,39 @@ function startClient() {
       }
     }
 
+    sim.time = data.servertime;
 
-    deserializeNewStates(data.new_cells);
+
+    deserializeNewStates(data.new_cells, server_time_diff);
     // Sim will only draw the active cells
     sim.activeCells = data.active_cells;
-
-
   });
+  ping_func();
 }
 
-function deserializeNewStates(new_cells_states) {
+function deserializeNewStates(new_cells_states, server_time_diff) {
   for (var i = 0; i < new_cells_states.length; i++) {
     var cell = sim.numberToCell(new_cells_states[i].num);
+    /*
     cell.staticObjects =
       serializer.deserializeArray(new_cells_states[i].state.static_obj)
                 .filter(function(x) { return x != null; });
-    cell.gameObjects =
-      serializer.deserializeArray(new_cells_states[i].state.game_obj)
+                */
+    var objects = 
+      serializer.deserializeArray(new_cells_states[i].state.game_obj,
+          server_time_diff)
                 .filter(function(x) { return x != null; });
+
+    //  Flush cell object lists
+    cell.gameObjects = [];
+    cell.drawObjects = [];
+    cell.colObjects = [];
+
+    for (var j = 0; j < objects.length; j++){
+      cell.addObject(objects[j]);
+    }
+
+    cell.prerenderedBackground = prerenderBackground(cell);
   }
 }
 
@@ -508,34 +378,30 @@ function playClientGame(data) {
   our_id = null;
 
   remote = new Game.Remote();
+
   meta = data.meta;
+
   our_id = data.id;
-  sim = new Sim.Class(remote, meta.gridNumber, meta.cellWidth, meta.cellHeight,
+  sim = new Sim.Class(remote, data.meta.servertime, meta.gridNumber, meta.cellWidth, meta.cellHeight,
     meta.activeCells);
   serializer = new Serializer.Class(sim);
   sim.treasures = serializer.deserializeArray(data.treasures);
 
   deserializeNewStates(data.new_cells_states);
-
   updateHighScoresTable(data.scoresTable);
-
-
-  //  Using 16:9 aspect ratio
-  viewport = new Viewport(sim, 0, 0, 1.6, 0.9, 1/3);
 
   console.log("Our id is " + our_id);
 
-  var pirateNames = ["William Kidd", "Blackbeard", "Long Ben", "Sir Francis Drake",
-                     "Calico Jack", "Grace O'Malley", "Anne Bonny", "Thomas Tew", "Barbarossa"];
+  var our_name = (localStorage['nickname'] == "") ?
+    PirateNameGenerator.generate() : localStorage['nickname'];
 
-  var randomPirate = pirateNames[Math.floor(Math.random()*pirateNames.length)];
-
-  var our_name = (localStorage['nickname'] == "") ?  randomPirate : localStorage['nickname'];
   remote.newPlayer(our_id, our_name, data.state);
   player = sim.addShip(our_id, our_name, data.state, localShipInput);
-  player.scale = 1;
-  player.hp = player.scale * 100;
+  player.isLocalShip = true;
   player.onDeath = onShipDeath;
+
+  //  Using 16:9 aspect ratio
+  viewport = new Viewport(sim, player, 0, 0, 1.6, 0.9);
 
   // Make compass point to nearest treasure
   setupCompass();

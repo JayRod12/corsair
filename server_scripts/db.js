@@ -1,5 +1,6 @@
 var pg = require("pg");
-var conString = "pg://g1527124_u:rpia6dfn33@db.doc.ic.ac.uk:5432/g1527124_u";
+pg.defaults.ssl = true;
+var conString = process.env.CORSAIR_DB_URL;
 var client = new pg.Client(conString);
 var query = client.query("CREATE TABLE IF NOT EXISTS scores(name varchar(64), score integer, date date)");
 

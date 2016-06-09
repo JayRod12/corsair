@@ -7,8 +7,14 @@ if (typeof exports === 'undefined'){
   var ship_image1 = new Image();
   ship_image1.src = "../media/ship1.png";
   var ship_image2 = new Image();
-  ship_image2.src = "../media/ship2.png";
+  ship_image2.src = "../media/ship2.png";	
+  var symimage = new Image();
+  symimage.src = "../media/symship.png";
+  var ship_frames = [ship_image1, ship_image2];
   server = false;
+  //TODO: (if necessary), make this an array so we can display different frames
+	//at different times
+  animationFrameTime = 10;
 }
 else{
   //  Server
@@ -20,6 +26,8 @@ else{
 
 (function(exports){
 
+var valueToScale = 1/10000;
+
 //  Inputfunction determines updates to the ship
 //  onDraw can be null
 function Ship(sim, state, uid, name, inputFunction){
@@ -28,15 +36,18 @@ function Ship(sim, state, uid, name, inputFunction){
   this.sim = sim;
   this.uid = uid;
   this.name = name;
+  this.isLocalShip = false;
 
   this.speed_cap = 0.8;
   this.gold = 0;
   this.maxhp = 100;
   this.hp = this.maxhp;
 
-  //UPDATE THIS WHEN SCALE IS UPDATED.
-  this.hypotenuse = Math.sqrt(shipBaseWidth*shipBaseWidth 
-                              + shipBaseHeight*shipBaseHeight);
+  this.scale = 1.5;
+  this.targetScale = this.scale;
+  this.growthRate = 0;
+  this.hypotenuse = Math.sqrt(this.scale*this.scale * shipHitWidth*shipHitWidth 
+                            + this.scale*this.scale * shipHitHeight*shipHitHeight);
  
   //  Should contain:
   //  x, y, angle, speed
@@ -51,8 +62,6 @@ function Ship(sim, state, uid, name, inputFunction){
     return sim.remote.getRemoteStates()[this.uid];
   };
 
-  // Scale of the ship ?
-  this.scale = 1.5;
 
   this.cannon = new Cannon.Class(this);
   this.inputFunction = inputFunction;
@@ -86,33 +95,61 @@ function Ship(sim, state, uid, name, inputFunction){
 
 
     //  TODO better interpolation
-    if (remoteState){
+    if (!this.isLocalShip && remoteState) {
+      this.state.x = remoteState.x;
+      this.state.y = remoteState.y;
+
+    } else if (this.isLocalShip && remoteState){
       this.state.x = (this.state.x + remoteState.x) / 2
       this.state.y = (this.state.y + remoteState.y) / 2
     }
+
     Game.updateCell(this.sim, this, this.state.x, this.state.y);
 
     this.cannon.onTick(dt);
+
+    // scale update
+    if (this.scale < this.targetScale) {
+      this.updateScale();
+    }
 
   }
 
   this.collisionHandler = function(other_object) {
 	  /*TODO: different cases (possibly) i.e. what if 
   		it's a cannonball I've collided with?*/
+
+    var shipUpdate = false;
+
     if (other_object instanceof Cannon.CannonBall){
       if (other_object.uid === this.uid) return;
       if (typeof other_object.level !== "undefined"){
-        this.hp -= other_object.level;
+        if (server){
+          this.hp -= other_object.level;
+          shipUpdate = true;
+        }
       }
     } else if (other_object instanceof Treasure.Class) {
-      // TODO: ALL COLLISIONS ONLY ON SERVER
       if (!server) {
         return;
       }
       this.gold += other_object.value;
       this.hp = Math.min(this.maxhp, this.hp + other_object.hp);
-      other_object.cell.addUpdate('remove_treasure', other_object);
+
+      sim.remote.setScore(this.uid, this.gold);
+      shipUpdate = true;
+      this.increaseScale(this.gold);
+      other_object.cell.addSerializedUpdate('remove_treasure', other_object);
       sim.removeTreasure(other_object);
+    }
+
+    if (server && shipUpdate){
+      var ship_update = {
+        uid : this.uid
+      , gold : this.gold
+      , hp : this.hp
+      };
+      other_object.cell.addNonSerialUpdate('ship_update', ship_update); 
     }
 
    this.collided_timer = this.collided_basetime;
@@ -121,11 +158,27 @@ function Ship(sim, state, uid, name, inputFunction){
 
   this.default_colour = "black";
 
-  this.wait = 0;
+  this.animationFrame = 0;
+  this.animationFrameElapse = 0;
+
+  this.increaseScale = function(scale_increase) {
+    scale_increase *= valueToScale;
+    this.targetScale = this.scale + scale_increase;
+    this.growthRate = scale_increase / 100;
+  }
+
+  this.updateScale = function() {
+    this.scale += this.growthRate;
+    this.hypotenuse = Math.sqrt(this.scale * this.scale * shipHitWidth*shipHitWidth 
+                              + this.scale * this.scale * shipHitHeight*shipHitHeight);
+  }
 
   this.onDraw = function(ctx){
-    var width = shipBaseWidth * this.scale;
-    var height = shipBaseHeight * this.scale;
+	this.cannon.onDraw();
+	var drawWidth = shipDrawWidth * this.scale;
+    var drawHeight = shipDrawHeight * this.scale;
+	var hitWidth = shipHitWidth * this.scale;
+	var hitHeight = shipHitHeight * this.scale;
 
     //We translate to the origin of our ship
     ctx.translate(this.state.x, this.state.y);
@@ -133,25 +186,27 @@ function Ship(sim, state, uid, name, inputFunction){
     //We rotate around this origin 
     ctx.rotate(this.state.angle);
 
-      //We draw the ship, ensuring that we start drawing from the correct location 
+      //Draw the ship's hitbox under it
     //(the fillRect function draws from the topmost left corner of the rectangle 
-    if(this.collided_timer > 0) {
+    /*if(this.collided_timer > 0) {
         ctx.fillStyle = "red";
     } else {
-      ctx.fillStyle = this.default_colour;
+      ctx.fillStyle = "pink";
     }
-    // ctx.fillRect(-width/2, -height/2, width, height);
-    // ctx.strokeStyle = "#ffc0cb";
-    // ctx.strokeRect(-width/2, -height/2, width, height);
+     ctx.fillRect(-hitWidth/2, -hitHeight/2, hitWidth, hitHeight);*/
 
-    
+    //ctx.drawImage(ship_frames[this.animationFrame], -width/2, -height/2, width, height);
+	ctx.drawImage(symimage, -drawWidth/2, -drawHeight/2, drawWidth, drawHeight);
     if (this.wait < 50) {
-      ctx.drawImage(ship_image1, -width/2, -height/2, width, height);
     } else {
-      ctx.drawImage(ship_image2, -width/2, -height/2, width, height);
+     // ctx.drawImage(ship_image2, -width/2, -height/2, width, height);
     }
 
-    this.wait = (this.wait + 1) % 100;
+    this.animationFrameElapse += 1;
+    if (this.animationFrameElapse > animationFrameTime){
+      this.animationFrameElapse = 0;
+      this.animationFrame = (this.animationFrame + 1 ) % ship_frames.length;
+    }
 
     //We undo our transformations for the next draw/calculations
     ctx.rotate(-this.state.angle);
@@ -169,20 +224,21 @@ function Ship(sim, state, uid, name, inputFunction){
 
     // Ship name
     ctx.fillStyle = "white";
-    ctx.font = "15px Josefin Sans";
+    ctx.font =  drawWidth/11 + "px Josefin Sans";
     ctx.textAlign="left"; 
     var metrics = ctx.measureText(this.name);
     var textWidth = metrics.width;
-    ctx.fillText(this.name, this.state.x - textWidth/2, this.state.y + height);
+    ctx.fillText(this.name, this.state.x - textWidth/2, this.state.y + drawHeight);
   }
 
-  this.getColType = function() {return "rectangle"};
+  this.getColType = function() {return "rectangle";};
+  this.getColCategory = function() {return "dynamic";};
   this.getColObj = function() {
     return {
       x: this.state.x,
       y: this.state.y,
-      width: shipBaseWidth * this.scale,
-      height: shipBaseHeight * this.scale,
+      width: shipHitWidth * this.scale,
+      height: shipHitHeight * this.scale,
       hypotenuse: this.hypotenuse,
       angle: this.state.angle
     }
@@ -199,11 +255,15 @@ function Ship(sim, state, uid, name, inputFunction){
 
 }
 
-var shipBaseWidth = 144;
-var shipBaseHeight = 80;
+var shipDrawWidth = 112.5;
+var shipDrawHeight = 60.5;
+var shipHitWidth = 70;
+var shipHitHeight = 28;
 
 exports.Class = Ship;
-exports.shipBaseWidth = shipBaseWidth;
-exports.shipBaseHeight = shipBaseHeight;
+exports.shipDrawWidth = shipDrawWidth;
+exports.shipDraweHeight = shipDrawHeight;
+exports.shipHitWidth = shipHitWidth;
+exports.shipHitHeight = shipHitHeight;
 
 })(typeof exports == 'undefined' ? this.Ship = {} : exports);
