@@ -157,12 +157,12 @@ function Ship(sim, state, uid, name, inputFunction){
 
 	//draw hitbox underneath
 
-	if(this.collided_timer > 0) {
+	/*if(this.collided_timer > 0) {
         ctx.fillStyle = "red";
     } else {
       ctx.fillStyle = this.default_colour;
     }
-     ctx.fillRect(-hitwidth/2, -hitheight/2, hitwidth, hitheight);
+     ctx.fillRect(-hitwidth/2, -hitheight/2, hitwidth, hitheight);*/
       //We draw the ship, ensuring that we start drawing from the correct location 
     //(the fillRect function draws from the topmost left corner of the rectangle 
     

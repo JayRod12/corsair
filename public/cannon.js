@@ -83,15 +83,17 @@ function Cannons(ship) {
 	  }
 	}
 
-	var normalising_const_origin = -this.ship.scale*0.3*Ship.shipDrawWidth;
+
+  
+	var normalising_const_origin = 0.3*-this.ship.scale*Ship.shipDrawWidth;
 	this.offset_info.origin_offset_x = normalising_const_origin*Math.cos(Col.trimBranch(this.ship.state.angle));
 	this.offset_info.origin_offset_y = normalising_const_origin*Math.sin(Col.trimBranch(this.ship.state.angle));
 
-    var normalising_const_edge = this.ship.scale*0.5*Ship.shipHitHeight;
+    var normalising_const_edge = 0.5*this.ship.scale*Ship.shipHitHeight;
   	this.offset_info.edge_offset_x = normalising_const_edge*Math.cos(Col.trimBranch(this.ship.state.angle + Math.PI/2));
     this.offset_info.edge_offset_y = normalising_const_edge*Math.sin(Col.trimBranch(this.ship.state.angle + Math.PI/2));
 
-	var normalising_const_length = this.ship.scale*0.7*Ship.shipHitWidth;
+	var normalising_const_length = 0.7*this.ship.scale*Ship.shipHitWidth;
    	this.offset_info.length_offset_x = normalising_const_length*Math.cos(this.ship.state.angle);
     this.offset_info.length_offset_y = normalising_const_length*Math.sin(this.ship.state.angle);
 
@@ -159,7 +161,6 @@ function CannonBall(sim, uid, state, level) {
 
 
   this.collisionHandler = function(other_object){
-    //if (typeof other_object == Ship.Class && other_object.uid == this.uid){
     if (other_object.uid == this.uid){
     }
     else{
