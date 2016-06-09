@@ -221,7 +221,7 @@ function Ship(sim, state, uid, name, inputFunction){
 
     // Ship name
     ctx.fillStyle = "white";
-    ctx.font = "15px Josefin Sans";
+    ctx.font =  width/11 + "px Josefin Sans";
     ctx.textAlign="left"; 
     var metrics = ctx.measureText(this.name);
     var textWidth = metrics.width;
