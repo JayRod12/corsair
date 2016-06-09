@@ -10,7 +10,7 @@ included in all copies or substantial portions of the Software.
 
 */
 
-
+var animation_loop;
 var camera, scene, renderer, light;
 var geometry,
   material,
@@ -157,7 +157,7 @@ function createWorld() {
 }
 
 function animation() {
-  window.requestAnimationFrame(animation);
+  animation_loop = window.requestAnimationFrame(animation);
 
   world_mesh.rotation.x = Date.now() * -0.0001;
   world_mesh.rotation.y = Date.now() * -0.0005;
