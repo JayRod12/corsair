@@ -39,12 +39,45 @@ function islandColor(height){
     return makeHSL(seaHue, seaSat, height*100);
   }
 }
+
+function generateIslands2(sim, gridNumber, cellWidth, cellHeight) {
+  var perlin = new Perlin(8 * gridNumber, 8 * gridNumber, 6, 0.5);
+  var height_maps = new Array(gridNumber * gridNumber);
+
+  var island_size = 32;
+  var max_x = gridNumber * cellWidth;
+  var max_y = gridNumber * cellHeight;
+
+  console.log("Generating islands");
+  for (var cell = 0; cell < gridNumber * gridNumber; cell++) {
+    var array = new Array(cellWidth / island_size);
+    var base = sim.cellNumberToTuple(cell);
+    var x = base.x * cellWidth;
+    var y = base.y * cellHeight;
+
+    for (var i = 0; i < cellWidth / island_size; i++) {
+      array[i] = new Array(cellHeight / island_size);
+      y = base.y * cellHeight;
+      for (var j = 0; j < cellHeight / island_size; j++) {
+        array[i][j] = perlin.perlin(x / max_x, y / max_y);
+        y += island_size;
+      }
+      x += island_size;
+    }
+    height_maps[cell] = array;
+  }
+  return height_maps;
+}
+
 function generateIslands(sim, gridNumber, cellWidth, cellHeight){
   var perlin = new Perlin(8 * gridNumber, 8 * gridNumber, 6, 0.5);
+
+
   var island_size = 32;
   var max_x = gridNumber * cellWidth;
   var max_y = gridNumber * cellHeight;
   var islands = [];
+
   for (var x = 0; x < max_x; x+= island_size){
     var island_col = [];
     for (var y = 0; y < max_y; y+= island_size){
@@ -67,8 +100,8 @@ function generateIslands(sim, gridNumber, cellWidth, cellHeight){
       }
       else{
         
-        var i = new CosmeticIsland(sim, x, y, island_size, island_size, 0, color);
-        sim.coordinateToCell(x,y).addObject(i);
+        //var i = new CosmeticIsland(sim, x, y, island_size, island_size, 0, color);
+        //sim.coordinateToCell(x,y).addObject(i);
 
         
       }
@@ -102,9 +135,9 @@ function generateIslands(sim, gridNumber, cellWidth, cellHeight){
         if (i == neighbours.length - 1 && (typeof islands[x][y].cell !==
               "undefined")){
           var color = islands[x][y].color;
-          var i = new CosmeticIsland(sim, islands[x][y].x, islands[x][y].y, 
-              island_size, island_size, 0, color);
-          i.cell.addObject(i);
+          //jvar i = new CosmeticIsland(sim, islands[x][y].x, islands[x][y].y, 
+              //jisland_size, island_size, 0, color);
+          //i.cell.addObject(i);
 
           sim.removeObject(islands[x][y]);
           islands[x][y] = true;
@@ -199,4 +232,5 @@ function checkSafeSpawn(sim, x, y){
 exports.generateTreasures = generateTreasures;
 exports.checkSafeSpawn = checkSafeSpawn;
 exports.generateIslands = generateIslands;
+exports.generateIslands2 = generateIslands2;
 

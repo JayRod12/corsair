@@ -27,19 +27,23 @@ var socketList = [];
 
 // Game related data
 
-const gridNumber = 2;
+const gridNumber = 7;
 const cellWidth  = 2048;
 const cellHeight = 2048;
+const vert_resolution = 1080;
+const horiz_resolution = 1920;
 var allCells = [];
 for (var i = 0; i < gridNumber * gridNumber; i++) {
     allCells.push(i);
 }
 
-var treasure_number = Math.floor(gridNumber * gridNumber / 2);
+var treasure_number = Math.floor(gridNumber * gridNumber / 5);
 var sim = new Sim.Class(remote, Date.now(), gridNumber, cellWidth, cellHeight, allCells);
 // serialized treasures
 ServerGame.generateTreasures(sim, gridNumber, cellWidth, cellHeight, treasure_number);
 ServerGame.generateIslands(sim, gridNumber, cellWidth, cellHeight);
+var height_maps = ServerGame.generateIslands2(sim, gridNumber, cellWidth, cellHeight);
+console.log('Height map size: ' + height_maps.length * height_maps[0].length * height_maps[0][0].length);
 
 //var island = new Island(100, 100, 100, 100, Math.PI/4, "black");
 
@@ -66,7 +70,11 @@ app.get('/highScores', function(req, res) {
 });
 
 app.get('/top10', function(req, res) {
-  Database.getTopTen(res);
+  Database.getTopTenOverall(res);
+});
+
+app.get('/top10Today',function(req,res){
+  Database.getTopTenToday(res);
 });
 
 http.listen(process.env.PORT || port, function() {
@@ -120,7 +128,8 @@ io.on('connection', function(client){
   var new_cells_states = serializeNewCells(ac);
   var data = { id : client.userid, names : remote.getPlayerNames()
              , players : remote.getPlayers(), state: initState, meta: metadata
-             , new_cells_states: new_cells_states, treasures: serializer.serializeArray(sim.treasures) };
+             , new_cells_states: new_cells_states, treasures: serializer.serializeArray(sim.treasures)
+             , height_maps : height_maps };
   client.emit('on_connect', data);
 
 
@@ -308,9 +317,8 @@ function serializeNewCells(new_cells) {
   var new_cells_states = [];
   for (var i = 0; i < new_cells.length; i++) {
     var cell_game_objects = sim.numberToCell(new_cells[i]).gameObjects;
-    var cell_server_objects = sim.numberToCell(new_cells[i]).serverObjects;
     var cell_state = { game_obj:
-      serializer.serializeArray(cell_game_objects).concat(serializer.serializeArray(cell_server_objects))};
+      serializer.serializeArray(cell_game_objects) };
     new_cells_states.push({ num: new_cells[i]
                           , state: cell_state });
   }
@@ -324,41 +332,26 @@ function calculateCellsToSend(uid){
   }
   var list = [];
   var base = sim.coordinateToCellIndex(s.state.x,s.state.y);
-  var x_pos = false;
-  var x_neg = false;
-  var y_pos = false;
-  var y_neg = false;
+
   if (base != null) {
-    const bufferConst = 2;
+    // Number of cells that the viewport spans.
 
-    x_pos = base.x + 1 < gridNumber && s.state.x % cellWidth > cellWidth/bufferConst;
-    y_pos = base.y + 1 < gridNumber && s.state.y % cellHeight > cellHeight/bufferConst;
-    x_neg = base.x - 1 >= 0 && s.state.x % cellWidth < cellWidth/bufferConst;
-    y_neg = base.y - 1 >= 0 && s.state.y % cellHeight < cellHeight/bufferConst;
+    var num_viewed_cells_h = Math.ceil(horiz_resolution * s.scale / cellWidth);
+    var num_viewed_cells_v = Math.ceil(vert_resolution * s.scale / cellHeight);
 
-    if (x_pos){
-      list.push(sim.cellTupleToNumber({x:base.x+1, y:base.y}));
-      if (y_pos) {
-        list.push(sim.cellTupleToNumber({x:base.x+1, y:base.y+1}));
-      } else if (y_neg) {
-        list.push(sim.cellTupleToNumber({x:base.x+1, y:base.y-1}));
-      }
-    } else if (x_neg) {
-      list.push(sim.cellTupleToNumber({x:base.x-1, y:base.y}));
-      if (y_pos) {
-        list.push(sim.cellTupleToNumber({x:base.x-1, y:base.y+1}));
-      } else if(y_neg) {
-        list.push(sim.cellTupleToNumber({x:base.x-1, y:base.y-1}));
+    for (var i = base.x - Math.ceil(num_viewed_cells_h);
+             i <= base.x + Math.ceil(num_viewed_cells_h);
+             i++) {
+      if (i < 0) continue;
+      if (i >= gridNumber) break;
+      for (var j = base.y - Math.ceil(num_viewed_cells_v);
+               j <= base.y + Math.ceil(num_viewed_cells_v);
+               j++) {
+        if (j < 0) continue;
+        if (j >= gridNumber) break; 
+        list.push(sim.cellTupleToNumber({x: i, y: j}));
       }
     }
-
-    if (y_pos) {
-      list.push(sim.cellTupleToNumber({x:base.x, y:base.y+1}));
-    } else if(y_neg) {
-      list.push(sim.cellTupleToNumber({x:base.x, y:base.y-1}));
-    }
-
-    list.push(sim.cellTupleToNumber(base));
   }
   return list;
 }
