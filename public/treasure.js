@@ -46,6 +46,7 @@ function Treasure(sim, x, y, value, hp) {
   this.getColCategory = function() {return "static";};
   this.getColObj = function() {
     return {
+	    type: "treasure",
       x: this.x,
       y: this.y,
     }

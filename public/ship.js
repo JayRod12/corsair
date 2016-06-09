@@ -77,7 +77,7 @@ function Ship(sim, state, uid, name, inputFunction){
     //  If player has left the server remove their ship from the sim
     //  TODO might cause 'ghost ships', player removed on local simulation
     //  but stille exists on server
-    if (typeof remoteState == "undefined" || this.hp < 0){
+    if (typeof remoteState == "undefined" || this.hp <= 0){
       sim.removeObject(this);
       return;
     }
@@ -114,10 +114,16 @@ function Ship(sim, state, uid, name, inputFunction){
   this.collisionHandler = function(other_object) {
 	  /*TODO: different cases (possibly) i.e. what if 
   		it's a cannonball I've collided with?*/
-
     var shipUpdate = false;
 
-    if (other_object instanceof Cannon.CannonBall){
+    if (other_object.type == "island") {
+      this.sim.removeObject(this);
+    }
+    if (other_object.type == "ship") {
+      this.hp -= other_object.hp*0.05;
+    }
+
+    if (other_object.type == "cannonball"){
       if (other_object.uid === this.uid) return;
       if (typeof other_object.level !== "undefined"){
         if (server){
@@ -125,7 +131,7 @@ function Ship(sim, state, uid, name, inputFunction){
           shipUpdate = true;
         }
       }
-    } else if (other_object instanceof Treasure.Class) {
+    } else if (other_object.type == "treasure") {
       if (!server) {
         return;
       }
@@ -231,8 +237,10 @@ function Ship(sim, state, uid, name, inputFunction){
   this.getColCategory = function() {return "dynamic";};
   this.getColObj = function() {
     return {
+	    type: "ship",
       x: this.state.x,
       y: this.state.y,
+      hp: this.hp,
       width: shipHitWidth * this.scale,
       height: shipHitHeight * this.scale,
       hypotenuse: this.hypotenuse,

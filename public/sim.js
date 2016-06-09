@@ -190,9 +190,11 @@ function Cell(sim, x, y, gridNumber, width, height) {
         }
 
         if(checkCollision(this.colObjects[i], this.colObjects[j])) {
-          this.colObjects[i].collisionHandler(this.colObjects[j]);
+			    var pre_update_object = this.colObjects[i].getColObj();
+          //we handle collisions using the collision states specified by each object
+          this.colObjects[i].collisionHandler(this.colObjects[j].getColObj());
           //  Avoid the case where object j is deleted
-          if (this.colObjects[j]) this.colObjects[j].collisionHandler(this.colObjects[i]);
+          if (this.colObjects[j]) this.colObjects[j].collisionHandler(pre_update_object);
         };
       }
     }
