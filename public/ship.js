@@ -7,6 +7,8 @@ if (typeof exports === 'undefined'){
   ship_image1.src = "../media/ship1NU.png";
   var ship_image2 = new Image();
   ship_image2.src = "../media/ship2NU.png";
+  var symimage = new Image();
+  symimage.src = "../media/symship.png";
 }
 else{
   //  Server
@@ -53,6 +55,9 @@ function Ship(sim, state, uid, name, inputFunction){
   this.inputFunction = inputFunction;
 
   this.onTick = function(dt){
+	this.scale = this.scale + 0.01;
+
+	
     var remoteState = this.getRemoteState();
 
     //decrement collision_timer to notify other functionalities
@@ -151,21 +156,27 @@ function Ship(sim, state, uid, name, inputFunction){
     ctx.rotate(this.state.angle);
 
 	//draw hitbox underneath
-/*
+
 	if(this.collided_timer > 0) {
         ctx.fillStyle = "red";
     } else {
       ctx.fillStyle = this.default_colour;
     }
-     ctx.fillRect(-hitwidth/2, -hitheight/2, hitwidth, hitheight);*/
+     ctx.fillRect(-hitwidth/2, -hitheight/2, hitwidth, hitheight);
       //We draw the ship, ensuring that we start drawing from the correct location 
     //(the fillRect function draws from the topmost left corner of the rectangle 
     
+	ctx.drawImage(symimage, (-drawwidth/2), (-drawheight/2), drawwidth, drawheight);
+
+      //We draw the ship, ensuring that we start drawing from the correct location 
+    //(the fillRect function draws from the topmost left corner of the rectangle 
+/*
     if (this.wait < 50) {
-      ctx.drawImage(ship_image1, -drawwidth/2, -drawheight/2, drawwidth, drawheight);
+      ctx.drawImage(ship_image1, (-drawwidth/2), (-drawheight/2), drawwidth, drawheight);
     } else {
       ctx.drawImage(ship_image2, -drawwidth/2, -drawheight/2, drawwidth, drawheight);
     }
+*/
 
     this.wait = (this.wait + 1) % 100;
 
@@ -222,17 +233,18 @@ function Ship(sim, state, uid, name, inputFunction){
 
 }
 
-//200: 80
-var shipDrawWidth = 160;
-var shipDrawHeight = 80;
+//These depend on the dimensions of the image we choose
+var shipDrawWidth = 112.5;
+var shipDrawHeight = 60.5;
 
-//100:35
-//Might need to improve the hitbox.
-var shipHitWidth = 80;
-var shipHitHeight = 35;
+//Likewise
+var shipHitWidth = 70;
+var shipHitHeight = 28;
 
 exports.Class = Ship;
 exports.shipDrawWidth = shipDrawWidth;
 exports.shipDrawHeight = shipDrawHeight;
+exports.shipHitWidth = shipHitWidth;
+exports.shipHitHeight = shipHitHeight;
 
 })(typeof exports == 'undefined' ? this.Ship = {} : exports);
