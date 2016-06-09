@@ -293,7 +293,7 @@ function startClient() {
             sim.treasures.push(treasure);
             treasure.cell.addObject(treasure);
             break;
-          case 'add_object':
+          case 'create_object':
             var object = serializer.deserializeObject(update.data,
                 server_time_diff);
             cell.addObject(object);
@@ -301,14 +301,14 @@ function startClient() {
           case 'remove_object':
             var object = serializer.deserializeObject(update.data,
                 server_time_diff);
-            sim.removeObject(object);
+            var cell = sim.coordinateToCell(object.x, object.y);
+            cell.removeObject(object);
+            break;
           case 'ship_update':
-            console.log('ship update');
             var ship = sim.getShip(update.data.uid);
             ship.hp = update.data.hp;
             ship.gold = update.data.gold;
             sim.increaseScale(update.data.uid, update.data.gold);
-            console.log('GOLD ' + ship.gold);
             break;
           default:
             console.log("Unrecognised command from server " + update.name);

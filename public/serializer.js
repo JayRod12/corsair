@@ -8,6 +8,7 @@ else{
   Sim = require('../public/sim.js');
   Ship = require('../public/ship.js');
   Treasure = require('../public/treasure.js');
+  Loot = require('../public/loot.js');
 }
 
 (function(exports){
@@ -69,6 +70,11 @@ function Serializer(sim) {
     //  Identity function
     treasure : function(o) {
       return new Treasure.Class(sim, o.x, o.y, o.value, o.hp);
+    },
+
+    //  Identity function
+    loot : function(o) {
+      return new Loot.Class(o.x, o.y, o.value, o.color);
     },
 
     island : function(o) {

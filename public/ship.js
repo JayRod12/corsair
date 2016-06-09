@@ -141,8 +141,9 @@ function Ship(sim, state, uid, name, inputFunction){
       sim.remote.setScore(this.uid, this.gold);
       shipUpdate = true;
       this.increaseScale(this.gold);
-      other_object.cell.addSerializedUpdate('remove_object', other_object);
-      
+      var cell = this.sim.coordinateToCell(other_object.x, other_object.y);
+      cell.addSerializedUpdate('remove_object', other_object);
+      cell.removeObject(other_object);
     }
 
     if (server && shipUpdate){
@@ -151,7 +152,7 @@ function Ship(sim, state, uid, name, inputFunction){
       , gold : this.gold
       , hp : this.hp
       };
-      other_object.cell.addNonSerialUpdate('ship_update', ship_update); 
+      this.cell.addNonSerialUpdate('ship_update', ship_update); 
     }
 
    this.collided_timer = this.collided_basetime;
@@ -236,15 +237,15 @@ function Ship(sim, state, uid, name, inputFunction){
 
   if (server){
   this.onDeath = function() {
-    var lootValueMin = this.scale*100;
-    var lootValueMax = this.scale*100;
+    var lootValueMin = this.scale*10;
+    var lootValueMax = this.scale*10;
     var lootDisperseRadMax = shipBaseWidth * this.scale;
     var lootDisperseRadMin = shipBaseWidth * this.scale / 2;
     for (var i = 0; i < Loot.lootPerScale * this.scale; i++) {
       var rad = lootDisperseRadMin + (lootDisperseRadMax - 
           lootDisperseRadMin) *
         Math.random();
-      var value = Loot.lootValueMax + (Loot.lootValueMax - Loot.lootValueMin) *
+      var value = lootValueMax + (lootValueMax - lootValueMin) *
         Math.random();
       var angle = 2 * Math.PI * Math.random();
 
@@ -253,8 +254,10 @@ function Ship(sim, state, uid, name, inputFunction){
 
       var loot = new Loot.Class(x, y, value);
       var cell = this.sim.coordinateToCell(loot.x, loot.y);
-      cell.addObject(loot);
-      cell.addSerializedUpdate('create_object', loot);
+      if (cell){
+        cell.addObject(loot);
+        cell.addSerializedUpdate('create_object', loot);
+      }
     }
   }}
 
