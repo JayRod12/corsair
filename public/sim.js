@@ -103,6 +103,7 @@ function Cell(sim, x, y, gridNumber, width, height) {
 
 
   this.removeObject = function(object) {
+	if(!object) return;
     var found = false;
     var deepequals = false;
     if (typeof object.equals !== "undefined"){
