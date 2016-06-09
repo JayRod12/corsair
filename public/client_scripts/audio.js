@@ -3,6 +3,8 @@
 var a_ctx; 
 window.addEventListener('load', audio_init, false);
 
+var loaded = false;
+
 var cannonDryLoader;
 var cannonWetLoader;
 var reverbBuffer;
@@ -19,7 +21,7 @@ function audio_init(){
   a_ctx = new AudioContext();
 
   //  Cannon
-  var cannon_sfx_count = 7;
+  var cannon_sfx_count = 5;
   var cannon_dry_filenames = [];
   var cannon_wet_filenames = [];
   for (var i = 0; i < cannon_sfx_count; i++){
@@ -38,10 +40,22 @@ var cannon_sfx;
 //function finishedLoading(){
 //}
 function finishedLoading(bufferList) {
+  loaded = true;
 }
 
 
 var cannonBallVolume = 0.8;
+
+function broadside(cannons, raw_delay, dist){
+  var delay = raw_delay * 6;
+  for (var i = 0; i < cannons; i++){
+    var dist_i = (dist + (i / cannons))/2;
+    var f = function(){
+      playCannonFire(dist_i);
+    };
+    setTimeout(f, delay * i );
+  }
+}
 
 //  Dist is a value from 0 to 1
 function playCannonFire(dist) {
@@ -50,25 +64,33 @@ function playCannonFire(dist) {
 
   var sourceDry = a_ctx.createBufferSource();
   var sourceWet = a_ctx.createBufferSource();
+  sourceDry.buffer = cannonDryLoader.bufferList[n];
+  sourceWet.buffer = cannonWetLoader.bufferList[n];
 
   var gainDry = a_ctx.createGain();
   var gainWet = a_ctx.createGain();
   gainDry.gain.value = (1-dist_2) * cannonBallVolume;
-  console.log(gainDry.gain.value);
   gainWet.gain.value = dist_2 * cannonBallVolume;
 
-  sourceDry.buffer = cannonDryLoader.bufferList[n];
-  sourceWet.buffer = cannonWetLoader.bufferList[n];
+  var biquadFilter = a_ctx.createBiquadFilter();
+  biquadFilter.type = "lowpass";
+  biquadFilter.frequency.value = 1000 + (1-dist)*5000;
+  biquadFilter.gain.value = 25;
+
 
   sourceDry.connect(gainDry);
   sourceWet.connect(gainWet);
 
-  gainDry.connect(a_ctx.destination);
-  gainWet.connect(a_ctx.destination);
+  gainDry.connect(biquadFilter);
+  gainWet.connect(biquadFilter);
 
-  //sourceDry.start(0);
+  biquadFilter.connect(a_ctx.destination);
+
+  sourceDry.start(0);
   sourceWet.start(0);
 }
+exports.broadside = broadside;
 exports.playCannonFire = playCannonFire;
+exports.loaded = loaded;
 
 })(this.Audio = {});

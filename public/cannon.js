@@ -15,7 +15,7 @@ function Cannon(ship) {
   this.ballSpeed = 0.2;
   this.cannons = 12;
   this.spacing = 10;
-  this.delay = 50;
+  this.delay = 10;
   this.ship = ship;
   this.level = 2;
 
@@ -24,11 +24,10 @@ function Cannon(ship) {
 
   this.futureShots = [];  //  List of future firing events
 
-  this.farfar = 0;
+  //this.farfar = 1;
 
   this.onShoot = function(side) {
-    Audio.playCannonFire(this.farfar);
-    this.farfar += 0.1;
+    Audio.broadside(this.cannons, this.delay, 0.1);
 
     //Ask server if we are allowed to shoot (MaybeTODO)
 
@@ -39,7 +38,6 @@ function Cannon(ship) {
     if (cooldown > 0) return false;
 
     this.cooldowns[index] = this.baseCooldown;
-
 
     for (var i = 0; i < this.cannons; i++){
 
@@ -53,7 +51,8 @@ function Cannon(ship) {
       var shot = function(i){
         var offsetX = spacing * (cannons / 2 - i) * Math.cos(ship.state.angle);
         var offsetY = spacing * (cannons / 2 - i) * Math.sin(ship.state.angle);
-        var ball = cannonBallFromLocal(ship, offsetX, offsetY, side, ballSpeed, level);
+        var ball = cannonBallFromLocal(ship, offsetX, offsetY, side, ballSpeed,
+            level, i/cannons);
         toSendServer.push(ball.serialize());
         var cell = ship.sim.coordinateToCell(ship.state.x + offsetX,ship.state.y + offsetY);
         cell.addObject(ball);
