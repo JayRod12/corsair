@@ -226,7 +226,7 @@ function SingleCannon(index, side, ship, handler) {
         var ball = cannonBallFromLocal(ship, this.offset_x, this.offset_y, this.side, handler.ballSpeed, handler.level);
          toSendServer.push(ball.serialize());
         var cell = ship.sim.coordinateToCell(ship.state.x,ship.state.y);
-        cell.gameObjects.push(ball);
+        cell.addObject(ball);
         this.fired = false;
 		this.cur_frame = 1;
      } 
