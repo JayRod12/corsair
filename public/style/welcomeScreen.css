@@ -1,13 +1,42 @@
 body {
   background: black;
+  margin: 0;
 }
 
-#scene{
-  position:absolute;
-  max-width: 250px;
-  max-height: 100px;
+form {
+  width: 90px;
+  margin: 0;
+  padding: 0;
 }
 
+#welcomeScreen {
+  min-width: 1000px;
+}
+
+#titleContainer {
+  height: 400px;
+}
+
+#title {
+  text-align: center;
+  font-size: 100px;
+  font-family: 'Josefin Sans';
+  color:white;
+  margin: 40px;
+  height: 220px;
+}
+
+#titleCorsair {
+  margin: 0;
+  resize: none;
+}
+
+#wheel {
+  position: relative;
+  bottom: 250px;
+  right: 200px;
+/*  border: 1px dashed red;*/
+}
 
 #trophyButton {
   padding: 0;
@@ -15,60 +44,47 @@ body {
   background: none;
 }
 
-#trophyButton:focus {
-  outline: none;
-}
-
-
 #trophyImage{
-  height: 80px;
+  height: 80px;  
   width: 80px;
   opacity: 0.4;
 }
 
-
-#trophyImage:focus {
- outline-style: none;
+#buttonAndTextField {
+  margin: 0 auto; 
+  width: 50%;
+  text-align:center;
+  position:relative;
 }
-
-#trophyImage:hover {
+ 
+#trophyImage:hover {  
    opacity: 1;
-}
-
-
-#buttonContainer {
-  text-align: center;
-}
-
-#buttonContainer:focus {
-	outline-style: none;
-}
+}  
 
 #textField {
   position: relative;
-  left: 395px;
-  max-width: 150px;
-  top: 0px;
-  border-color:#cccccc;
-  font-size:18px;
+  border-color:#cccccc; 
+  font-size:18px; 
   font-family: 'Josefin Sans';
-  text-align:center;
-  border-radius:21px;
-  border-style:hidden;
-  background-color:#3d003d;
-  color:#ffffff;
-  padding:12px;
-  border-width:13px;
-  text-shadow:0px 0px 0px rgba(42,42,42,.75);
+  text-align:center; 
+  border-radius:21px; 
+  border-style:hidden; 
+  margin:auto;
+  background-color:#3d003d; 
+  color:#ffffff; 
+  padding:12px; 
+  margin-bottom: 30px;
+  border-width:13px; 
+  text-shadow:0px 0px 0px rgba(42,42,42,.75);  
 }
+
+
 #textField:focus {
   outline: none;
 }
 
 #playButton {
   position: relative;
-  top: 40px;
-  left: 8px;
   width: 100px;
   height: 40px;
   background: #3498db;
@@ -98,35 +114,6 @@ body {
   text-decoration: none;
 }
 
-#playButton:focus {
-  outline: none;
-}
-
-
-
-
-#titleContainer {
-  margin-left: auto;
-  margin-right: auto;
-  width: 960px;
-}
-
-div div canvas {
-  /*display: none;*/
-  max-width: 850px;
-  max-height: 500px;
-  position: relative;
-  bottom: 162px;
-  left: -142px;
-}
-
-#title {
-  text-align: center;
-  font-size: 100px;
-  font-family: 'Josefin Sans';
-  color:white;
-}
-
 #game_canvas {
   display: none;
   width: 100%;
@@ -134,3 +121,4 @@ div div canvas {
   margin: 0;
   padding: 0;
 }
+

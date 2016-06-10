@@ -2,6 +2,9 @@ var socket;
 var canvas = $("#main_canvas")[0];
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
+    canvas.focus();
+$("#main_canvas").attr("contentEditable", "true")
+$("#main_canvas")[0].contentEditable = true;
 var ctx = canvas.getContext("2d");
 var remote;
 var sim;
@@ -86,7 +89,7 @@ $(document).ready(function(){
 });
 
 //  Detect mouseclicks for shooting cannon balls
-$( "#main_canvas" ).mousedown(function(event){
+$("#main_canvas").mousedown(function(event){
 
   switch(event.which){
     case 1:
@@ -184,18 +187,10 @@ function endClient() {
     clearInterval(server_loop);
     server_loop = 0;
   }
-  if (animation_loop == 0) {
-    animation_loop = window.requestAnimationFrame(animation);
-  }
   socket.disconnect();
 }
 
 function startClient() {
-
-  if (animation_loop) {
-    window.cancelAnimationFrame(animation_loop);
-    animation_loop = 0;
-  }
 
   // Initialize sockets
   console.log('socket status' + socket);
@@ -426,7 +421,6 @@ function playClientGame(data) {
     socket.emit('on_connect_response', {name : our_name});
   }
 }
-
 
 $('document').unload(function() {
   if ((typeof socket != "undefined") && socket.connected) {
