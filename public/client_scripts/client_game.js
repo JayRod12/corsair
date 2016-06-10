@@ -55,7 +55,7 @@ function draw(){
   drawCompass();
   drawScore();
   drawHighScoresTable(localHighScoreTable);
-  drawDebug();
+  //drawDebug();
 }
 
 
