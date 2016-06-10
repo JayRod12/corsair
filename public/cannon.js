@@ -183,6 +183,7 @@ function CannonBall(sim, uid, state, level) {
   this.state = state;
   this.level = level;
   this.despawn = 2500;
+  if (typeof this.uid === "undefined") console.log(this);
 
   this.cell = this.sim.coordinateToCell(this.state.x, this.state.y);
 
@@ -202,7 +203,8 @@ function CannonBall(sim, uid, state, level) {
   this.getColType = function(){return "point"};
   this.getColCategory = function(){return "dynamic";};
   this.getColObj = function(){
-    return {type: "cannonball", x: this.state.x, y: this.state.y};
+    return {type: "cannonball", x: this.state.x, y: this.state.y, uid: this.uid,
+    level: this.level};
   }
 
 
