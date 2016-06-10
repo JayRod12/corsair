@@ -7,6 +7,13 @@ if (typeof exports === 'undefined'){
     cannon_frame.src = "../media/cannon/"+i+".png";
     cannon_frames.push(cannon_frame);
   }
+  var smoke_frames = new Array();
+  var smoke_frame_count = 3;
+  for (var i = 0; i < smoke_frame_count; i++){
+    var smoke_frame = new Image();
+    smoke_frame.src = "../media/smoke/smoke"+i+".png";
+    smoke_frames.push(smoke_frame);
+  }
 }
 else{
   Game = require ('./shared_game.js');
@@ -280,6 +287,15 @@ function SingleCannon(index, side, ship, handler) {
                                              ship.state.y + this.offset_y);
         cell.addObject(ball);
        }
+       var xvel = ship.state.speed * Math.cos(ship.state.angle) / 5;
+       var yvel = ship.state.speed * Math.sin(ship.state.angle) / 5;
+       var frame = Math.floor(Math.random() * smoke_frame_count);
+       var width = 16 + 32 * Math.random();
+       var height = 16 + 32 * Math.random();
+       var smoke = new Smoke(sim,ship.state.x + this.offset_x, ship.state.y + 
+           this.offset_y, xvel, yvel, Math.random() * 2 * Math.PI, width,
+           height, frame);
+       smoke.cell.addObject(smoke);
         this.fired = false;
 		this.cur_frame = 1;
      } 
@@ -310,6 +326,37 @@ function SingleCannon(index, side, ship, handler) {
 
     ctx.rotate(-angle);
     ctx.translate(-x, -y);
+  }
+}
+
+function Smoke(sim, x, y, xvel, yvel, angle, width, height, frame){
+  this.sim = sim;
+  this.x = x;
+  this.y = y;
+  this.cell = this.sim.coordinateToCell(this.x, this.y);
+  this.xvel = xvel;
+  this.yvel = yvel;
+  this.angle = angle;
+  this.width = width;
+  this.height = height;
+  this.frame = frame;
+  this.alpha = 1;
+  this.onTick = function (dt){
+    this.x += this.xvel * dt;
+    this.y += this.yvel * dt;
+    this.alpha -= dt * 1/5000;
+    if (this.alpha <= 0) sim.removeObject(this);
+    else Game.updateCell(this.sim, this, this.x, this.y);
+  }
+
+  this.onDraw = function(ctx){
+    ctx.globalAlpha = this.alpha;
+    ctx.translate(this.x, this.y);
+    ctx.rotate(this.angle);
+    ctx.drawImage(smoke_frames[this.frame], -this.width / 2, -this.height / 2, this.width, this.height);
+    ctx.rotate(-this.angle);
+    ctx.translate(-this.x, -this.y);
+    ctx.globalAlpha = 1;
   }
 }
 
