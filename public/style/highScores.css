@@ -37,9 +37,10 @@ body {
 
 
 #prev {
-	position:fixed;
-	top:50%;
-	left:40%;
+	position:relative;
+	display:inline-block;
+	bottom: 200px;
+	right:150px;
 	padding: 0;
 	border: 12px solid black;
 	background: none;
@@ -51,9 +52,10 @@ body {
 
 
 #next {
-	position:fixed;
-	top:50%;
-	right:40%;
+	position:relative;
+	display:inline-block;
+	bottom: 200px;
+	left:150px;
 	padding: 0;
 	border: 12px solid black;
 	background: none;
@@ -176,4 +178,24 @@ td:first-child {
 
 td:nth-child(2) {
 	text-align: left;
+}
+
+#TodayTable {
+	display:none;
+	position:relative;
+	left: 50;
+	text-align:center;
+	top: 100px;
+	border: 1px solid black;
+	white-space: nowrap;
+}
+
+
+#overallTable {
+	position:relative;
+	left: 50;
+	text-align:center;
+	top: 100px;
+	border: 1px solid black;
+	white-space: nowrap;
 }

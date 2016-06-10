@@ -17,7 +17,7 @@
  	<h1>Hall of Fame</h1>
 
 <div>
-	<div id='overallTable' style=' position:relative; left: 50; text-align:center; top: 100px; border: 1px solid black; white-space: nowrap'>
+	<div id='overallTable'>
 		<div id="table" ng-controller="controller">
 				 <table>
 					 <h2>ALL TIME</h2>
@@ -30,7 +30,7 @@
 </div>
 
 <div>
-	<div id='TodayTable' style='display:none; position:relative; left: 50; text-align:center; top: 100px; border: 1px solid black; white-space: nowrap'>
+	<div id='TodayTable'>
 		<div ng-controller="controllerToday">
 				 <table>
 					 <h2>TODAY</h2>
@@ -58,21 +58,20 @@
 
     $('#next').click(function(){
 			//	$('#overallTable').animate({width:'toggle'},1000);
-			$('#next').fadeOut();
+			$('#next').hide();
 
 	      $('#overallTable').fadeOut(function(){
 	    		$('#TodayTable').fadeIn();
 				});
 
-				console.log("Gets here");
 				$('#prev').show();
 
 		});
 
 
 		$('#prev').click(function(){
-			  $('#prev').fadeOut();
-				$('#next').fadeIn();
+			  $('#prev').hide();
+				$('#next').show();
 
 				$('#TodayTable').fadeOut(function(){
 	      $('#overallTable').fadeIn();
