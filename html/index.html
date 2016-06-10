@@ -5,47 +5,37 @@
     <title>Corsair</title>
     <link rel="stylesheet" href="style/welcomeScreen.css">
     <link href='https://fonts.googleapis.com/css?family=Josefin+Sans' rel='stylesheet' type='text/css'>
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js" 
+      integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="
+      crossorigin="anonymous"></script>
   </head>
 
   <body>
-    <!--ANIMATION-->
     <div id="welcomeScreen">
       <form action="/highScores" method="get">
         <button id="trophyButton"><img id="trophyImage" 
           src="media/trophy.png" alt="Hall of Fame"></button>
       </form>
-      <div id="titleContainer">
-        <div id="scene"></div>
-          <!--External scripts. Needs to be put here so that js can reference "scene"-->
-          <script src='https://ajax.googleapis.com/ajax/libs/threejs/r67/three.min.js'></script>
-          <script src='https://s3-us-west-2.amazonaws.com/s.cdpn.io/264161/OrbitControls.js'></script>
-          <script src='https://dl.dropboxusercontent.com/u/3587259/Code/Threejs/OrbitControls.js'></script>
-          <script src='https://cdn.rawgit.com/sole/tween.js/master/src/Tween.js'></script>
-          <script src="https://code.jquery.com/jquery-1.12.4.min.js" 
-                integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="
-                crossorigin="anonymous"></script>
-          <script src='https://code.createjs.com/tweenjs-0.6.2.min.js'></script>
-          <script src='https://cdnjs.cloudflare.com/ajax/libs/gsap/1.18.5/TweenMax.min.js'></script>
-          <script src="client_scripts/animation.js"></script>
-          <script src="client_scripts/index.js"></script>
-        <div id="title">
-          <h1 id="titleCorsair">
-            C&nbsp &nbsp &nbspRSAIR
-          </h1>
-        </div>
+      <div id="title">
+        <h1 id="titleCorsair">
+          C&nbsp &nbsp &nbspRSAIR
+        </h1>
+        <canvas id="wheel" width="250px" height="250px"></canvas>
+      </div>
+      <div id="buttonAndTextField">
         <div>
           <input id="textField" type="text" name="shipName" placeholder="Ship's Name" maxlength="14">
-          <div id="buttonContainer">
-            <button id="playButton">
-              Play
-            </button>
-          </div>
+        </div>
+        <div>
+          <button id="playButton">
+            Play
+          </button>
         </div>
       </div>
     </div>
     <div id="game_canvas">
       <script src="/socket.io/socket.io.js"></script>
-      <canvas id="main_canvas"></canvas>
+      <canvas id="main_canvas" tabindex='1'></canvas>
       <script src="serializer.js"></script>
       <script src="pirateNames.js"></script>
       <script src="collision_detection.js"></script>
@@ -54,12 +44,14 @@
       <script src="loot.js"></script>
       <script src="cannon.js"></script>
       <script src="ship.js"></script>
+      <script src="client_scripts/buffer-loader.js"></script>
+      <script src="client_scripts/audio.js"></script>
       <script src="shared_game.js"></script>
       <script src="treasure.js"></script>
       <script src="utils.js"></script>
+      <script src="client_scripts/animation.js"></script>
+      <script src="client_scripts/index.js"></script>
       <script src="client_scripts/draw.js"></script>
-      <script src="client_scripts/buffer-loader.js"></script>
-      <script src="client_scripts/audio.js"></script>
       <script src="client_scripts/client_game.js"></script>
       <script src="client_scripts/compass.js"></script>
     </div>
