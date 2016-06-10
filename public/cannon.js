@@ -44,9 +44,32 @@ function Cannon(ship) {
   this.baseCooldown = 1200;
   this.cooldowns = [10, 10];
 
+  this.cosmeticShoot = function(side) {
+
+    console.log('coms');
+    SFX.broadside(this.cannons, this.delay, 0.2);
+
+    var index = ((side == 1) ? 0 : 1);
+    var cannonArray;
+    if (index == 0) {
+      cannonArray = this.leftCannons;
+    } else {
+      cannonArray = this.rightCannons;
+    }
+
+    for (var i = 0; i < cannonArray.length; i++) {
+      var fire_delay = Math.random()*this.delay;
+      //tell each 
+      cannonArray[i].cosmeticFire(fire_delay);
+    } 
+
+  }
   
   this.onShoot = function(side) {
 
+    var seed = Math.random();
+    toSendServer.push({type: "cannon_fire", uid: this.ship.uid, seed: seed, side
+        : side});
     SFX.broadside(this.cannons, this.delay, 0.2);
     //Ask server if we are allowed to shoot (MaybeTODO)
     var index = ((side == 1) ? 0 : 1);
@@ -209,11 +232,20 @@ function SingleCannon(index, side, ship, handler) {
   this.fire_delay = 0;
   this.fire_timer = 0;
   this.cur_frame = 0; 
+  this.cosmetic = false;
+
+  this.cosmeticFire = function(fire_delay) {
+	this.fire_delay = fire_delay;
+    this.fire_timer = fire_delay;
+    this.fired = true;
+    this.cosmetic = true;
+  }
   
   this.fire = function(fire_delay) {
 	this.fire_delay = fire_delay;
     this.fire_timer = fire_delay;
     this.fired = true;
+    this.cosmetic = false;
   }
   
   this.onTick = function(dt) {
@@ -227,11 +259,13 @@ function SingleCannon(index, side, ship, handler) {
      if (this.fire_timer > 0) {
        this.fire_timer -= dt;
      } else {
+       if (!this.cosmetic){
         var ball = cannonBallFromLocal(ship, this.offset_x, this.offset_y, this.side, handler.ballSpeed, handler.level);
          toSendServer.push(ball.serialize());
         var cell = ship.sim.coordinateToCell(ship.state.x + this.offset_x,
                                              ship.state.y + this.offset_y);
         cell.addObject(ball);
+       }
         this.fired = false;
 		this.cur_frame = 1;
      } 

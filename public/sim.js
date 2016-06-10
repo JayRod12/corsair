@@ -149,7 +149,6 @@ function Cell(sim, x, y, gridNumber, width, height) {
     }
 
     if (object instanceof Cannon.CannonBall) {
-      console.log('remove cannonball');
     }
     if (object instanceof Ship.Class){
       this.sim.removeShip(object);

@@ -61,6 +61,7 @@ function broadside(cannons, raw_delay, dist){
 function playCannonFire(dist) {
   var n = Math.floor(Math.random() * cannonDryLoader.bufferList.length);
   var dist_2 = dist * dist;
+  var inv_dist_2 = (1-dist) * (1-dist);
 
   var sourceDry = a_ctx.createBufferSource();
   var sourceWet = a_ctx.createBufferSource();
@@ -69,12 +70,12 @@ function playCannonFire(dist) {
 
   var gainDry = a_ctx.createGain();
   var gainWet = a_ctx.createGain();
-  gainDry.gain.value = (1-dist_2) * cannonBallVolume;
+  gainDry.gain.value = inv_dist_2 * cannonBallVolume;
   gainWet.gain.value = dist_2 * cannonBallVolume;
 
   var biquadFilter = a_ctx.createBiquadFilter();
   biquadFilter.type = "lowpass";
-  biquadFilter.frequency.value = 1000 + (1-dist)*5000;
+  biquadFilter.frequency.value = 1000 + (inv_dist_2)*5000;
   biquadFilter.gain.value = 25;
 
 

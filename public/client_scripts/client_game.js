@@ -315,6 +315,12 @@ function startClient() {
             var cell = sim.coordinateToCell(object.x, object.y);
             cell.removeObject(object);
             break;
+          case 'cannon_fire':
+            var ship = sim.getShip(update.data.uid);
+            if (update.data.uid !== our_id && ship){
+              ship.cannon.cosmeticShoot(update.data.side);
+            }
+            break;
           case 'ship_update':
             var ship = sim.getShip(update.data.uid);
             if (ship){

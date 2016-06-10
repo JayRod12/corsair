@@ -194,6 +194,12 @@ io.on('connection', function(client){
     for (var i = 0; i < data.updates.length; i++){
       //  Only allow deserialization of certain objects
       var serial = data.updates[i];
+      if (serial.type === "cannon_fire"){
+        var ship = sim.getShip(serial.uid);
+        if (ship){
+          ship.cell.addNonSerialUpdate(serial.type, serial);
+        }
+      }
       if (serial.type === "cannonball"){
         var cannonball = serializer.deserializeObject(serial, time_diff);
         var cell = cannonball.cell;
