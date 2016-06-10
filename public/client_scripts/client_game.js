@@ -281,8 +281,12 @@ function startClient() {
               if (update.data.o.uid != our_id) {
                 var obj = serializer.deserializeObject(update.data,
                     server_time_diff);
-                //sim.removeObject(obj);
+                if (sim.getShip(update.data.o.uid)){
+                  sim.removeObject(obj);
+                }
+                sim.setShip(update.data.o.uid, obj);
                 cell.addObject(obj);
+                
               }
             }
             break;
@@ -327,6 +331,9 @@ function startClient() {
               ship.hp = update.data.hp;
               ship.gold = update.data.gold;
               sim.increaseScale(update.data.uid, update.data.gold);
+            }
+            else{
+              console.log('Trying to update ship that doesnt exist');
             }
             break;
           default:

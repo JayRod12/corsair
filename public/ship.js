@@ -160,11 +160,13 @@ function Ship(sim, state, uid, name, inputFunction){
     }
 
     if (server && shipUpdate){
+
       var ship_update = {
         uid : this.uid
       , gold : this.gold
       , hp : this.hp
       };
+      console.log(ship_update);
       this.cell.addNonSerialUpdate('ship_update', ship_update); 
     }
 
