@@ -297,7 +297,9 @@ function send_loop_func(){
     }
 
     // Find all cells of interest for the client
-    var cells = calculateCellsToSend(client.userid);
+   // var cells = calculateCellsToSend(client.userid);
+    var cells = allCells;
+    
     // Find which cells it already knows about
     var old_cells = cells.intersection(client.cells);
     // Find which cells it has no information about
