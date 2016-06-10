@@ -150,8 +150,11 @@ function Ship(sim, state, uid, name, inputFunction){
       sim.remote.setScore(this.uid, this.gold);
       shipUpdate = true;
       this.increaseScale(this.gold);
-      other_object.cell.addSerializedUpdate('remove_treasure', other_object);
-      sim.removeTreasure(other_object);
+      var remObj = new Treasure.Class(this.sim, other_object.x, other_object.y,
+          other_object.value, other_object.hp);
+      var cell = this.sim.coordinateToCell(other_object.x, other_object.y);
+      cell.addSerializedUpdate('remove_treasure', remObj);
+      sim.removeTreasure(remObj);
     }
     else if (other_object.type == "loot") {
       this.gold += other_object.value;
