@@ -1,29 +1,22 @@
-function webglSupport() { 
-   try {
-    var canvas = document.createElement( 'canvas' ); 
-    return !! window.WebGLRenderingContext && canvas.getContext('webgl');
-   } catch(e) { 
-   	return false; 
-   } 
- };
-
-function mobileBrowser() { 
- return navigator.userAgent.match(/Android/i)
- || navigator.userAgent.match(/webOS/i)
- || navigator.userAgent.match(/iPhone/i)
- || navigator.userAgent.match(/iPad/i)
- || navigator.userAgent.match(/iPod/i)
- || navigator.userAgent.match(/BlackBerry/i)
- || navigator.userAgent.match(/Windows Phone/i);
+var wheelCanvas = document.getElementById('wheel');
+var context = wheelCanvas.getContext('2d');
+var wait = 0;
+var image = new Image();
+image.onload = function() {
+  context.translate(wheelCanvas.width/2, wheelCanvas.height/2);
+  context.drawImage(image, -wheelCanvas.width/2, -wheelCanvas.height/2);
 }
 
-// For old browsers or for mobile phone browsers,
-//replace the boat animation with just the title.
-if (!webglSupport() || mobileBrowser()) {
-    document.getElementById("scene").style.display = "none";
-    document.getElementById("titleCorsair").style.fontFamily = "Josefin Sans";
-    document.getElementById("titleCorsair").innerHTML = "CORSAIR";
+image.onerror = function() {
+  console.log("Image not loaded.");
 }
+
+image.src = "../media/wheel.png";
+
+var last_move_x = 0;
+var last_move_y = 0;
+var mouse_x = 0;
+var mouse_y = 0;
 
 $(document).ready(function () {
    $('#textField').keydown(function(event) {
@@ -32,14 +25,68 @@ $(document).ready(function () {
        }
    });
 
-     $('#playButton').click(function(event) {
-       localStorage['nickname'] = $('#textField').val(); 
-       $('#welcomeScreen').hide();
-       $('body').css({'margin':'0px',
-                      'padding':'0px',
-                      'display':'block'});
-       $('#game_canvas').fadeIn('slow');
-       startClient();
-       return false;
-     });
+   $("body").mousemove(function(event) {
+    if (wait == 0) {
+      mouse_x = event.pageX - getOffset(document.getElementById('wheel')).left - wheelCanvas.width/2;
+      mouse_y = event.pageY - getOffset(document.getElementById('wheel')).top - wheelCanvas.height/2;
+    }
+
+
+    var offset_x = 0;
+    var offset_y = 0;
+    var offset   = 100000;
+
+    offset_x = mouse_x > 0 ? offset_x = mouse_x + offset : offset_x = mouse_x - offset;
+    offset_y = mouse_y > 0 ? offset_y = mouse_y + offset : offset_y = mouse_y - offset;
+
+    context.clearRect(-wheelCanvas.width/2, -wheelCanvas.height/2, wheelCanvas.width, wheelCanvas.height);
+
+    // var leftOrRight = last_move_y/last_move_x > event.pageY/event.pageX ? 1 : - 1;
+
+    if (mouse_x < 0) {
+      context.rotate(Math.atan2(offset_x, offset_y).toFixed(0));
+    } else {
+      context.rotate(-Math.atan2(offset_x, offset_y).toFixed(0));
+    }
+
+    context.drawImage(image, -wheelCanvas.width/2, -wheelCanvas.height/2);
+
+    if (wait == 0) {
+      last_move_x = event.pageX;
+      last_move_y = event.pageY;
+    }
+
+    wait = (wait + 1) % 3; 
+
+    //console.log("leftOrRight is: " + leftOrRight);
+    console.log("lastMove is: " + last_move_x);
+    console.log("current x is: " + mouse_x);
+
+    // console.log("mouse_x: " + mouse_x + ", mouse_y" + mouse_y);
+    // console.log("offset_x: " + offset_x + ", offset_y" + offset_y);
+    // console.log("angle is: " + Math.atan2(offset_x, offset_y));
+
+   });
+
+   $('#playButton').click(function(event) {
+     localStorage['nickname'] = $('#textField').val(); 
+     $('#welcomeScreen').hide();
+     $('body').css({'margin':'0px',
+                    'padding':'0px',
+                    'display':'block'});
+     $('#game_canvas').fadeIn('slow');
+     startClient();
+     return false;
+   });
 });
+
+function getOffset( el ) {
+    var _x = 0;
+    var _y = 0;
+    while( el && !isNaN( el.offsetLeft ) && !isNaN( el.offsetTop ) ) {
+        _x += el.offsetLeft - el.scrollLeft;
+        _y += el.offsetTop - el.scrollTop;
+        el = el.offsetParent;
+    }
+    return { top: _y, left: _x };
+}
