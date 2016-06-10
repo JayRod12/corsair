@@ -79,10 +79,11 @@ function Ship(sim, state, uid, name, inputFunction){
     //  TODO might cause 'ghost ships', player removed on local simulation
     //  but stille exists on server
     if (typeof remoteState == "undefined" || this.hp <= 0){
-      sim.removeObject(this);
-      if (server && this.hp < 0){
+      if (server){// && this.hp <= 0){
+        console.log('spawning loot');
         this.spawnLoot();
       }
+      sim.removeObject(this);
       return;
     }
 
@@ -125,7 +126,10 @@ function Ship(sim, state, uid, name, inputFunction){
       this.sim.removeObject(this);
     }
     if (other_object.type == "ship") {
-      this.hp -= other_object.hp*0.05;
+      if (server){
+        this.hp -= other_object.hp*0.05;
+        shipUpdate = true;
+      }
     }
 
     if (other_object.type == "cannonball"){
@@ -149,14 +153,16 @@ function Ship(sim, state, uid, name, inputFunction){
       other_object.cell.addSerializedUpdate('remove_treasure', other_object);
       sim.removeTreasure(other_object);
     }
-    else if (server && other_object instanceof Loot.Class) {
+    else if (other_object.type == "loot") {
       this.gold += other_object.value;
       sim.remote.setScore(this.uid, this.gold);
       shipUpdate = true;
       this.increaseScale(this.gold);
       var cell = this.sim.coordinateToCell(other_object.x, other_object.y);
-      cell.addSerializedUpdate('remove_object', other_object);
-      cell.removeObject(other_object);
+      var lootRem = new Loot.Class(other_object.x, other_object.y,
+          other_object.value);
+      cell.addNonSerialUpdate('remove_object', lootRem);
+      cell.removeObject(lootRem);
     }
 
     if (server && shipUpdate){
@@ -165,6 +171,7 @@ function Ship(sim, state, uid, name, inputFunction){
         uid : this.uid
       , gold : this.gold
       , hp : this.hp
+      , scale : this.scale
       };
       console.log(ship_update);
       this.cell.addNonSerialUpdate('ship_update', ship_update); 
@@ -253,14 +260,14 @@ function Ship(sim, state, uid, name, inputFunction){
   this.spawnLoot = function() {
     var lootValueMin = this.scale*10;
     var lootValueMax = this.scale*10;
-    var lootDisperseRadMax = shipDrawWidth * this.scale;
-    var lootDisperseRadMin = shipDrawWidth * this.scale / 2;
+    var lootDisperseRadMax = shipDrawWidth * this.scale / 4;
+    var lootDisperseRadMin = shipDrawWidth * this.scale / 8;
     for (var i = 0; i < Loot.lootPerScale * this.scale; i++) {
       var rad = lootDisperseRadMin + (lootDisperseRadMax - 
           lootDisperseRadMin) *
         Math.random();
-      var value = lootValueMax + (lootValueMax - lootValueMin) *
-        Math.random();
+      var value = Math.floor(lootValueMin + (lootValueMax - lootValueMin) *
+        Math.random());
       var angle = 2 * Math.PI * Math.random();
 
       var x = this.state.x + rad * Math.cos(angle);

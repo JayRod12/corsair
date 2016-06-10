@@ -45,8 +45,11 @@ function Loot(x, y, value, color) {
   this.getColCategory = function(){return "static";};
   this.getColObj = function(){
     return {
+      type: "loot",
       x: this.x,
       y: this.y,
+      value: this.value,
+      color: this.color
     }
   };
 

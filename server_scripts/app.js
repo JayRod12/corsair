@@ -19,6 +19,7 @@ var Sim = require('../public/sim.js');
 var Perlin = require('../public/perlin.js').Class;
 var ServerGame = require('./server_game.js');
 var Database = require('./db.js');
+var Loot = require('../public/loot.js');
 
 
 var remote = new Game.Remote();
@@ -47,6 +48,20 @@ ServerGame.generateIslands(sim, gridNumber, cellWidth, cellHeight);
 
 //var island = new Island(100, 100, 100, 100, Math.PI/4, "black");
 
+var lootState;
+for (var i = 0; i < 35; i ++){
+  var timeout = 1000;
+  var x, y;
+  while (timeout > 0){
+    x = Math.random()*gridNumber * cellWidth;
+    y = Math.random()*gridNumber * cellHeight;
+    if (ServerGame.checkSafeSpawn(sim, x, y)) break;
+  }
+  var v = Math.floor(10 + Math.random() * 20);
+  var loot = new Loot.Class(x, y, v);
+  var cell = sim.coordinateToCell(x, y);
+  cell.addObject(loot);
+}
 
 var sim_t = 1000 / 30;
 var serializer = new Game.Serializer(sim);
@@ -203,8 +218,10 @@ io.on('connection', function(client){
       if (serial.type === "cannonball"){
         var cannonball = serializer.deserializeObject(serial, time_diff);
         var cell = cannonball.cell;
-        cell.addObject(cannonball);
-        cell.addSerializedUpdate('create_cannonball', cannonball);
+        if (cell){
+          cell.addObject(cannonball);
+          cell.addSerializedUpdate('create_cannonball', cannonball);
+        }
       }
     }
   });

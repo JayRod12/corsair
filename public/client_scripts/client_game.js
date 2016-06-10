@@ -329,6 +329,7 @@ function startClient() {
             var ship = sim.getShip(update.data.uid);
             if (ship){
               ship.hp = update.data.hp;
+              ship.scale = update.data.scale;
               ship.gold = update.data.gold;
               sim.increaseScale(update.data.uid, update.data.gold);
             }
@@ -364,6 +365,22 @@ function deserializeNewStates(new_cells_states, server_time_diff) {
       serializer.deserializeArray(new_cells_states[i].state.game_obj,
           server_time_diff)
                 .filter(function(x) { return x != null; });
+
+    /*
+    for (var i = 0; i < objects.length; i++){
+      var o = objects[i];
+      if (o instanceof Ship.Class){
+        debugger;
+        if (o.uid !== our_id){
+          var ss = sim.getShip(o.uid);
+          if (ss){
+            sim.removeObject(ss);
+          }
+          sim.setShip(o);
+        }
+      }
+    }
+    */
 
     //  Flush cell object lists
     cell.gameObjects = [];
