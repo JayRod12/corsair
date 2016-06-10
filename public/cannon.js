@@ -76,11 +76,6 @@ function Cannon(ship) {
   
   this.onShoot = function(side) {
 
-    var seed = Math.random();
-    toSendServer.push({type: "cannon_fire", uid: this.ship.uid, seed: seed, side
-        : side});
-    SFX.broadside(this.leftCannons.length, this.delay/this.leftCannons.length, 0.2);
-    //Ask server if we are allowed to shoot (MaybeTODO)
     var index = ((side == 1) ? 0 : 1);
     
     var cannonArray;
@@ -95,6 +90,16 @@ function Cannon(ship) {
     if (cooldown > 0) return false;
 
     //otherwise, we're firing!
+
+    //  Juicy shit
+    viewport.shake_dur = 15;
+    viewport.shake_intensity = 5;
+    var seed = Math.random();
+    toSendServer.push({type: "cannon_fire", uid: this.ship.uid, seed: seed, side
+        : side});
+    SFX.broadside(this.leftCannons.length, this.delay/this.leftCannons.length, 0.2);
+
+    //Ask server if we are allowed to shoot (MaybeTODO)
     this.cooldowns[index] = this.baseCooldown;
 
     for (var i = 0; i < cannonArray.length; i++) {

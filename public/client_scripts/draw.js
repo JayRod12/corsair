@@ -12,6 +12,9 @@ function Viewport(sim, ship, x, y, baseWidth, baseHeight){
   this.baseWidth = 1;
   this.scale = 1/this.ship.scale;
 
+  this.shake_dur = 0;
+  this.shake_intensity = 0;
+
   this.getWidth = function(){
     return this.baseWidth * this.scale;
   }
@@ -22,13 +25,24 @@ function Viewport(sim, ship, x, y, baseWidth, baseHeight){
 
   this.draw = function(ctx, canvaswidth, canvasheight){
 
+    var x, y;
+    x = this.x;
+    y = this.y
+
+    if (this.shake_dur > 0){
+      this.shake_dur -= 1;
+      var angle = Math.random() * Math.PI * 2;
+      x += Math.cos(angle) * this.shake_intensity;
+      y += Math.sin(angle) * this.shake_intensity;
+    }
+
     this.scale = 1 / this.ship.scale;
     ctx.scale(this.scale, this.scale);
-    ctx.translate(-this.x, -this.y);
+    ctx.translate(-x, -y);
 
     sim.draw(ctx);
 
-    ctx.translate(this.x, this.y);
+    ctx.translate(x, y);
     ctx.scale(1/this.scale, 1/this.scale);
   }
 
