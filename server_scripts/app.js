@@ -28,9 +28,9 @@ var socketList = [];
 
 // Game related data
 
-const gridNumber = 2;
-const cellWidth  = 2048;
-const cellHeight = 2048;
+const gridNumber = 1;
+const cellWidth  = 4096;
+const cellHeight = 4096;
 const vert_resolution = 1080;
 const horiz_resolution = 1920;
 var allCells = [];
