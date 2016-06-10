@@ -161,7 +161,7 @@ function Ship(sim, state, uid, name, inputFunction){
       var cell = this.sim.coordinateToCell(other_object.x, other_object.y);
       var lootRem = new Loot.Class(other_object.x, other_object.y,
           other_object.value);
-      cell.addNonSerialUpdate('remove_object', lootRem);
+      cell.addSerializedUpdate('remove_object', lootRem);
       cell.removeObject(lootRem);
     }
 
@@ -173,7 +173,6 @@ function Ship(sim, state, uid, name, inputFunction){
       , hp : this.hp
       , scale : this.scale
       };
-      console.log(ship_update);
       this.cell.addNonSerialUpdate('ship_update', ship_update); 
     }
 
