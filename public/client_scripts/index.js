@@ -41,9 +41,13 @@ $(document).ready(function () {
 
     context.clearRect(-wheelCanvas.width/2, -wheelCanvas.height/2, wheelCanvas.width, wheelCanvas.height);
 
-    var leftOrRight = last_move_y/last_move_x > event.pageY/event.pageX ? 1 : - 1;
+    // var leftOrRight = last_move_y/last_move_x > event.pageY/event.pageX ? 1 : - 1;
 
-    context.rotate(leftOrRight * Math.atan2(offset_x, offset_y).toFixed(0));
+    if (mouse_x < 0) {
+      context.rotate(Math.atan2(offset_x, offset_y).toFixed(0));
+    } else {
+      context.rotate(-Math.atan2(offset_x, offset_y).toFixed(0));
+    }
 
     context.drawImage(image, -wheelCanvas.width/2, -wheelCanvas.height/2);
 
