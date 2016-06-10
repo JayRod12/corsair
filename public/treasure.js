@@ -49,6 +49,8 @@ function Treasure(sim, x, y, value, hp) {
 	    type: "treasure",
       x: this.x,
       y: this.y,
+      value: this.value,
+      hp: this.hp
     }
   };
   this.equals = function(o) {
