@@ -10,12 +10,17 @@ else{
 
 (function(exports){
 
-var lootSat = 60;
+var lootSatMin = 60;
+var lootSatMax = 100;
+
 var lootLight = 87;
 
 var lootPerScale = 4;
 
-this.valueToRadius = 1;//32;
+var lootHueMin = 40
+var lootHueMax = 50
+
+var valueToRadius = 1/4;
 
 function Loot(x, y, value, color) {
 
@@ -24,8 +29,9 @@ function Loot(x, y, value, color) {
   this.value = value;
 
   if (typeof color === "undefined"){
-    var hue = Math.floor(360*Math.random());
-    this.color = "hsl("+hue+", "+lootSat+"%, "+lootLight+"%)";
+    var sat = lootSatMin + Math.floor((lootSatMax - lootSatMin)*Math.random());
+    var hue = lootHueMin + Math.floor((lootHueMax - lootHueMin)*Math.random());
+    this.color = "hsl("+hue+", "+sat+"%, "+lootLight+"%)";
   }
   else{
     this.color = color;
