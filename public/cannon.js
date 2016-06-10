@@ -44,10 +44,19 @@ function Cannon(ship) {
   this.baseCooldown = 1200;
   this.cooldowns = [10, 10];
 
+  //  Used only in client
+  /// STILL HACKY
+  //  TODO Neaten
   this.cosmeticShoot = function(side) {
 
-    console.log('coms');
-    SFX.broadside(this.cannons, this.delay, 0.2);
+    var xdif = player.state.x - this.ship.state.x
+    var ydif = player.state.y - this.ship.state.y
+    var dist = xdif * xdif + ydif * ydif;
+    var smother = Math.sqrt(dist)/500;
+    smother = Math.max(0, smother);
+    smother = Math.min(1, smother);
+    SFX.broadside(this.leftCannons.length, this.delay/this.leftCannons.length,
+        smother);
 
     var index = ((side == 1) ? 0 : 1);
     var cannonArray;
@@ -70,7 +79,7 @@ function Cannon(ship) {
     var seed = Math.random();
     toSendServer.push({type: "cannon_fire", uid: this.ship.uid, seed: seed, side
         : side});
-    SFX.broadside(this.cannons, this.delay, 0.2);
+    SFX.broadside(this.leftCannons.length, this.delay/this.leftCannons.length, 0.2);
     //Ask server if we are allowed to shoot (MaybeTODO)
     var index = ((side == 1) ? 0 : 1);
     

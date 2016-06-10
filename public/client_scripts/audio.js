@@ -47,7 +47,7 @@ function finishedLoading(bufferList) {
 var cannonBallVolume = 0.8;
 
 function broadside(cannons, raw_delay, dist){
-  var delay = raw_delay * 6;
+  var delay = raw_delay * 2;
   for (var i = 0; i < cannons; i++){
     var dist_i = (dist + (i / cannons))/2;
     var f = function(){
@@ -59,6 +59,7 @@ function broadside(cannons, raw_delay, dist){
 
 //  Dist is a value from 0 to 1
 function playCannonFire(dist) {
+  console.log('afw');
   var n = Math.floor(Math.random() * cannonDryLoader.bufferList.length);
   var dist_2 = dist * dist;
   var inv_dist_2 = (1-dist) * (1-dist);
