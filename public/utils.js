@@ -34,6 +34,18 @@ function insertionSort(array, player) {
   }
 }
 
+exports.insertOrdered = function(array, object, getIndex){
+  var x = getIndex(object);
+  for (var i = 0; i < array.length; i++){
+    if (getIndex(array[i]) >= x){
+      //  Insert here
+      array.splice(i, 0, object);
+      return;
+    }
+  }
+  array.push(object);
+}
+
 exports.insertionSort = insertionSort;
 
 })(typeof exports == 'undefined' ? this.Utils = {} : exports);

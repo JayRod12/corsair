@@ -114,6 +114,25 @@ function Ship(sim, state, uid, name, inputFunction){
       this.updateScale();
     }
 
+    if (/*Math.floor(Math.random() * 4) == 0 &&*/ !server){
+      var w = this.scale * 8;
+      var h = this.scale * 16;
+      var ox = this.scale * shipDrawWidth/8 * Math.cos(this.state.angle +
+          Math.PI / 2);
+      var oy = this.scale * shipDrawWidth/8 * Math.sin(this.state.angle +
+          Math.PI / 2);
+      var wake = new Wake(this.sim, this.state.x + ox, this.state.y + oy,
+          this.state.angle, w, h);
+      this.cell.addObject(wake, 0.2);
+      var px = this.scale * shipDrawWidth/8 * Math.cos(this.state.angle -
+          Math.PI / 2);
+      var py = this.scale * shipDrawWidth/8 * Math.sin(this.state.angle -
+          Math.PI / 2);
+      wake = new Wake(this.sim, this.state.x + px, this.state.y + py,
+          this.state.angle, w, h);
+      this.cell.addObject(wake, 0.2);
+    }
+
   }
 
   this.collisionHandler = function(other_object) {
@@ -318,6 +337,35 @@ function Ship(sim, state, uid, name, inputFunction){
 
 }
 
+function Wake(sim, x, y, angle, width, height){
+  this.sim = sim;
+  this.x = x;
+  this.y = y;
+  this.cell = this.sim.coordinateToCell(this.x, this.y);
+  this.angle = angle;
+  this.width = width;
+  this.height = height;
+  this.alpha = 0.28;
+  this.onTick = function (dt){
+    this.alpha -= dt * 1/12000;
+    this.height -= dt * this.height / 1000;
+    if (this.alpha <= 0) sim.removeObject(this);
+    else Game.updateCell(this.sim, this, this.x, this.y);
+  }
+
+  this.onDraw = function(ctx){
+    ctx.globalAlpha = this.alpha;
+    ctx.translate(this.x, this.y);
+    ctx.rotate(this.angle);
+    ctx.fillStyle = "white";
+    ctx.fillRect(-this.width/2, -this.height/2, this.width, this.height);
+    ctx.fillRect(0,0,1,1);
+    ctx.rotate(-this.angle);
+    ctx.translate(-this.x, -this.y);
+    ctx.globalAlpha = 1;
+  }
+}
+
 var shipDrawWidth = 112.5;
 var shipDrawHeight = 60.5;
 var shipHitWidth = 70;
@@ -328,5 +376,6 @@ exports.shipDrawWidth = shipDrawWidth;
 exports.shipDraweHeight = shipDrawHeight;
 exports.shipHitWidth = shipHitWidth;
 exports.shipHitHeight = shipHitHeight;
+exports.Wake= Wake;
 
 })(typeof exports == 'undefined' ? this.Ship = {} : exports);

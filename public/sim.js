@@ -70,12 +70,13 @@ function Cell(sim, x, y, gridNumber, width, height) {
     }
     */
     for (var i = 0; i < this.drawObjects.length; i++){
-      this.drawObjects[i].onDraw(ctx);
+      this.drawObjects[i].object.onDraw(ctx);
     }
     
   }
 
-  this.addObject = function(object) {
+  //  Where depth is a value between 0 and 1
+  this.addObject = function(object, depth) {
 
     if (typeof object.onTick !== "undefined" || server){
       this.gameObjects.push(object);
@@ -83,6 +84,9 @@ function Cell(sim, x, y, gridNumber, width, height) {
 
     if (!server){
       if (typeof object.onDraw !== "undefined"){
+        if (typeof depth === "undefined"){
+          var depth = 0.5;
+        }
         var pre = false;
         for (var i = 0; i < prerenderClasses.length; i++){
           if (object instanceof prerenderClasses[i]){
@@ -90,8 +94,13 @@ function Cell(sim, x, y, gridNumber, width, height) {
             break;
           }
         }
-        if (!pre) this.drawObjects.push(object);
-        else this.prerenderObjects.push(object);
+        if (!pre){
+          Utils.insertOrdered(this.drawObjects, {depth: depth, object: object},
+              function(o){return o.depth});
+        }
+        else {
+          this.prerenderObjects.push(object);
+        }
       }
     }
 
@@ -121,8 +130,8 @@ function Cell(sim, x, y, gridNumber, width, height) {
 
     if (typeof object.onDraw !== "undefined"){
       for (var i = 0; i < this.drawObjects.length; i++){
-        if ((!deepequals && this.drawObjects[i] == object) ||
-                (deepequals && object.equals(this.drawObjects[i]))) {
+        if ((!deepequals && this.drawObjects[i].object == object) ||
+                (deepequals && object.equals(this.drawObjects[i].object))) {
           this.drawObjects.splice(i,1);
           found = true;
 		      break;

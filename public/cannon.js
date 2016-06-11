@@ -297,7 +297,7 @@ function SingleCannon(index, side, ship, handler) {
        var smoke = new Smoke(sim,ship.state.x + this.offset_x, ship.state.y + 
            this.offset_y, xvel, yvel, Math.random() * 2 * Math.PI, width,
            height, frame);
-       smoke.cell.addObject(smoke);
+       smoke.cell.addObject(smoke, 0.3);
         this.fired = false;
 		this.cur_frame = 1;
      } 

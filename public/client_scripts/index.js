@@ -59,8 +59,8 @@ $(document).ready(function () {
     wait = (wait + 1) % 3; 
 
     //console.log("leftOrRight is: " + leftOrRight);
-    console.log("lastMove is: " + last_move_x);
-    console.log("current x is: " + mouse_x);
+    //console.log("lastMove is: " + last_move_x);
+    //console.log("current x is: " + mouse_x);
 
     // console.log("mouse_x: " + mouse_x + ", mouse_y" + mouse_y);
     // console.log("offset_x: " + offset_x + ", offset_y" + offset_y);
