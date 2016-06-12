@@ -348,7 +348,7 @@ function Smoke(sim, x, y, xvel, yvel, angle, width, height, frame){
     this.x += this.xvel * dt;
     this.y += this.yvel * dt;
     this.alpha -= dt * 1/5000;
-    if (this.alpha <= 0) sim.removeObject(this);
+    if (this.alpha <= 0) this.cell.removeObject(this);
     else Game.updateCell(this.sim, this, this.x, this.y);
   }
 

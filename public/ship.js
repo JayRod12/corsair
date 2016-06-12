@@ -83,7 +83,7 @@ function Ship(sim, state, uid, name, inputFunction){
         console.log('spawning loot');
         this.spawnLoot();
       }
-      sim.removeObject(this);
+      this.cell.removeObject(this);
       return;
     }
 
@@ -142,7 +142,7 @@ function Ship(sim, state, uid, name, inputFunction){
     var shipUpdate = false;
 
     if (other_object.type == "island") {
-      this.sim.removeObject(this);
+      this.cell.removeObject(this);
     }
     if (other_object.type == "ship") {
       if (server){
@@ -216,25 +216,25 @@ function Ship(sim, state, uid, name, inputFunction){
       this.gold += other_object.value;
       this.hp = Math.min(this.maxhp, this.hp + other_object.hp);
 
-      sim.remote.setScore(this.uid, this.gold);
+      this.sim.remote.setScore(this.uid, this.gold);
       shipUpdate = true;
       this.increaseScale(this.gold);
       var remObj = new Treasure.Class(this.sim, other_object.x, other_object.y,
           other_object.value, other_object.hp);
       var cell = this.sim.coordinateToCell(other_object.x, other_object.y);
-      cell.addSerializedUpdate('remove_treasure', remObj);
-      sim.removeTreasure(remObj);
+      this.cell.addSerializedUpdate('remove_treasure', remObj);
+      this.sim.removeTreasure(remObj);
     }
     else if (other_object.type == "loot") {
       this.gold += other_object.value;
-      sim.remote.setScore(this.uid, this.gold);
+      this.sim.remote.setScore(this.uid, this.gold);
       shipUpdate = true;
       this.increaseScale(this.gold);
       var cell = this.sim.coordinateToCell(other_object.x, other_object.y);
       var lootRem = new Loot.Class(other_object.x, other_object.y,
           other_object.value);
-      cell.addSerializedUpdate('remove_object', lootRem);
-      cell.removeObject(lootRem);
+      this.cell.addSerializedUpdate('remove_object', lootRem);
+      this.cell.removeObject(lootRem);
     }
 
     if (server && shipUpdate){
@@ -402,7 +402,7 @@ function Wake(sim, x, y, angle, width, height){
   this.onTick = function (dt){
     this.alpha -= dt * 1/12000;
     this.height -= dt * this.height / 1000;
-    if (this.alpha <= 0) sim.removeObject(this);
+    if (this.alpha <= 0) this.cell.removeObject(this);
   }
 
   this.onDraw = function(ctx){
@@ -464,7 +464,7 @@ function Splinter(sim, x, y, xvel, yvel, angleVel, width, height, time){
     if (this.time > 0) this.time -= dt;
     else this.alpha -= dt * 1/400;
     this.angle += this.angleVel * dt;
-    if (this.alpha <= 0) sim.removeObject(this);
+    if (this.alpha <= 0) this.cell.removeObject(this);
     else Game.updateCell(this.sim, this, this.x, this.y);
   }
 
