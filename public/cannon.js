@@ -183,6 +183,13 @@ function CannonBall(sim, uid, state, level) {
   this.state = state;
   this.level = level;
   this.despawn = 2500;
+
+  this.trail_length = 12;
+  this.trail_points = [];
+  for (var i = 0; i < this.trail_length; i++){
+    this.trail_points[i] = {x:this.state.x, y:this.state.y};
+  }
+
   if (typeof this.uid === "undefined") console.log(this);
 
   this.cell = this.sim.coordinateToCell(this.state.x, this.state.y);
@@ -194,6 +201,10 @@ function CannonBall(sim, uid, state, level) {
       }
       return;
     }
+    //  Shift down
+    this.trail_points.splice(0, 1);
+    this.trail_points[this.trail_length - 1] = {x:this.state.x, y:this.state.y}
+
     this.state.x += dt * this.state.xvel;
     this.state.y += dt * this.state.yvel;
     this.despawn -= dt;
@@ -228,6 +239,14 @@ function CannonBall(sim, uid, state, level) {
     ctx.arc(this.state.x, this.state.y, radius, 2 * Math.PI, false);
     ctx.fillStyle = "black";
     ctx.fill();
+
+    ctx.globalAlpha = 0.14;
+    ctx.beginPath();
+    ctx.moveTo(this.state.x, this.state.y);
+    ctx.lineTo(this.trail_points[0].x, this.trail_points[0].y);
+    ctx.strokeStyle = "black";
+    ctx.stroke();
+    ctx.globalAlpha = 1;
   }
   this.serialize = function() {
     return {type: "cannonball",
