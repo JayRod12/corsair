@@ -12,6 +12,7 @@ var reverbBuffer;
 var pickupLoader;
 var impactLoader;
 
+var ambianceLoader;
 function audio_init(){
   try{
     window.AudioContext = window.AudioContext||window.webkitAudioContext;
@@ -54,6 +55,10 @@ function audio_init(){
   }
   impactLoader = new BufferLoader(a_ctx, impact_filenames, finishedLoading);
   impactLoader.load();
+
+  ambianceLoader = new BufferLoader(a_ctx, ['../media/ambiance.ogg'],
+      playAmbiance);
+  ambianceLoader.load();
 }
 
 var cannon_sfx;
@@ -112,9 +117,10 @@ function playCannonFire(dist) {
   sourceWet.start(0);
 }
 
-function playSound(buffer, level){
+function playSound(buffer, level, loop){
   var source = a_ctx.createBufferSource();
   source.buffer = buffer;
+  source.loop = loop;
   var gain = a_ctx.createGain();
   gain.gain.value = level;
   source.connect(gain);
@@ -122,7 +128,7 @@ function playSound(buffer, level){
   source.start(0);
 }
 
-var pickup_volume = 0.6;
+var pickup_volume = 0.4;
 function playPickup(){
 
   var n = Math.floor(Math.random() * pickupLoader.bufferList.length);
@@ -143,6 +149,12 @@ function playImpact(dist){
   //  TODO low pass?
   var n = Math.floor(Math.random() * impactLoader.bufferList.length);
   playSound(impactLoader.bufferList[n], impact_volume);
+
+}
+
+var ambiance_volume = 0.15;
+function playAmbiance(bufferList){
+  playSound(bufferList[0], ambiance_volume, true);
 
 }
 
