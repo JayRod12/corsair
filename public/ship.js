@@ -159,6 +159,7 @@ function Ship(sim, state, uid, name, inputFunction){
           shipUpdate = true;
         }
         else{
+          SFX.playImpact();
           for (var k = 0; k < 4; k++){
             var angle_spread = Math.PI/4;
             var minspeed = 0.04;
@@ -344,7 +345,7 @@ function Ship(sim, state, uid, name, inputFunction){
       var x = this.state.x + rad * Math.cos(angle);
       var y = this.state.y + rad * Math.sin(angle);
 
-      var loot = new Loot.Class(x, y, value);
+      var loot = new Loot.Class(this.sim, x, y, value);
       var cell = this.sim.coordinateToCell(loot.x, loot.y);
       if (cell){
         cell.addObject(loot);

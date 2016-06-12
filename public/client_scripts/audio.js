@@ -10,6 +10,7 @@ var cannonWetLoader;
 var reverbBuffer;
 
 var pickupLoader;
+var impactLoader;
 
 function audio_init(){
   try{
@@ -45,6 +46,14 @@ function audio_init(){
   pickupLoader = new BufferLoader(a_ctx, pickup_filenames, finishedLoading);
   pickupLoader.load();
 
+  //  Impact
+  var impact_sfx_count = 3;
+  var impact_filenames = [];
+  for (var i = 0; i < impact_sfx_count; i++){
+    impact_filenames.push('../media/impact/impact'+i+'.wav');
+  }
+  impactLoader = new BufferLoader(a_ctx, impact_filenames, finishedLoading);
+  impactLoader.load();
 }
 
 var cannon_sfx;
@@ -103,21 +112,38 @@ function playCannonFire(dist) {
   sourceWet.start(0);
 }
 
+function playSound(buffer, level){
+  var source = a_ctx.createBufferSource();
+  source.buffer = buffer;
+  var gain = a_ctx.createGain();
+  gain.gain.value = level;
+  source.connect(gain);
+  gain.connect(a_ctx.destination);
+  source.start(0);
+}
+
 var pickup_volume = 0.6;
 function playPickup(){
 
   var n = Math.floor(Math.random() * pickupLoader.bufferList.length);
-
+  playSound(pickupLoader.bufferList[n], pickup_volume);
+  /*
   var source = a_ctx.createBufferSource();
   source.buffer = pickupLoader.bufferList[n];
-
   var gain = a_ctx.createGain();
   gain.gain.value = pickup_volume;
-
   source.connect(gain);
   gain.connect(a_ctx.destination);
-
   source.start(0);
+  */
+}
+
+var impact_volume = 0.5;
+function playImpact(dist){
+  //  TODO low pass?
+  var n = Math.floor(Math.random() * impactLoader.bufferList.length);
+  playSound(impactLoader.bufferList[n], impact_volume);
+
 }
 
 
@@ -125,5 +151,6 @@ exports.broadside = broadside;
 exports.playCannonFire = playCannonFire;
 exports.loaded = loaded;
 exports.playPickup = playPickup;
+exports.playImpact = playImpact;
 
 })(this.SFX = {});
