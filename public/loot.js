@@ -66,12 +66,13 @@ function Loot(sim, x, y, value, color) {
 
   this.onDeath = function(){
     if (server) return;
+    SFX.playPickup();
     for (var i = 0; i < 5; i++){
       var angle = Math.random() * 2 * Math.PI;
       var grow_rate = 0.003 * this.value;
       var part = new LootParticle(this.sim, this.x, this.y, angle,
           grow_rate, this.color);
-      this.cell.addObject(part, 0.7);
+      if (part.cell) part.cell.addObject(part, 0.7);
     }
   }
 

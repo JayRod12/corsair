@@ -123,14 +123,14 @@ function Ship(sim, state, uid, name, inputFunction){
           Math.PI / 2);
       var wake = new Wake(this.sim, this.state.x + ox, this.state.y + oy,
           this.state.angle, w, h);
-      this.cell.addObject(wake, 0.2);
+      if (wake.cell) wake.cell.addObject(wake, 0.2);
       var px = this.scale * shipDrawWidth/8 * Math.cos(this.state.angle -
           Math.PI / 2);
       var py = this.scale * shipDrawWidth/8 * Math.sin(this.state.angle -
           Math.PI / 2);
       wake = new Wake(this.sim, this.state.x + px, this.state.y + py,
           this.state.angle, w, h);
-      this.cell.addObject(wake, 0.2);
+      if (wake.cell) wake.cell.addObject(wake, 0.2);
     }
 
   }
@@ -181,7 +181,7 @@ function Ship(sim, state, uid, name, inputFunction){
             var angleVel = Utils.randBetween(angleVelMin, angleVelMax);
             var s = new Splinter(this.sim, other_object.x, other_object.y, xvel,
                 yvel, angleVel, width, height, time);
-            s.cell.addObject(s);
+            if (s.cell) s.cell.addObject(s);
           }
         for (var k = 0; k < 2; k++){
             var angle_spread = Math.PI/4;

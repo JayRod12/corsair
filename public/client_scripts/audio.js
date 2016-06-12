@@ -9,6 +9,8 @@ var cannonDryLoader;
 var cannonWetLoader;
 var reverbBuffer;
 
+var pickupLoader;
+
 function audio_init(){
   try{
     window.AudioContext = window.AudioContext||window.webkitAudioContext;
@@ -33,6 +35,16 @@ function audio_init(){
   cannonWetLoader = new BufferLoader(a_ctx, cannon_wet_filenames, finishedLoading);
   cannonDryLoader.load();
   cannonWetLoader.load();
+
+  //  Pickup
+  var pickup_sfx_count = 3;
+  var pickup_filenames = [];
+  for (var i = 0; i < pickup_sfx_count; i++){
+    pickup_filenames.push('../media/loot_sfx/pickup'+i+'.wav');
+  }
+  pickupLoader = new BufferLoader(a_ctx, pickup_filenames, finishedLoading);
+  pickupLoader.load();
+
 }
 
 var cannon_sfx;
@@ -59,7 +71,6 @@ function broadside(cannons, raw_delay, dist){
 
 //  Dist is a value from 0 to 1
 function playCannonFire(dist) {
-  console.log('afw');
   var n = Math.floor(Math.random() * cannonDryLoader.bufferList.length);
   var dist_2 = dist * dist;
   var inv_dist_2 = (1-dist) * (1-dist);
@@ -91,8 +102,28 @@ function playCannonFire(dist) {
   sourceDry.start(0);
   sourceWet.start(0);
 }
+
+var pickup_volume = 0.6;
+function playPickup(){
+
+  var n = Math.floor(Math.random() * pickupLoader.bufferList.length);
+
+  var source = a_ctx.createBufferSource();
+  source.buffer = pickupLoader.bufferList[n];
+
+  var gain = a_ctx.createGain();
+  gain.gain.value = pickup_volume;
+
+  source.connect(gain);
+  gain.connect(a_ctx.destination);
+
+  source.start(0);
+}
+
+
 exports.broadside = broadside;
 exports.playCannonFire = playCannonFire;
 exports.loaded = loaded;
+exports.playPickup = playPickup;
 
 })(this.SFX = {});
