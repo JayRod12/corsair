@@ -155,7 +155,7 @@ function Ship(sim, state, uid, name, inputFunction){
       if (other_object.uid === this.uid) return;
       if (typeof other_object.level !== "undefined"){
         if (server){
-          this.hp -= other_object.level;
+          this.hp -= other_object.level*2;
           shipUpdate = true;
         }
         else{
@@ -330,16 +330,18 @@ function Ship(sim, state, uid, name, inputFunction){
 
   if (server){
   this.spawnLoot = function() {
-    var lootValueMin = this.scale*10;
-    var lootValueMax = this.scale*10;
+    var lootDrop = 200 + this.gold/2;
+
+    var loots_to_drop = 3 + this.gold/100;
+
+    var value = Math.floor(lootDrop / loots_to_drop);
+
     var lootDisperseRadMax = shipDrawWidth * this.scale / 4;
     var lootDisperseRadMin = shipDrawWidth * this.scale / 8;
     for (var i = 0; i < Loot.lootPerScale * this.scale; i++) {
       var rad = lootDisperseRadMin + (lootDisperseRadMax - 
           lootDisperseRadMin) *
         Math.random();
-      var value = Math.floor(lootValueMin + (lootValueMax - lootValueMin) *
-        Math.random());
       var angle = 2 * Math.PI * Math.random();
 
       var x = this.state.x + rad * Math.cos(angle);

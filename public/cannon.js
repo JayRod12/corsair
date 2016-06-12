@@ -46,7 +46,7 @@ function Cannon(ship) {
 							origin_offset_x: 0, origin_offset_y: 0}; 
 
   this.ship = ship;
-  this.level = 2;
+  this.level = 3.5;
 
   this.baseCooldown = 1200;
   this.cooldowns = [10, 10];
