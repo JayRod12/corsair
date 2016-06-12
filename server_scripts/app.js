@@ -60,7 +60,7 @@ for (var i = 0; i < 35; i ++){
     if (ServerGame.checkSafeSpawn(sim, x, y)) break;
   }
   var v = Math.floor(10 + Math.random() * 20);
-  var loot = new Loot.Class(x, y, v);
+  var loot = new Loot.Class(sim, x, y, v);
   var cell = sim.coordinateToCell(x, y);
   cell.addObject(loot);
 }

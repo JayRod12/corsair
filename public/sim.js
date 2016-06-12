@@ -451,8 +451,11 @@ function Sim(remote, starttime, gridNumber, cellWidth, cellHeight, activeCells){
 
   this.removeObject = function(object) {
     var cell = object.cell;
-    if (typeof cell !== "undefined"){
+    if (typeof cell != "undefined"){
       return cell.removeObject(object);
+    }
+    else{
+      debugger;
     }
   };
 

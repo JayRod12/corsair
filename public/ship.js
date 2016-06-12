@@ -231,7 +231,7 @@ function Ship(sim, state, uid, name, inputFunction){
       shipUpdate = true;
       this.increaseScale(this.gold);
       var cell = this.sim.coordinateToCell(other_object.x, other_object.y);
-      var lootRem = new Loot.Class(other_object.x, other_object.y,
+      var lootRem = new Loot.Class(this.sim, other_object.x, other_object.y,
           other_object.value);
       this.cell.addSerializedUpdate('remove_object', lootRem);
       this.cell.removeObject(lootRem);

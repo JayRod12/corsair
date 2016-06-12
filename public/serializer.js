@@ -74,7 +74,7 @@ function Serializer(sim) {
 
     //  Identity function
     loot : function(o) {
-      return new Loot.Class(o.x, o.y, o.value, o.color);
+      return new Loot.Class(sim, o.x, o.y, o.value, o.color);
     },
 
     island : function(o) {
