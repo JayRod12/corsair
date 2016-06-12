@@ -191,12 +191,20 @@ function drawHighScoresTable(scoreTable) {
   var currentPlayers = Object.keys(scoreTable).length;
   var i = 0;
   var displayNumber = Math.min(maxDisplay, currentPlayers);
+  var sortScores = [];
 
   for (var uid in scoreTable) {
-    if (i < displayNumber) {
+    sortScores.push(uid);
+  }
+
+  sortScores.sort(function(a, b) {
+    return scoreTable[b] - scoreTable[a];
+  });
+
+  for (var i = 1; i <= displayNumber; i++) {
+      var uid = sortScores[i-1];
       if (sim.getShip(uid) == undefined) return;
       var shipName = sim.getShip(uid).name;
-      i++;
       ctx.beginPath();
       ctx.font = "italic 15px Josefin Sans";
       ctx.lineWidth = 2;
@@ -207,10 +215,9 @@ function drawHighScoresTable(scoreTable) {
       ctx.fillText(scoreTable[uid], (7.8/8)*canvas.width, (1/20)*canvas.height + i * 20);
       ctx.fill();
       ctx.closePath();
-    } else {
-      break;
-    }
   }
+
+
 }
 
 function drawScore() {
