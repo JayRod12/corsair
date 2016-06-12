@@ -60,6 +60,19 @@ exports.choose = function(){
 
 exports.sqr = function(x){ return x * x };
 
+exports.findClosestIndex = function(array, v){
+  //  Large number
+  var best = 1000000000;
+  var best_i = 0;
+  for (var i = 0; i < array.length; i++){
+    if (Math.abs(array[i] - v) < best){
+      best = Math.abs(array[i] - v);
+      best_i = i;
+    }
+  }
+  return best_i;
+}
+
 exports.insertionSort = insertionSort;
 
 })(typeof exports == 'undefined' ? this.Utils = {} : exports);

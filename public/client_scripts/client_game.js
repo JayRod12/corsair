@@ -141,7 +141,11 @@ function clientTick(){
     lastTime = currentTime - (delta % interval);
     mouse_x = (mouse_screen_x/viewport.scale + viewport.x);
     mouse_y = (mouse_screen_y/viewport.scale + viewport.y);
+    
+    //console.log(SFX.getDanger());
+    //SFX.setDanger(SFX.getDanger() + 0.0001);
 
+    SFX.tick_music(delta);
     sim.tick(delta);
     setupCompass();
     draw();
@@ -235,6 +239,7 @@ function startClient() {
 
   //  Recieved when another player joins the server
   socket.on('player_joined', function (data){
+      SFX.setDanger(1);
     console.log('player joined');
     if (data.id != our_id) {
       addServerShip(data.id, data.name, data.state);
