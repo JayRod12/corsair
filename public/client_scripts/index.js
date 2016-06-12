@@ -4,7 +4,10 @@ var wait = 0;
 var image = new Image();
 image.onload = function() {
   contextt.translate(wheelCanvas.width/2, wheelCanvas.height/2);
-  contextt.drawImage(image, -wheelCanvas.width/2, -wheelCanvas.height/2);
+  for (var i = 0; i < 10; i++) {
+    contextt.clearRect(-wheelCanvas.width/2, -wheelCanvas.height/2, wheelCanvas.width, wheelCanvas.height);
+    contextt.drawImage(image, -wheelCanvas.width/2, -wheelCanvas.height/2);
+  }
 }
 
 image.onerror = function() {
