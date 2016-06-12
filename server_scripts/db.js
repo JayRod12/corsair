@@ -21,7 +21,7 @@ function saveFinalScore(name,score){
 
 function getTopTenOverall(res) {
   var rows = [];
-  var query = client.query("SELECT name,score FROM scores ORDER BY score DESC limit 10 ", function(err, result) {
+  var query = client.query("SELECT name,score FROM scores where name is not null order by scores DESC limit 10;", function(err, result) {
       if (err) {
           console.error('Error with table query', err);
       } else {
@@ -36,7 +36,7 @@ function getTopTenOverall(res) {
 
 function getTopTenToday(res){
   var rows = [];
-  var query = client.query("SELECT name,score from scores where date=current_date order by score DESC limit 10;", function(err, result) {
+  var query = client.query("SELECT name,score from scores where date=current_date and name is not null order by score DESC limit 10;", function(err, result) {
       if (err) {
           console.error('Error with table query', err);
       } else {
