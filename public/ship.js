@@ -78,7 +78,7 @@ function Ship(sim, state, uid, name, inputFunction){
     //  If player has left the server remove their ship from the sim
     //  TODO might cause 'ghost ships', player removed on local simulation
     //  but stille exists on server
-    if (typeof remoteState == "undefined" || this.hp <= 0){
+    if ((!this.robot && typeof remoteState == "undefined") || this.hp <= 0){
       if (server){// && this.hp <= 0){
         console.log('spawning loot');
         this.spawnLoot();
@@ -157,6 +157,56 @@ function Ship(sim, state, uid, name, inputFunction){
         if (server){
           this.hp -= other_object.level;
           shipUpdate = true;
+        }
+        else{
+          for (var k = 0; k < 4; k++){
+            var angle_spread = Math.PI/4;
+            var minspeed = 0.04;
+            var maxspeed = 0.05;
+            var sizemin = 6;
+            var sizemax = 17;
+            var angleVelMin = -0.1;
+            var angleVelMax = 0.1;
+
+            var other_angle = Math.PI + Math.atan2(other_object.yvel, other_object.xvel);
+            //createSplinter(thi.state.x, this.state.y, other_angle);
+            var angle = Utils.randBetween(-angle_spread/2, angle_spread/2) +
+              other_angle;
+            var time = 90;
+            var speed = Utils.randBetween(minspeed, maxspeed);
+            var xvel = speed * Math.cos(angle);
+            var yvel = speed * Math.sin(angle);
+            var width = Utils.randBetween(sizemin, sizemax);
+            var height = Utils.randBetween(sizemin, sizemax);
+            var angleVel = Utils.randBetween(angleVelMin, angleVelMax);
+            var s = new Splinter(this.sim, other_object.x, other_object.y, xvel,
+                yvel, angleVel, width, height, time);
+            s.cell.addObject(s);
+          }
+        for (var k = 0; k < 2; k++){
+            var angle_spread = Math.PI/4;
+            var sizemin = 20;
+            var sizemax = 60;
+            var angleVelMin = -0.1;
+            var angleVelMax = 0.1;
+
+            var other_angle = Math.atan2(other_object.yvel, other_object.xvel);
+            //createSplinter(thi.state.x, this.state.y, other_angle);
+            var angle = Utils.randBetween(-angle_spread/2, angle_spread/2) +
+              other_angle;
+            var time = 90;
+            var speed = 1.5 * Math.sqrt(Utils.sqr(other_object.xvel) +
+                Utils.sqr(other_object.yvel));
+            var xvel = speed * Math.cos(angle);
+            var yvel = speed * Math.sin(angle);
+            var width = Utils.randBetween(sizemin, sizemax);
+            var height = Utils.randBetween(sizemin, sizemax);
+            var angleVel = Utils.randBetween(angleVelMin, angleVelMax);
+            var s = new Splinter(this.sim, other_object.x, other_object.y, xvel,
+                yvel, angleVel, width, height, time);
+            s.cell.addObject(s);
+
+        }
         }
       }
     } else if (other_object.type == "treasure") {
@@ -337,6 +387,9 @@ function Ship(sim, state, uid, name, inputFunction){
 
 }
 
+//  TODO inherit from particle class, no idea how to do this in js
+
+
 function Wake(sim, x, y, angle, width, height){
   this.sim = sim;
   this.x = x;
@@ -350,7 +403,6 @@ function Wake(sim, x, y, angle, width, height){
     this.alpha -= dt * 1/12000;
     this.height -= dt * this.height / 1000;
     if (this.alpha <= 0) sim.removeObject(this);
-    else Game.updateCell(this.sim, this, this.x, this.y);
   }
 
   this.onDraw = function(ctx){
@@ -359,7 +411,69 @@ function Wake(sim, x, y, angle, width, height){
     ctx.rotate(this.angle);
     ctx.fillStyle = "white";
     ctx.fillRect(-this.width/2, -this.height/2, this.width, this.height);
-    ctx.fillRect(0,0,1,1);
+    ctx.rotate(-this.angle);
+    ctx.translate(-this.x, -this.y);
+    ctx.globalAlpha = 1;
+  }
+}
+
+/*
+var splinterHueMin = 35;
+var splinterHueMax = 50;
+var splinterSatMin = 35;
+var splinterSatMax = 75;
+var splinterLightMin = 25;
+var splinterLightMax = 93;
+*/
+var splinterHueMin = 24;
+var splinterHueMax = 28;
+var splinterSatMin = 30;
+var splinterSatMax = 40;
+var splinterLightMin = 25;
+var splinterLightMax = 32;
+
+function Splinter(sim, x, y, xvel, yvel, angleVel, width, height, time){
+  this.sim = sim;
+  this.x = x;
+  this.y = y;
+  this.xvel = xvel;
+  this.yvel = yvel;
+  this.cell = this.sim.coordinateToCell(this.x, this.y);
+  this.angleVel = angleVel;
+  this.width = width;
+  this.height = height;
+  var c_choice = Math.floor(Math.random() * 3);
+  if (c_choice == 0){
+    var h, s, l;
+    h = Math.floor(splinterHueMin + (splinterHueMax - splinterHueMin) *
+        Math.random());
+    s = Math.floor(splinterSatMin + (splinterSatMax - splinterSatMin) *
+        Math.random());
+    l = Math.floor(splinterLightMin + (splinterLightMax - splinterLightMin) *
+        Math.random());
+    this.color = Utils.makeHSL(h, s, l);
+  }
+  if (c_choice == 1) this.color = "red";
+  if (c_choice == 2) this.color = "yellow";
+  this.angle = Math.random() * 2 * Math.PI;
+  this.alpha = 1;
+  this.time = time;
+  this.onTick = function (dt){
+    this.x += this.xvel * dt;
+    this.y += this.yvel * dt;
+    if (this.time > 0) this.time -= dt;
+    else this.alpha -= dt * 1/400;
+    this.angle += this.angleVel * dt;
+    if (this.alpha <= 0) sim.removeObject(this);
+    else Game.updateCell(this.sim, this, this.x, this.y);
+  }
+
+  this.onDraw = function(ctx){
+    ctx.globalAlpha = this.alpha;
+    ctx.translate(this.x, this.y);
+    ctx.rotate(this.angle);
+    ctx.fillStyle = this.color;
+    ctx.fillRect(-this.width/2, -this.height/2, this.width, this.height);
     ctx.rotate(-this.angle);
     ctx.translate(-this.x, -this.y);
     ctx.globalAlpha = 1;

@@ -453,6 +453,13 @@ function playClientGame(data) {
   player.isLocalShip = true;
   player.onDeath = onShipDeath;
 
+  /*
+  remote.newPlayer(69, "Robot", {x: 10, y:10, speed: 0, angle: 0});
+  robot = sim.addShip(69, "Robot", {x:10, y:10, speed: 0, angle: 0},
+      function(){return true;});
+  robot.robot = true;
+  */
+
   //  Using 16:9 aspect ratio
   viewport = new Viewport(sim, player, 0, 0, 1.6, 0.9);
 

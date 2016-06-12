@@ -200,11 +200,12 @@ function CannonBall(sim, uid, state, level) {
     Game.updateCell(this.sim, this, this.state.x, this.state.y);
   };
 
+  //  TODO USE SERIALIZED OBJECTS INSTEAD OF COL OBJS
   this.getColType = function(){return "point"};
   this.getColCategory = function(){return "dynamic";};
   this.getColObj = function(){
     return {type: "cannonball", x: this.state.x, y: this.state.y, uid: this.uid,
-    level: this.level};
+    level: this.level, xvel: this.state.xvel, yvel: this.state.yvel};
   }
 
 

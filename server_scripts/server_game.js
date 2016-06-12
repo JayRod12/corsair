@@ -5,6 +5,7 @@ var Col = require('../public/collision_detection.js');
 var Ship = require('../public/ship.js').Class;
 var TestObj = require('../public/sim.js').TestObj;
 var Treasure = require('../public/treasure.js').Class;
+var Utils = require('../public/utils.js');
 
 const seaHue = 222;
 const seaSat = 49;
@@ -22,21 +23,18 @@ const seaLevel = 0.64;
 const landLevel = 0.68;
 const mountainLevel = 0.70;
 
-function makeHSL(h, s, l){
-  return "hsl("+h.toString()+", "+s.toString()+"%, "+l.toString()+"%)";
-}
 function islandColor(height){
   if (height > mountainLevel){
-    return makeHSL(mountainHue, mountainSat, height*100);
+    return Utils.makeHSL(mountainHue, mountainSat, height*100);
   }
   else if (height > landLevel){
-    return makeHSL(landHue, landSat, height*100);
+    return Utils.makeHSL(landHue, landSat, height*100);
   }
   else if (height > seaLevel){
-    return makeHSL(beachHue, beachSat, height*100);
+    return Utils.makeHSL(beachHue, beachSat, height*100);
   }
   else {
-    return makeHSL(seaHue, seaSat, height*100);
+    return Utils.makeHSL(seaHue, seaSat, height*100);
   }
 }
 

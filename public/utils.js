@@ -46,6 +46,20 @@ exports.insertOrdered = function(array, object, getIndex){
   array.push(object);
 }
 
+exports.makeHSL = function(h, s, l){
+  return "hsl("+h.toString()+", "+s.toString()+"%, "+l.toString()+"%)";
+};
+
+exports.randBetween = function(min, max){
+  return min + (max - min) * Math.random();
+};
+
+exports.choose = function(){
+  return arguments[Math.floor(arguments.length * Math.random())];
+};
+
+exports.sqr = function(x){ return x * x };
+
 exports.insertionSort = insertionSort;
 
 })(typeof exports == 'undefined' ? this.Utils = {} : exports);
