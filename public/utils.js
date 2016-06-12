@@ -60,6 +60,8 @@ exports.choose = function(){
 
 exports.sqr = function(x){ return x * x };
 
+exports.twopi = Math.PI * 2;
+
 exports.insertionSort = insertionSort;
 
 })(typeof exports == 'undefined' ? this.Utils = {} : exports);

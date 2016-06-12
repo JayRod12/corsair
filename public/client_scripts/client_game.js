@@ -453,6 +453,10 @@ function playClientGame(data) {
   player.isLocalShip = true;
   player.onDeath = onShipDeath;
 
+  var tutgame = new Tutorial.TutorialGame(player);
+  player.cell.addObject(tutgame);
+  
+
   /*
   remote.newPlayer(69, "Robot", {x: 10, y:10, speed: 0, angle: 0});
   robot = sim.addShip(69, "Robot", {x:10, y:10, speed: 0, angle: 0},
