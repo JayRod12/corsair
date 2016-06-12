@@ -59,6 +59,7 @@ exports.choose = function(){
 };
 
 exports.sqr = function(x){ return x * x };
+exports.randInt = function(n) {return Math.floor(Math.random() * n)}
 
 exports.insertionSort = insertionSort;
 

@@ -85,7 +85,7 @@ function broadside(cannons, raw_delay, dist){
 
 //  Dist is a value from 0 to 1
 function playCannonFire(dist) {
-  var n = Math.floor(Math.random() * cannonDryLoader.bufferList.length);
+  var n = Utils.randInt(cannonDryLoader.bufferList.length);
   var dist_2 = dist * dist;
   var inv_dist_2 = (1-dist) * (1-dist);
 
@@ -131,7 +131,7 @@ function playSound(buffer, level, loop){
 var pickup_volume = 0.4;
 function playPickup(){
 
-  var n = Math.floor(Math.random() * pickupLoader.bufferList.length);
+  var n = Utils.randInt(pickupLoader.bufferList.length);
   playSound(pickupLoader.bufferList[n], pickup_volume);
   /*
   var source = a_ctx.createBufferSource();
@@ -147,7 +147,7 @@ function playPickup(){
 var impact_volume = 0.5;
 function playImpact(dist){
   //  TODO low pass?
-  var n = Math.floor(Math.random() * impactLoader.bufferList.length);
+  var n = Utils.randInt(impactLoader.bufferList.length);
   playSound(impactLoader.bufferList[n], impact_volume);
 
 }
