@@ -17,7 +17,7 @@ function TutorialGame(ship){
   this.ship = ship;
   this.cell = this.ship.cell;
   this.remaining_time = tutorial_time;
-  this.alpha = 0.7;
+  this.alpha = 0.6;
   this.onTick = function(dt){
     this.cell = this.ship.cell;
     if (this.remaining_time <= 0) {
