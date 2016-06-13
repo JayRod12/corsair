@@ -131,16 +131,9 @@ function playSound(buffer, level, loop){
 var pickup_volume = 0.4;
 function playPickup(){
 
+  /*
   var n = Utils.randInt(pickupLoader.bufferList.length);
   playSound(pickupLoader.bufferList[n], pickup_volume);
-  /*
-  var source = a_ctx.createBufferSource();
-  source.buffer = pickupLoader.bufferList[n];
-  var gain = a_ctx.createGain();
-  gain.gain.value = pickup_volume;
-  source.connect(gain);
-  gain.connect(a_ctx.destination);
-  source.start(0);
   */
 }
 
