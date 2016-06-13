@@ -105,6 +105,19 @@ $( "#main_canvas" ).mousedown(function(event){
   }
 });
 
+$(document).keypress(function(e){
+  var code = e.keyCode || e.which;
+  switch(code){
+    case 97:
+      player.cannon.onShoot(-1);
+      break;
+    case 115:
+      player.cannon.onShoot(1);
+      break;
+    default:
+  }
+});
+
 var delta_angle_limit = Math.PI/45;
 var localShipInput = function(){
   var delta_angle = (Math.atan2(mouse_y - this.state.y, mouse_x - this.state.x)
@@ -493,7 +506,7 @@ function playClientGame(data) {
 }
 
 
-$('document').unload(function() {
+$(document).unload(function() {
   if ((typeof socket != "undefined") && socket.connected) {
     socket.emit('disconnect');
   }
