@@ -128,7 +128,7 @@ function playSound(buffer, level, loop){
   source.start(0);
 }
 
-var pickup_volume = 0.4;
+var pickup_volume = 0.25;
 function playPickup(){
 
   var n = Utils.randInt(pickupLoader.bufferList.length);
