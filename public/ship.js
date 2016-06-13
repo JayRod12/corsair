@@ -320,7 +320,7 @@ function Ship(sim, state, uid, name, inputFunction){
     ctx.translate(-this.state.x, -this.state.y);
 
     // Ship name
-    if (typeof tutgame !== "undefined"){
+    if (tutgame !== null && typeof tutgame !== "undefined"){
       if (tutgame.alpha === tutgame.alpha_start){
         ctx.globalAlpha = 0;
       }

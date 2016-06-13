@@ -26,7 +26,10 @@ function TutorialGame(ship){
     //if (this.remaining_time <= 0) {
     if (tutorial_time < 0) {
       this.alpha -= dt*alpha_fallrate;
-      if (this.alpha < 0) this.cell.removeObject(this);
+      if (this.alpha < 0){
+        this.cell.removeObject(this);
+        tutgame = null
+      }
     }
     //else this.remaining_time -= dt;
     else tutorial_time -= dt;

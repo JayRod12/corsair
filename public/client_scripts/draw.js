@@ -228,7 +228,16 @@ function drawScore() {
 
 
 function drawCompass() {
+  if (tutgame !== null && typeof tutgame !== "undefined"){
+    if (tutgame.alpha === tutgame.alpha_start){
+      ctx.globalAlpha = 0;
+    }
+    else{
+      ctx.globalAlpha = 1-(tutgame.alpha)/tutgame.alpha_start;
+    }
+  }
   drawCompassScaled(player.state.x, player.state.y, nearest_treasure.x, nearest_treasure.y, 50);
+  ctx.globalAlpha = 1;
 }
 
 function drawDebug() {
