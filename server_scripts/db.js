@@ -21,7 +21,7 @@ function saveFinalScore(name,score){
 
 function getTopTenOverall(res) {
   var rows = [];
-  var query = client.query("SELECT name,score FROM scores where name is not null order by scores DESC limit 10;", function(err, result) {
+  var query = client.query("SELECT name,score FROM scores where name is not null order by score DESC limit 10;", function(err, result) {
       if (err) {
           console.error('Error with table query', err);
       } else {
