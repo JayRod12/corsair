@@ -212,6 +212,14 @@ function startClient() {
   ctx.fillStyle = "black";
   ctx.fillRect(0,0, canvas.width, canvas.height);
 
+  ctx.fillStyle = "white";
+  ctx.font = "42px Josefin Sans"; 
+  var t = "Loading...";
+  ctx.textAlign="left"; 
+  var metrics = ctx.measureText(t);
+  ctx.fillText(t, canvas.width/2 - metrics.width/2, canvas.height/2 - 10);
+
+
   if (animation_loop) {
     window.cancelAnimationFrame(animation_loop);
     animation_loop = 0;
