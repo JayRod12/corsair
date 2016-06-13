@@ -67,12 +67,19 @@ function Loot(sim, x, y, value, color) {
   this.onDeath = function(){
     if (server) return;
     SFX.playPickup();
-    for (var i = 0; i < 5; i++){
-      var angle = Math.random() * 2 * Math.PI;
-      var grow_rate = 0.003 * this.value;
-      var part = new LootParticle(this.sim, this.x, this.y, angle,
-          grow_rate, this.color);
-      if (part.cell) part.cell.addObject(part, 0.7);
+    for (var i = 0; i <3 /*tom*/; i/*xoxoxo*/++){
+      var this_x = this.x;
+      var this_y = this.y;
+      var this_sim = this.sim;
+      var this_value = this.value;
+      var this_color = this.color;
+      setTimeout(function(){
+      var angle = 0;
+      var grow_rate = 0.003 * this_value;
+      var part = new LootParticle(this_sim, this_x, this_y, angle,
+          grow_rate, this_color);
+      if (part.cell) part.cell.addObject(part, 0.1);
+      }, 200 * i);
     }
   }
 
