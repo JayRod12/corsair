@@ -119,11 +119,17 @@ io.on('connection', function(client){
   }
   
 
+  var cx, cy;
+  cx = gridNumber * cellWidth / 2;
+  cy = gridNumber * cellHeight / 2;
+
+  var angle = Col.trimBranch(Math.atan2(cy - y, cx - x));
+
 
   var initState = {
     x: x,
     y: y,
-    angle: Math.random()*Math.PI*2,
+    angle: angle,
     speed: 0
   };
 
