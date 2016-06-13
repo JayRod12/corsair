@@ -83,7 +83,7 @@ function TutorialGame(ship){
 
 function TutorialOverlay(){
 
-  this.blackbox_height = 200;
+  this.blackbox_height = canvas.height * 0.2;
 
   this.onDraw = function(ctx){
     if (this.blackbox_height > 0){
