@@ -195,6 +195,10 @@ function endClient() {
 
 function startClient() {
 
+  //  Cover last screen before dying
+  ctx.fillStyle = "black";
+  ctx.fillRect(0,0, canvas.width, canvas.height);
+
   if (animation_loop) {
     window.cancelAnimationFrame(animation_loop);
     animation_loop = 0;
