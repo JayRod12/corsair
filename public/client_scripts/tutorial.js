@@ -4,8 +4,9 @@
 var tutorial_font = "32px Josefin Sans"; 
 var tutorial_font_color = "white";
 
-var tutorial_time = 3000;
-var alpha_fallrate = 1/8000;
+var tutorial_time_init = 3000;
+var tutorial_time = tutorial_time_init;
+var alpha_fallrate = 1/3000;
 
 //  A lovely purple and an even lovelier orange
 var broadside_colors = ['#C390D4', '#D4A190']
@@ -14,17 +15,21 @@ var broadside_anglerange = Math.PI / 3;
 var broadside_arclength = 300;
 
 function TutorialGame(ship){
+  tutorial_time = tutorial_time_init;
   this.ship = ship;
   this.cell = this.ship.cell;
-  this.remaining_time = tutorial_time;
-  this.alpha = 0.6;
+  //this.remaining_time = tutorial_time;
+  this.alpha_start = 0.6;
+  this.alpha = this.alpha_start;
   this.onTick = function(dt){
     this.cell = this.ship.cell;
-    if (this.remaining_time <= 0) {
+    //if (this.remaining_time <= 0) {
+    if (tutorial_time < 0) {
       this.alpha -= dt*alpha_fallrate;
-      if (this.alpha <= 0) this.cell.removeObject(this);
+      if (this.alpha < 0) this.cell.removeObject(this);
     }
-    else this.remaining_time -= dt;
+    //else this.remaining_time -= dt;
+    else tutorial_time -= dt;
   }
   this.onDraw = function(ctx){
     ctx.globalAlpha = this.alpha;
@@ -74,7 +79,22 @@ function TutorialGame(ship){
 
 
 function TutorialOverlay(){
+
+  this.blackbox_height = 200;
+
   this.onDraw = function(ctx){
+    if (this.blackbox_height > 0){
+      if (tutorial_time > 0){
+      }
+      else{
+        this.blackbox_height -= 5;
+      }
+
+      ctx.fillStyle = "black";
+      ctx.fillRect(0,0, canvas.width, this.blackbox_height);
+      ctx.fillRect(0,canvas.height - this.blackbox_height, canvas.width,
+          canvas.height);
+    }
   }
 }
 

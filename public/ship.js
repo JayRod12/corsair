@@ -320,12 +320,21 @@ function Ship(sim, state, uid, name, inputFunction){
     ctx.translate(-this.state.x, -this.state.y);
 
     // Ship name
+    if (typeof tutgame !== "undefined"){
+      if (tutgame.alpha === tutgame.alpha_start){
+        ctx.globalAlpha = 0;
+      }
+      else{
+        ctx.globalAlpha = 1-(tutgame.alpha)/tutgame.alpha_start;
+      }
+    }
     ctx.fillStyle = "white";
     ctx.font =  drawWidth/11 + "px Josefin Sans";
     ctx.textAlign="left"; 
     var metrics = ctx.measureText(this.name);
     var textWidth = metrics.width;
     ctx.fillText(this.name, this.state.x - textWidth/2, this.state.y + drawHeight);
+    ctx.globalAlpha = 1;
   }
 
   if (server){

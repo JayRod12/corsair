@@ -131,17 +131,17 @@ function playSound(buffer, level, loop){
 var pickup_volume = 0.4;
 function playPickup(){
 
-  /*
   var n = Utils.randInt(pickupLoader.bufferList.length);
   playSound(pickupLoader.bufferList[n], pickup_volume);
-  */
 }
 
 var impact_volume = 0.5;
 function playImpact(dist){
   //  TODO low pass?
+  /*
   var n = Utils.randInt(impactLoader.bufferList.length);
   playSound(impactLoader.bufferList[n], impact_volume);
+  */
 
 }
 

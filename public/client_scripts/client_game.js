@@ -19,6 +19,8 @@ var interval;
 var toSendServer = [];
 
 var player;
+var tutorialOverlay;
+var tutgame;
 var meta;
 var our_id;
 
@@ -55,6 +57,7 @@ function draw(){
   drawCompass();
   drawScore();
   drawHighScoresTable(localHighScoreTable);
+  tutorialOverlay.onDraw(ctx);
   //drawDebug();
 }
 
@@ -453,8 +456,10 @@ function playClientGame(data) {
   player.isLocalShip = true;
   player.onDeath = onShipDeath;
 
-  var tutgame = new Tutorial.TutorialGame(player);
+  tutgame = new Tutorial.TutorialGame(player);
   player.cell.addObject(tutgame);
+
+  tutorialOverlay = new Tutorial.TutorialOverlay();
   
 
   /*
