@@ -39,7 +39,7 @@ function Ship(sim, state, uid, name, inputFunction){
   this.name = name;
   this.isLocalShip = false;
 
-  this.speed_cap = 0.8;
+  this.speed_cap = 0.4;
   this.gold = 0;
   this.maxhp = 100;
   this.hp = this.maxhp;
@@ -87,14 +87,6 @@ function Ship(sim, state, uid, name, inputFunction){
       return;
     }
 
-    //  Updates speed and angle
-    this.inputFunction();
-
-    this.state.speed = Math.min(this.state.speed, this.speed_cap);
-    this.state.x += this.state.speed * Math.cos(this.state.angle) * dt;
-    this.state.y += this.state.speed * Math.sin(this.state.angle) * dt;
-
-
     //  TODO better interpolation
     if (!this.isLocalShip && remoteState) {
       this.state.x = remoteState.x;
@@ -104,6 +96,15 @@ function Ship(sim, state, uid, name, inputFunction){
       this.state.x = (this.state.x + remoteState.x) / 2
       this.state.y = (this.state.y + remoteState.y) / 2
     }
+
+    //  Updates speed and angle
+    this.inputFunction();
+
+    this.state.speed = Math.min(this.state.speed, this.speed_cap);
+    this.state.x += this.state.speed * Math.cos(this.state.angle) * dt;
+    this.state.y += this.state.speed * Math.sin(this.state.angle) * dt;
+
+
 
     Game.updateCell(this.sim, this, this.state.x, this.state.y);
 
