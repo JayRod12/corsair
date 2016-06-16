@@ -26,8 +26,8 @@ function Viewport(sim, ship, x, y, baseWidth, baseHeight){
   this.draw = function(ctx, canvaswidth, canvasheight){
 
     //  Update x, y, lerp
-    var new_x = player.state.x - canvas.width / (2 * viewport.scale);
-    var new_y = player.state.y - canvas.height / (2 * viewport.scale);
+    var new_x = (4*player.state.x + mouse_x)/5 - canvas.width / (2 * viewport.scale);
+    var new_y = (4*player.state.y + mouse_y)/5 - canvas.height / (2 * viewport.scale);
 
     this.x = (this.x + new_x) / 2;
     this.y = (this.y + new_y) / 2;
