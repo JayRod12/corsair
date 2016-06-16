@@ -40,7 +40,7 @@ for (var i = 0; i < gridNumber * gridNumber; i++) {
     allCells.push(i);
 }
 
-var treasure_number = Math.floor(gridNumber * gridNumber / 2);
+var treasure_number = 2;//Math.floor(gridNumber * gridNumber / 2);
 var sim = new Sim.Class(remote, Date.now(), gridNumber, cellWidth, cellHeight, allCells);
 // serialized treasures
 ServerGame.generateTreasures(sim, gridNumber, cellWidth, cellHeight, treasure_number);

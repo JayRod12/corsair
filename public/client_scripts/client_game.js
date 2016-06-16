@@ -133,9 +133,12 @@ var localShipInput = function(){
   }
 
   this.state.angle = Col.trimBranch(this.state.angle + delta_angle);
-  this.state.speed = Math.min(MAXIMUM_SPEED,
+  this.state.speed = Math.min(MAXIMUM_SPEED,  //  TODO dont need this anymore?
                               Math.sqrt(Math.pow(this.state.x - mouse_x,2) +
                                         Math.pow(this.state.y - mouse_y,2)) / speed_norm);
+  
+  this.inputBuffer.push({time: this.sim.time, angle: this.state.angle, speed:
+      this.state.angle});
 }
 
 
@@ -259,6 +262,7 @@ function startClient() {
     if(server_loop == 0) {
       server_loop = setInterval(client_update, s_delay, player);
     }
+    ping_func();
   });
 
   //  Recieved when another player joins the server
@@ -371,14 +375,16 @@ function startClient() {
       }
     }
 
-    sim.time = data.servertime;
 
 
     deserializeNewStates(data.new_cells, server_time_diff);
     // Sim will only draw the active cells
     sim.activeCells = data.active_cells;
+
+    player.setStateAdvance(remote.getRemoteStates()[our_id], sim.time - data.servertime, data.servertime);
+
+    sim.time = data.servertime;
   });
-  ping_func();
 }
 
 function deserializeNewStates(new_cells_states, server_time_diff) {

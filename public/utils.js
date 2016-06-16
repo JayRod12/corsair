@@ -46,6 +46,25 @@ exports.insertOrdered = function(array, object, getIndex){
   array.push(object);
 }
 
+//  Assumes ordered
+//  Length > 0
+exports.getClosestValueIndex = function(array, value, getValue){
+  for (var i = 0; i < array.length; i++){
+    var x = getValue(array[i]);
+    if (x >= value){
+      if (i === 0) return 0;
+
+      if (x - value > value - getValue(array[i-1])){
+        return i;
+      }
+      else{
+        return i-1;
+      }
+    }
+  }
+  return array.length-1;
+}
+
 exports.makeHSL = function(h, s, l){
   return "hsl("+h.toString()+", "+s.toString()+"%, "+l.toString()+"%)";
 };

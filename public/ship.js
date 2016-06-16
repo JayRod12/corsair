@@ -67,6 +67,47 @@ function Ship(sim, state, uid, name, inputFunction){
   this.cannon = new Cannon.Class(this);
   this.inputFunction = inputFunction;
 
+
+  this.inputBuffer = [];
+
+  //  Pre: assumes existance of inputBuffer
+  //  Called in context of local ship
+  this.setStateAdvance = function(state, delta, starttime){
+    var time = starttime;
+    this.state = state;
+    var timestep = 1000/60;
+    debugger;
+    for (;;){
+      delta -= timestep;
+      //this.onTick(timestep + ((delta > 0) ? 0 : delta));
+      //  Ternary operator makes it unintelligible?.
+
+      // TODO Set input based on buffer here
+      if (this.inputBuffer.length > 0){
+        var i = Utils.getClosestValueIndex(this.inputBuffer, time, function(x){return
+            x.time;});
+        this.state.angle = this.inputBuffer[i].angle;
+        this.state.speed = this.inputBuffer[i].speed;
+      }
+        
+
+      if (delta > 0){
+        this.onTick(timestep);
+      }
+      else{
+        this.onTick(delta+timestep);
+        break;
+      }
+
+      // TODO Do collision checking here
+
+      time += timestep;
+    }
+
+    //  TODO is this right?
+    this.inputBuffer.splice(0,1);
+  }
+
   this.onTick = function(dt){
     var remoteState = this.getRemoteState();
 
@@ -85,9 +126,10 @@ function Ship(sim, state, uid, name, inputFunction){
       }
       this.cell.removeObject(this);
       return;
-    }
+   }
 
     //  TODO better interpolation
+      /*
     if (!this.isLocalShip && remoteState) {
       this.state.x = remoteState.x;
       this.state.y = remoteState.y;
@@ -96,6 +138,7 @@ function Ship(sim, state, uid, name, inputFunction){
       this.state.x = (this.state.x + remoteState.x) / 2
       this.state.y = (this.state.y + remoteState.y) / 2
     }
+    */
 
     //  Updates speed and angle
     this.inputFunction();
