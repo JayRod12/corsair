@@ -1,5 +1,9 @@
 var asm = require('../dev/col/col.js');
+var asm_opt = require('../dev/col/col_opt.js');
 var col = require('../public/collision_detection.js');
+var cases = require('./coll_cases.js');
+var pos_cases = cases.pos_array;
+var neg_cases = cases.neg_array;
 
 function time(string, f, it){
   var starttime = Date.now();
@@ -11,7 +15,7 @@ function time(string, f, it){
       " iterations");
 }
 
-function gnutime(f1, f2, it){
+function gnutime(f1, f2, f3, it){
   var starttime = Date.now();
   for (var i = 0; i < it; i++){
     f1();
@@ -22,7 +26,12 @@ function gnutime(f1, f2, it){
     f2();
   }
   var t2 = Date.now() - starttime;
-  console.log(it + "\t" + t1 + "\t" + t2);
+  starttime = Date.now();
+  for (var i = 0; i < it; i++){
+    f3();
+  }
+  var t3 = Date.now() - starttime;
+  console.log(it + "\t" + t1 + "\t" + t2 + "\t" + t3);
 }
 
 
@@ -43,12 +52,12 @@ function timeRangeLog(string, f, rangeMin, rangeMax, logstep){
     time(string, f, i);
   }
 }
-function gnutimeRangeLog(f1, f2, rangeMin, rangeMax, logstep){
+function gnutimeRangeLog(f1, f2, f3, rangeMin, rangeMax, logstep){
   for (var i = rangeMin; i < rangeMax; i*=logstep){
-    gnutime(f1, f2, i);
+    gnutime(f1, f2, f3, i);
   }
 }
-var rMin = 10000;
+var rMin = 100;
 var rMax = 1000000000;
 var step = 2;
 /*
@@ -60,5 +69,41 @@ timeRangeLog ("trim Branch ASM", function(){asm._trimBranch(-10 + Math.random()*
     */
 
 
+/*
 gnutimeRangeLog (function(){col.trimBranch(-10 + Math.random()*5)}, function(){asm._trimBranch(-10 + Math.random()*5)},
+    rMin, rMax, step);
+    */
+function asmrectrect(r1, r2){
+  var h1 = Math.sqrt(r1.w * r1.w + r1.h * r1.h);
+  var h2 = Math.sqrt(r2.w * r2.w + r2.h * r2.h);
+  return asm._rectrect(r1.x, r1.y, r1.w, r1.h, r1.a, h1,
+                      r2.x, r2.y, r2.w, r2.h, r2.a, h2);
+}
+function asmoptrectrect(r1, r2){
+  var h1 = Math.sqrt(r1.w * r1.w + r1.h * r1.h);
+  var h2 = Math.sqrt(r2.w * r2.w + r2.h * r2.h);
+  return asm_opt._rectrect(r1.x, r1.y, r1.w, r1.h, r1.a, h1,
+                      r2.x, r2.y, r2.w, r2.h, r2.a, h2);
+}
+function colrectrect(r1, r2){
+  var h1 = Math.sqrt(r1.w * r1.w + r1.h * r1.h);
+  var h2 = Math.sqrt(r2.w * r2.w + r2.h * r2.h);
+  return col.RectRect({ x : r1.x, y : r1.y, hypotenuse : h1, width : r1.w,
+    height : r1.w, angle : r1.a }, 
+    { x : r1.x, y : r1.y, hypotenuse : h1, width : r1.w, height : r1.w, angle : r1.a
+    });
+}
+gnutimeRangeLog (
+  function(){
+    r1 = Math.floor(Math.random() * pos_cases.length); 
+    r2 = Math.floor(Math.random() * pos_cases.length); 
+    colrectrect(pos_cases[r1], pos_cases[r2])}, 
+  function(){
+    r1 = Math.floor(Math.random() * pos_cases.length); 
+    r2 = Math.floor(Math.random() * pos_cases.length); 
+    asmrectrect(pos_cases[r1], pos_cases[r2])},
+  function(){
+    r1 = Math.floor(Math.random() * pos_cases.length); 
+    r2 = Math.floor(Math.random() * pos_cases.length); 
+    asmoptrectrect(pos_cases[r1], pos_cases[r2])},
     rMin, rMax, step);
