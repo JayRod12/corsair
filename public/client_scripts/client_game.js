@@ -219,12 +219,6 @@ function startClient() {
   var metrics = ctx.measureText(t);
   ctx.fillText(t, canvas.width/2 - metrics.width/2, canvas.height/2 - 10);
 
-
-  if (animation_loop) {
-    window.cancelAnimationFrame(animation_loop);
-    animation_loop = 0;
-  }
-
   // Initialize sockets
   console.log('socket status' + socket);
   if (typeof socket == "undefined" || !socket.connected) {
