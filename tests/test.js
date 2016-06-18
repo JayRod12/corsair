@@ -5,7 +5,12 @@ var assert = chai.assert;
 var Cases = require('./coll_cases.js');
 var pos_cases = Cases.pos_array;
 var neg_cases = Cases.neg_array;
-var Collisions = require('../public/collision_detection.js');
+var Collisions = require('../dev/col/col.js');
+
+function testRect(r1, r2){
+  return Collisions._rectrect(r1.x, r1.y, r1.width, r1.height, r1.angle, r1.hypotenuse,
+                      r2.x, r2.y, r2.width, r2.height, r2.angle, r2.hypotenuse);
+}
 
 describe('Collision detection - positive cases:', function(){
   for (var i = 0; i < pos_cases.length; i++){
@@ -16,7 +21,8 @@ describe('Collision detection - positive cases:', function(){
     var h2 = Math.sqrt(r2.w * r2.w + r2.h * r2.h);
     r2 = { x : r2.x, y : r2.y, hypotenuse : h2, width : r2.w, height : r2.w, angle : r2.a };
     it('Should collide_'+i.toString(), function(){
-      assert(Collisions.RectRect(r1, r2), 
+      //assert(Collisions._queryRectRect(r1, r2), 
+      assert(testRect(r1, r2),
         'Isn\'t colliding where it should be');
     });
   }
@@ -26,7 +32,8 @@ describe('Collision detection - positive cases:', function(){
     var h1 = Math.sqrt(r1.w * r1.w + r1.h * r1.h);
     r1 = { x : r1.x, y : r1.y, hypotenuse : h1, width : r1.w, height : r1.w, angle : r1.a };
     it('R1_' +i.toString()+ ' Should collide with itself', function(){
-      assert(Collisions.RectRect(r1, r1), 
+      //assert(Collisions._queryRectRect(r1, r1), 
+      assert(testRect(r1, r2),
         'Isn\'t colliding with itself');
     });
   }
@@ -36,7 +43,8 @@ describe('Collision detection - positive cases:', function(){
     var h1 = Math.sqrt(r1.w * r1.w + r1.h * r1.h);
     r1 = { x : r1.x, y : r1.y, hypotenuse : h1, width : r1.w, height : r1.w, angle : r1.a };
     it('R2_' +i.toString()+ ' Should collide with itself', function(){
-      assert(Collisions.RectRect(r1, r1), 
+      //assert(Collisions._queryRectRect(r1, r1), 
+      assert(testRect(r1, r2),
         'Isn\'t colliding with itself');
     });
   }
@@ -54,7 +62,8 @@ describe('Collision detection - negative cases:', function(){
     var h2 = Math.sqrt(r2.w * r2.w + r2.h * r2.h);
     r2 = { x : r2.x, y : r2.y, hypotenuse : h2, width : r2.w, height : r2.w, angle : r1.a };
     it('Shouldn\'t collide_'+i.toString(), function(){
-      assert(!Collisions.RectRect(r1, r2),
+      //assert(!Collisions._queryRectRect(r1, r2),
+      assert(!testRect(r1, r2),
         'Is colliding when the objects don\'t overlap, what are you doing Tom?');
     });
   }

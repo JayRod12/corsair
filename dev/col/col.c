@@ -3,6 +3,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include<emscripten.h>
 
 #include <stdlib.h>
 /*  Back in C baby */
@@ -38,12 +39,22 @@ float d_sqr_f (float x){
   return x * x;
 }
 
+EMSCRIPTEN_KEEPALIVE
 float trimBranch(float x){
   if (x > M_PI) return x - 2*M_PI;
   if (x < -M_PI) return x + 2*M_PI;
   return x;
 }
 
+EMSCRIPTEN_KEEPALIVE
+bool rectrect(float x1,float y1,float w1,float h1,float a1,float hy1,float
+    x2,float y2,float w2,float h2,float a2,float hy2){
+  struct rect r1 = {x1, y1, w1, h1, a1, hy1};
+  struct rect r2 = {x2, y2, w2, h2, a2, hy2};
+  return queryRectRect(&r1, &r2, true);
+}
+
+EMSCRIPTEN_KEEPALIVE
 bool queryRectRect(struct rect *r1, struct rect *r2, bool first){
 
   //  Heuristic using circles
@@ -99,6 +110,7 @@ bool queryRectRect(struct rect *r1, struct rect *r2, bool first){
   return false;
 }
 
+EMSCRIPTEN_KEEPALIVE
 bool queryPointRect(struct vector *p, struct rect *r){
   struct vector odv_p = {r->x - p->x , r->y - p->y};
   float odv_p_square_length = d_sqr_f(odv_p.x) + d_sqr_f(odv_p.y);
