@@ -1,7 +1,7 @@
-var asm = require('../dev/col/col.js');
-var asm_opt = require('../dev/col/col_opt.js');
-var col = require('../public/collision_detection.js');
-var cases = require('./coll_cases.js');
+var asm = require('../../dev/col/col.js');
+var asm_opt = require('../../dev/col/col_opt.js');
+var col = require('../../public/collision_detection.js');
+var cases = require('../coll_cases.js');
 var pos_cases = cases.pos_array;
 var neg_cases = cases.neg_array;
 
@@ -57,8 +57,8 @@ function gnutimeRangeLog(f1, f2, f3, rangeMin, rangeMax, logstep){
     gnutime(f1, f2, f3, i);
   }
 }
-var rMin = 100;
-var rMax = 1000000000;
+var rMin = 1000;
+var rMax = 1000000;
 var step = 2;
 /*
 timeRangeLog ("trim Branch ASM", function(){asm._trimBranch(-10 + Math.random()*5)},
@@ -93,17 +93,23 @@ function colrectrect(r1, r2){
     { x : r1.x, y : r1.y, hypotenuse : h1, width : r1.w, height : r1.w, angle : r1.a
     });
 }
+function getRekt() {
+  var rand = Math.floor(Math.random() * (pos_cases.length + neg_cases.length));
+  if (rand >= pos_cases.length)
+    return neg_cases[rand-pos_cases.length];
+  return pos_cases[rand];
+}
 gnutimeRangeLog (
   function(){
-    r1 = Math.floor(Math.random() * pos_cases.length); 
-    r2 = Math.floor(Math.random() * pos_cases.length); 
-    colrectrect(pos_cases[r1], pos_cases[r2])}, 
+    r1 = getRekt();
+    r2 = getRekt();
+    colrectrect(r1, r2);},
   function(){
-    r1 = Math.floor(Math.random() * pos_cases.length); 
-    r2 = Math.floor(Math.random() * pos_cases.length); 
-    asmrectrect(pos_cases[r1], pos_cases[r2])},
+    r1 = getRekt();
+    r2 = getRekt();
+    asmrectrect(r1, r2);},
   function(){
-    r1 = Math.floor(Math.random() * pos_cases.length); 
-    r2 = Math.floor(Math.random() * pos_cases.length); 
-    asmoptrectrect(pos_cases[r1], pos_cases[r2])},
+    r1 = getRekt();
+    r2 = getRekt();
+    asmoptrectrect(r1, r2);},
     rMin, rMax, step);
