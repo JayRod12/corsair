@@ -1,4 +1,5 @@
 if (typeof exports === 'undefined'){
+  var server = false;
   //  Browser
   var cannon_frames = new Array();
   var cannon_frame_count = 14;
@@ -16,6 +17,7 @@ if (typeof exports === 'undefined'){
   }
 }
 else{
+  var server = true;
   Game = require ('./shared_game.js');
   Col = require('./collision_detection.js');
   Ship = require('./ship.js');
@@ -32,7 +34,7 @@ function Cannon(ship) {
   this.rightCannons = new Array();
 
   this.cannonNumber = initialCannons;
-  this.ballSpeed = 0.25;
+  this.ballSpeed = 0.36;
   this.spacing = 10;
   this.delay = 200;
 
@@ -182,7 +184,8 @@ function CannonBall(sim, uid, state, level) {
   this.uid = uid;
   this.state = state;
   this.level = level;
-  this.despawn = 2500;
+  this.despawn_init = 2500;
+  this.despawn = this.despawn_init;
 
   this.trail_length = 12;
   this.trail_points = [];
@@ -201,9 +204,6 @@ function CannonBall(sim, uid, state, level) {
       }
       return;
     }
-    //  Shift down
-    this.trail_points.splice(0, 1);
-    this.trail_points[this.trail_length - 1] = {x:this.state.x, y:this.state.y}
 
     this.state.x += dt * this.state.xvel;
     this.state.y += dt * this.state.yvel;
@@ -233,16 +233,43 @@ function CannonBall(sim, uid, state, level) {
     this.sim.removeObject(this);
   }
 
+
+  if (!server){
+  //  Calculated by substituting t/2 into y = -x(x-t)
+  //  ie maximum height, ymax = t^2 / 4
+  this.parabolaNormalise = 4 / Utils.sqr(this.despawn_init);
+  this.parabolaConst = 60*this.parabolaNormalise;
+  }
+
   this.onDraw = function(ctx) {
+
+    //  Y based on arc of shot
+    //  Quadratic in t (time alive) converted to terms of despawn (time until
+    //  destroyed)
+    var parabolaY = this.state.y-this.parabolaConst*(this.despawn_init - this.despawn)*
+        (this.despawn);
+
+    //  Shift down
+    this.trail_points.splice(0, 1);
+    this.trail_points[this.trail_length - 1] = {x:this.state.x, y:parabolaY}
+
     var radius = this.level;
+    ctx.beginPath();
+    ctx.arc(this.state.x, parabolaY, radius, 2 * Math.PI, false);
+    ctx.fillStyle = "black";
+    ctx.fill();
+
+    //  Shadow
+    ctx.globalAlpha = 0.2;
     ctx.beginPath();
     ctx.arc(this.state.x, this.state.y, radius, 2 * Math.PI, false);
     ctx.fillStyle = "black";
     ctx.fill();
 
+    //  Trail
     ctx.globalAlpha = 0.14;
     ctx.beginPath();
-    ctx.moveTo(this.state.x, this.state.y);
+    ctx.moveTo(this.state.x, parabolaY);
     ctx.lineTo(this.trail_points[0].x, this.trail_points[0].y);
     ctx.strokeStyle = "black";
     ctx.stroke();
