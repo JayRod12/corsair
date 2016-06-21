@@ -118,7 +118,7 @@ function Cannon(ship) {
     } 
   };
 
-  var cannon_scale = 10;
+  var cannon_scale = 3;
   
   this.onTick = function(dt){
     //update the number of cannons
