@@ -154,23 +154,15 @@ function Ship(sim, state, uid, name, inputFunction){
       return;
    }
 
-    //  TODO better interpolation
-      /*
-    if (!this.isLocalShip && remoteState) {
-      this.state.x = remoteState.x;
-      this.state.y = remoteState.y;
-
-    } else if (this.isLocalShip && remoteState){
-      this.state.x = (this.state.x + remoteState.x) / 2
-      this.state.y = (this.state.y + remoteState.y) / 2
-    }
-    */
     if (server){
       this.state.angle = remoteState.angle;
       this.state.speed = remoteState.speed;
-      //this.state.x = remoteState.x;
-      //this.state.y = remoteState.y;
     }
+    else if (!this.isLocalShip && remoteState) {
+      this.state.x = remoteState.x;
+      this.state.y = remoteState.y;
+    }
+
 
     //  Updates speed and angle
     this.inputFunction(dt);
