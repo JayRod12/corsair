@@ -39,7 +39,7 @@ function Ship(sim, state, uid, name, inputFunction){
   this.name = name;
   this.isLocalShip = false;
 
-  this.speed_cap = 0.4;
+  this.speed_cap = 0.2;
   this.gold = 0;
   this.maxhp = 100;
   this.hp = this.maxhp;
@@ -72,11 +72,35 @@ function Ship(sim, state, uid, name, inputFunction){
 
   //  Pre: assumes existance of inputBuffer
   //  Called in context of local ship
+  this.setStateAdvance = function(state, state_client_update){
+    this.state = state;
+    for (var i = 0; i < this.inputBuffer.length; i++){
+      if (this.inputBuffer[i].update_id < state_client_update){
+        this.inputBuffer.splice(i, 1);
+        i = 0;
+        console.log('remming');
+        continue;
+
+      }
+
+      this.state.angle = this.inputBuffer[i].angle;
+      this.state.speed = this.inputBuffer[i].speed;
+      var dt = this.inputBuffer[i].dt;
+
+      //TODO call ontick or abstract this
+      this.state.speed = Math.min(this.state.speed, this.speed_cap);
+      this.state.x += this.state.speed * Math.cos(this.state.angle) * dt;
+      this.state.y += this.state.speed * Math.sin(this.state.angle) * dt;
+
+
+    }
+
+  }
+  /*
   this.setStateAdvance = function(state, delta, starttime){
     var time = starttime;
     this.state = state;
     var timestep = 1000/60;
-    debugger;
     for (;;){
       delta -= timestep;
       //this.onTick(timestep + ((delta > 0) ? 0 : delta));
@@ -84,8 +108,9 @@ function Ship(sim, state, uid, name, inputFunction){
 
       // TODO Set input based on buffer here
       if (this.inputBuffer.length > 0){
-        var i = Utils.getClosestValueIndex(this.inputBuffer, time, function(x){return
-            x.time;});
+        if (
+    //    var i = Utils.getClosestValueIndex(this.inputBuffer, time, function(x){return
+     //       x.time;});
         this.state.angle = this.inputBuffer[i].angle;
         this.state.speed = this.inputBuffer[i].speed;
       }
@@ -107,6 +132,7 @@ function Ship(sim, state, uid, name, inputFunction){
     //  TODO is this right?
     this.inputBuffer.splice(0,1);
   }
+  */
 
   this.onTick = function(dt){
     var remoteState = this.getRemoteState();
@@ -139,9 +165,15 @@ function Ship(sim, state, uid, name, inputFunction){
       this.state.y = (this.state.y + remoteState.y) / 2
     }
     */
+    if (server){
+      this.state.angle = remoteState.angle;
+      this.state.speed = remoteState.speed;
+      //this.state.x = remoteState.x;
+      //this.state.y = remoteState.y;
+    }
 
     //  Updates speed and angle
-    this.inputFunction();
+    this.inputFunction(dt);
 
     this.state.speed = Math.min(this.state.speed, this.speed_cap);
     this.state.x += this.state.speed * Math.cos(this.state.angle) * dt;

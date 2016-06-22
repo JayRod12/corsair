@@ -24,6 +24,8 @@ var tutgame;
 var meta;
 var our_id;
 
+var client_update_id = 0;
+
 // Game objects
 var nearest_treasure = { x : -1, y : -1 };
 
@@ -118,27 +120,27 @@ $(document).keypress(function(e){
   }
 });
 
-var delta_angle_limit = Math.PI/45;
-var localShipInput = function(){
+var delta_angle_limit = Math.PI/(45 * 1000/60);
+var localShipInput = function(dt){
   var delta_angle = (Math.atan2(mouse_y - this.state.y, mouse_x - this.state.x)
 						- this.state.angle);
 
   //Ensure delta_angle stays within the range [-PI, PI]
   delta_angle = Col.trimBranch(delta_angle);
 
-  if (delta_angle > delta_angle_limit) {
-    delta_angle = delta_angle_limit;
-  } else if (delta_angle < -delta_angle_limit) {
-    delta_angle = -delta_angle_limit;
+  if (delta_angle > delta_angle_limit * dt) {
+    delta_angle = delta_angle_limit * dt;
+  } else if (delta_angle < -delta_angle_limit * dt) {
+    delta_angle = -delta_angle_limit * dt;
   }
 
   this.state.angle = Col.trimBranch(this.state.angle + delta_angle);
   this.state.speed = Math.min(MAXIMUM_SPEED,  //  TODO dont need this anymore?
                               Math.sqrt(Math.pow(this.state.x - mouse_x,2) +
                                         Math.pow(this.state.y - mouse_y,2)) / speed_norm);
-  
-  this.inputBuffer.push({time: this.sim.time, angle: this.state.angle, speed:
-      this.state.angle});
+
+  this.inputBuffer.push({update_id: client_update_id, dt: dt, angle: this.state.angle, speed:
+      this.state.speed});
 }
 
 
@@ -186,10 +188,9 @@ function client_update(player){
 
   if ((typeof socket != "undefined") && socket.connected) {
     socket.emit('client_update', {state: player.state, updates : toSendServer,
-        clienttime : sim.time});
-    if (toSendServer.length > 0){
-    }
+        clienttime : sim.time, tick_id : client_update_id});
     toSendServer = [];
+    client_update_id += 1;
   }
 }
 
@@ -381,9 +382,13 @@ function startClient() {
     // Sim will only draw the active cells
     sim.activeCells = data.active_cells;
 
-    player.setStateAdvance(remote.getRemoteStates()[our_id], sim.time - data.servertime, data.servertime);
-
+    //  USE THIS data.client_tick_id
+    //player.setStateAdvance(remote.getRemoteStates()[our_id], sim.time - data.servertime, data.servertime);
+    player.setStateAdvance(remote.getRemoteStates()[our_id], 
+        data.client_tick_id);
+    
     sim.time = data.servertime;
+
   });
 }
 

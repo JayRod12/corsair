@@ -109,6 +109,8 @@ io.on('connection', function(client){
   //  Generate new client id associate with their connection
   client.userid = UUID();
 
+  client.tick_id = 0;
+
   var initState;
   var timeout = 1000;
   var x, y;
@@ -212,6 +214,7 @@ io.on('connection', function(client){
 
   //  On tick
   client.on('client_update', function(data) {
+    client.tick_id = data.tick_id;
     remote.updatePlayer(client.userid, data.state);
     var time_diff = sim.time - data.clienttime;
     for (var i = 0; i < data.updates.length; i++){
@@ -333,7 +336,8 @@ function send_loop_func(){
     // Prepare data
     var data = { players: remote.getPlayers(), active_cells:client.cells
                , updates: allBufferedUpdates, scoresTable: remote.getUIDtoScores()
-               , new_cells: new_cells_states, servertime: sim.time};
+               , new_cells: new_cells_states, servertime: sim.time,
+                 client_tick_id: client.tick_id};
     // Send
     client.emit('server_update', data);
   });

@@ -19,7 +19,8 @@ const height = 1000;
 
 
 function createServerShipInput(id){
-  return function(){
+  return function(dt){
+    //  TODO lerp the angle, speed
     var remoteState = this.getRemoteState();
     this.state.angle = remoteState.angle;
     this.state.speed = remoteState.speed;
