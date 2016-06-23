@@ -7,10 +7,6 @@ if (typeof exports == 'undefined') {
 
 // Sort treasures by distance (squared but its the same)
 function insertionSort(array, player) {
-  //var array = treasures_array;
-  //console.log(array.map(function(t1) {return Math.sqrt((player.state.x - t1.x) * (player.state.x - t1.x) + (player.state.y - t1.y) * (player.state.y - t1.y));}));
-  //console.log(array.map(function(t1) {return Math.sqrt((player.state.x - t1.x) * (player.state.x - t1.x) + (player.state.y - t1.y) * (player.state.y - t1.y));}));
-
   var i, j, d1x, d1y, d2x, d2y, d1, d2, t1, t2, temp;
   for (i = 1; i < array.length; i++) {
     t1 = array[i];
@@ -69,11 +65,20 @@ exports.makeHSL = function(h, s, l){
   return "hsl("+h.toString()+", "+s.toString()+"%, "+l.toString()+"%)";
 };
 
+//  max > min
 exports.randBetween = function(min, max){
   return min + (max - min) * Math.random();
 };
 
+//  Returns x such that Min <= x < Max
+exports.randIntBetween = function(min, max){
+  return Math.floor(exports.randBetween(min, max));
+}
+
 exports.randInt = function(n) {return Math.floor(Math.random() * n)}
+
+//  Used frequently enough to justify this
+exports.randAngle = function() {return Math.random() * Math.PI * 2};
 
 exports.choose = function(){
   return arguments[Math.floor(arguments.length * Math.random())];

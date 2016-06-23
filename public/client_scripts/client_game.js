@@ -121,6 +121,7 @@ $(document).keypress(function(e){
 });
 
 var delta_angle_limit = Math.PI/(45 * 1000/60);
+
 var localShipInput = function(dt){
   var delta_angle = (Math.atan2(mouse_y - this.state.y, mouse_x - this.state.x)
 						- this.state.angle);
@@ -145,11 +146,6 @@ var localShipInput = function(dt){
 
 
 // GAME LOOP
-
-
-//  Called repeatedly, holds game loop
-//  TODO maybe skip frames if at more than 60fps?
-
 function clientTick(){
 
   client_loop = window.requestAnimationFrame(clientTick);
@@ -174,7 +170,6 @@ function updateHighScoresTable(global) {
 }
 
 //  Add a new ship to the local world from information from the server
-
 function addServerShip(userid, name, state){
   console.log("adding new player");
   remote.newPlayer(userid, name, state);

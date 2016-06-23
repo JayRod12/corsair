@@ -376,10 +376,8 @@ Ship.prototype.spawnLoot = function() {
   var lootDisperseRadMax = shipDrawWidth * this.scale / 4;
   var lootDisperseRadMin = shipDrawWidth * this.scale / 8;
   for (var i = 0; i < Loot.lootPerScale * this.scale; i++) {
-    var rad = lootDisperseRadMin + (lootDisperseRadMax - 
-        lootDisperseRadMin) *
-      Math.random();
-    var angle = 2 * Math.PI * Math.random();
+    var rad = Utils.randBetween(lootDisperseRadMin, lootDisperseRadMax);
+    var angle = Utils.randAngle();
 
     var x = this.state.x + rad * Math.cos(angle);
     var y = this.state.y + rad * Math.sin(angle);
@@ -473,20 +471,17 @@ function Splinter(sim, x, y, xvel, yvel, angleVel, width, height, time){
   this.angleVel = angleVel;
   this.width = width;
   this.height = height;
-  var c_choice = Math.floor(Math.random() * 3);
+  var c_choice = Utils.randInt(3);
   if (c_choice == 0){
     var h, s, l;
-    h = Math.floor(splinterHueMin + (splinterHueMax - splinterHueMin) *
-        Math.random());
-    s = Math.floor(splinterSatMin + (splinterSatMax - splinterSatMin) *
-        Math.random());
-    l = Math.floor(splinterLightMin + (splinterLightMax - splinterLightMin) *
-        Math.random());
+    h = Utils.randIntBetween(splinterHueMin, splinterHueMax);
+    s = Utils.randIntBetween(splinterSatMin, splinterSatMax);
+    l = Utils.randIntBetween(splinterLightMin, splinterLightMax);
     this.color = Utils.makeHSL(h, s, l);
   }
-  if (c_choice == 1) this.color = "red";
-  if (c_choice == 2) this.color = "yellow";
-  this.angle = Math.random() * 2 * Math.PI;
+  else if (c_choice == 1) this.color = "red";
+  else this.color = "yellow";
+  this.angle = Utils.randAngle;
   this.alpha = 1;
   this.time = time;
 }
