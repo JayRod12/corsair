@@ -333,8 +333,17 @@ function send_loop_func(){
     // Send all objects from the new cells (serialized)
     var new_cells_states = serializeNewCells(new_cells);
 
+    var shipStates = {};
+    for (var player_uid in remote.getPlayers()){
+      var ship_obj = sim.getShip(player_uid);
+      if (!ship_obj) break;
+      shipStates[player_uid] = ship_obj.state;
+    }
+
+
+
     // Prepare data
-    var data = { players: remote.getPlayers(), active_cells:client.cells
+    var data = { players: shipStates/*remote.getPlayers()*/, active_cells:client.cells
                , updates: allBufferedUpdates, scoresTable: remote.getUIDtoScores()
                , new_cells: new_cells_states, servertime: sim.time,
                  client_tick_id: client.tick_id};

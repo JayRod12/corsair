@@ -24,7 +24,7 @@ var tutgame;
 var meta;
 var our_id;
 
-var client_update_id = 0;
+var client_update_id = 1;
 
 // Game objects
 var nearest_treasure = { x : -1, y : -1 };
@@ -44,7 +44,7 @@ const speed_norm = 100 * 5;
 const backColor = "rgb(104, 104, 104)";
 const seaColor = "rgb(92, 184, 235)";
 const seaHighlightColor = "rgb(102, 204, 255)";
-const s_delay = 1000/40;
+const s_delay = 1000/60;
 
 
 //  Draws all objects
@@ -290,6 +290,7 @@ function startClient() {
       player.onDeath();
     }
 
+      //console.log(remote.getRemoteStates()[our_id]);
     var players = data.players;
     for (var uid in players){
       var update = players[uid];
