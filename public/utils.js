@@ -73,14 +73,36 @@ exports.randBetween = function(min, max){
   return min + (max - min) * Math.random();
 };
 
+exports.randInt = function(n) {return Math.floor(Math.random() * n)}
+
 exports.choose = function(){
   return arguments[Math.floor(arguments.length * Math.random())];
 };
 
-exports.sqr = function(x){ return x * x };
-exports.randInt = function(n) {return Math.floor(Math.random() * n)}
-
 exports.twopi = Math.PI * 2;
+
+exports.sqr = function(x){ return x * x };
+
+exports.dist_2 = function(x,y){
+  return exports.sqr(x) + exports.sqr(y);
+}
+
+exports.dist = function(x,y){
+  return Math.sqrt(exports.sqr(x) + exports.sqr(y));
+}
+
+//  Pre: bound > 0
+exports.bound = function(x, bound) {
+  if (x > bound) return bound;
+  if (x < -bound) return -bound;
+  return x;
+}
+//  Pre: bound > epsilon > 0
+exports.bound2 = function(x, bound, epsilon) {
+  if (x > bound) return bound;
+  if (x < -bound) return -bound;
+  return (Math.abs(x) < epsilon) ? 0 : x;
+}
 
 exports.insertionSort = insertionSort;
 
