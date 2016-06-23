@@ -186,6 +186,8 @@ function CannonBall(sim, uid, state, level) {
   this.level = level;
   this.despawn_init = 2500;
   this.despawn = this.despawn_init;
+  this.angle = Math.atan2(this.state.yvel, this.state.xvel);
+  this.abs_cos_angle = Math.abs(Math.cos(this.angle));
 
   this.trail_length = 12;
   this.trail_points = [];
@@ -246,7 +248,7 @@ function CannonBall(sim, uid, state, level) {
     //  Y based on arc of shot
     //  Quadratic in t (time alive) converted to terms of despawn (time until
     //  destroyed)
-    var parabolaY = this.state.y-this.parabolaConst*(this.despawn_init - this.despawn)*
+    var parabolaY = this.state.y-this.abs_cos_angle*this.parabolaConst*(this.despawn_init - this.despawn)*
         (this.despawn);
 
     //  Shift down
