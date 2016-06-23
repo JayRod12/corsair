@@ -59,16 +59,21 @@ function Ship(sim, state, uid, name, inputFunction){
 
   this.collided_timer = 0;
 
-  this.getRemoteState = function(){
-    return sim.remote.getRemoteStates()[this.uid];
-  };
 
+  this.inputBuffer = [];
 
   this.cannon = new Cannon.Class(this);
   this.inputFunction = inputFunction;
 
+  this.default_colour = "black";
 
-  this.inputBuffer = [];
+  this.animationFrame = 0;
+  this.animationFrameElapse = 0;
+
+
+  this.getRemoteState = function(){
+    return sim.remote.getRemoteStates()[this.uid];
+  };
 
   //  Pre: assumes existance of inputBuffer
   //  Called in context of local ship
@@ -78,7 +83,6 @@ function Ship(sim, state, uid, name, inputFunction){
       if (this.inputBuffer[i].update_id < state_client_update){
         this.inputBuffer.splice(i, 1);
         i = 0;
-        console.log('remming');
         continue;
 
       }
@@ -96,43 +100,6 @@ function Ship(sim, state, uid, name, inputFunction){
     }
 
   }
-  /*
-  this.setStateAdvance = function(state, delta, starttime){
-    var time = starttime;
-    this.state = state;
-    var timestep = 1000/60;
-    for (;;){
-      delta -= timestep;
-      //this.onTick(timestep + ((delta > 0) ? 0 : delta));
-      //  Ternary operator makes it unintelligible?.
-
-      // TODO Set input based on buffer here
-      if (this.inputBuffer.length > 0){
-        if (
-    //    var i = Utils.getClosestValueIndex(this.inputBuffer, time, function(x){return
-     //       x.time;});
-        this.state.angle = this.inputBuffer[i].angle;
-        this.state.speed = this.inputBuffer[i].speed;
-      }
-        
-
-      if (delta > 0){
-        this.onTick(timestep);
-      }
-      else{
-        this.onTick(delta+timestep);
-        break;
-      }
-
-      // TODO Do collision checking here
-
-      time += timestep;
-    }
-
-    //  TODO is this right?
-    this.inputBuffer.splice(0,1);
-  }
-  */
 
   this.onTick = function(dt){
     var remoteState = this.getRemoteState();
@@ -155,12 +122,6 @@ function Ship(sim, state, uid, name, inputFunction){
    }
 
     if (server){
-      //  TODO THIS IS BAD
-      //  - Instead send inputBuffer and simulate nicer
-      //this.state.x = (this.state.x + remoteState.x) / 2;
-      //this.state.y = (this.state.y + remoteState.y) / 2;
-      //  END OF BAD
-
       this.state.angle = remoteState.angle;
       this.state.speed = remoteState.speed;
     }
@@ -171,14 +132,11 @@ function Ship(sim, state, uid, name, inputFunction){
 
 
     //  Updates speed and angle
-
-    //if (!server){  //  DEBUG
     this.inputFunction(dt);
+
     this.state.speed = Math.min(this.state.speed, this.speed_cap);
     this.state.x += this.state.speed * Math.cos(this.state.angle) * dt;
     this.state.y += this.state.speed * Math.sin(this.state.angle) * dt;
-
-    //}
 
 
     Game.updateCell(this.sim, this, this.state.x, this.state.y);
@@ -190,7 +148,7 @@ function Ship(sim, state, uid, name, inputFunction){
       this.updateScale();
     }
 
-    if (/*Math.floor(Math.random() * 4) == 0 &&*/ !server){
+    if (!server){
       var w = this.scale * 8;
       var h = this.scale * 16;
       var ox = this.scale * shipDrawWidth/8 * Math.cos(this.state.angle +
@@ -212,8 +170,6 @@ function Ship(sim, state, uid, name, inputFunction){
   }
 
   this.collisionHandler = function(other_object) {
-	  /*TODO: different cases (possibly) i.e. what if 
-  		it's a cannonball I've collided with?*/
 
     var shipUpdate = false;
 
@@ -329,11 +285,6 @@ function Ship(sim, state, uid, name, inputFunction){
    //decrement health & handle physics;
   }
 
-  this.default_colour = "black";
-
-  this.animationFrame = 0;
-  this.animationFrameElapse = 0;
-
   this.increaseScale = function(scale_increase) {
     scale_increase *= valueToScale;
     this.targetScale = this.scale + scale_increase;
@@ -413,70 +364,69 @@ function Ship(sim, state, uid, name, inputFunction){
     ctx.globalAlpha = 1;
   }
 
-  if (server){
-  this.spawnLoot = function() {
-    var lootDrop = 200 + this.gold/2;
+}
 
-    var loots_to_drop = 3 + this.gold/100;
+Ship.prototype.spawnLoot = function() {
+  var lootDrop = 200 + this.gold/2;
 
-    var value = Math.floor(lootDrop / loots_to_drop);
+  var loots_to_drop = 3 + this.gold/100;
 
-    var lootDisperseRadMax = shipDrawWidth * this.scale / 4;
-    var lootDisperseRadMin = shipDrawWidth * this.scale / 8;
-    for (var i = 0; i < Loot.lootPerScale * this.scale; i++) {
-      var rad = lootDisperseRadMin + (lootDisperseRadMax - 
-          lootDisperseRadMin) *
-        Math.random();
-      var angle = 2 * Math.PI * Math.random();
+  var value = Math.floor(lootDrop / loots_to_drop);
 
-      var x = this.state.x + rad * Math.cos(angle);
-      var y = this.state.y + rad * Math.sin(angle);
+  var lootDisperseRadMax = shipDrawWidth * this.scale / 4;
+  var lootDisperseRadMin = shipDrawWidth * this.scale / 8;
+  for (var i = 0; i < Loot.lootPerScale * this.scale; i++) {
+    var rad = lootDisperseRadMin + (lootDisperseRadMax - 
+        lootDisperseRadMin) *
+      Math.random();
+    var angle = 2 * Math.PI * Math.random();
 
-      var loot = new Loot.Class(this.sim, x, y, value);
-      var cell = this.sim.coordinateToCell(loot.x, loot.y);
-      if (cell){
-        cell.addObject(loot);
-        cell.addSerializedUpdate('create_object', loot);
-      }
+    var x = this.state.x + rad * Math.cos(angle);
+    var y = this.state.y + rad * Math.sin(angle);
+
+    var loot = new Loot.Class(this.sim, x, y, value);
+    var cell = this.sim.coordinateToCell(loot.x, loot.y);
+    if (cell){
+      cell.addObject(loot);
+      cell.addSerializedUpdate('create_object', loot);
     }
-  }}
-
-  this.getColType = function() {return "rectangle";};
-  this.getColCategory = function() {return "dynamic";};
-  this.getColObj = function() {
-    return {
-	    type: "ship",
-      x: this.state.x,
-      y: this.state.y,
-      hp: this.hp,
-      width: shipHitWidth * this.scale,
-      height: shipHitHeight * this.scale,
-      hypotenuse: this.hypotenuse,
-      angle: this.state.angle
-    }
-  };
-
-  this.serialize = function() {
-    return { type:"ship"
-           , o : { uid: this.uid
-                 , name: this.name
-                 , state: this.state 
-                 , hp : this.hp
-                 , scale: this.scale}};
-  };
-
-  this.equals = function(o) {
-    if (!(o instanceof Ship)){
-      return false;
-    }
-    return this.uid == o.uid;
-
   }
+}
 
+Ship.prototype.getColType = function() {return "rectangle";};
+Ship.prototype.getColCategory = function() {return "dynamic";};
+
+Ship.prototype.serialize = function() {
+  return { type:"ship"
+         , o : { uid: this.uid
+               , name: this.name
+               , state: this.state 
+               , hp : this.hp
+               , scale: this.scale}};
+};
+
+
+Ship.prototype.getColObj = function() {
+  return {
+    type: "ship",
+    x: this.state.x,
+    y: this.state.y,
+    hp: this.hp,
+    width: shipHitWidth * this.scale,
+    height: shipHitHeight * this.scale,
+    hypotenuse: this.hypotenuse,
+    angle: this.state.angle
+  }
+};
+
+Ship.prototype.equals = function(o){
+  if (!(o instanceof Ship)){
+    return false;
+  }
+  return this.uid == o.uid;
 }
 
 //  TODO inherit from particle class, no idea how to do this in js
-
 
 function Wake(sim, x, y, angle, width, height){
   this.sim = sim;
@@ -487,32 +437,25 @@ function Wake(sim, x, y, angle, width, height){
   this.width = width;
   this.height = height;
   this.alpha = 0.28;
-  this.onTick = function (dt){
-    this.alpha -= dt * 1/12000;
-    this.height -= dt * this.height / 1000;
-    if (this.alpha <= 0) this.cell.removeObject(this);
-  }
-
-  this.onDraw = function(ctx){
-    ctx.globalAlpha = this.alpha;
-    ctx.translate(this.x, this.y);
-    ctx.rotate(this.angle);
-    ctx.fillStyle = "white";
-    ctx.fillRect(-this.width/2, -this.height/2, this.width, this.height);
-    ctx.rotate(-this.angle);
-    ctx.translate(-this.x, -this.y);
-    ctx.globalAlpha = 1;
-  }
 }
 
-/*
-var splinterHueMin = 35;
-var splinterHueMax = 50;
-var splinterSatMin = 35;
-var splinterSatMax = 75;
-var splinterLightMin = 25;
-var splinterLightMax = 93;
-*/
+Wake.prototype.onTick = function(dt){
+  this.alpha -= dt * 1/12000;
+  this.height -= dt * this.height / 1000;
+  if (this.alpha <= 0) this.cell.removeObject(this);
+}
+
+Wake.prototype.onDraw = function(ctx){
+  ctx.globalAlpha = this.alpha;
+  ctx.translate(this.x, this.y);
+  ctx.rotate(this.angle);
+  ctx.fillStyle = "white";
+  ctx.fillRect(-this.width/2, -this.height/2, this.width, this.height);
+  ctx.rotate(-this.angle);
+  ctx.translate(-this.x, -this.y);
+  ctx.globalAlpha = 1;
+}
+
 var splinterHueMin = 24;
 var splinterHueMax = 28;
 var splinterSatMin = 30;
@@ -546,27 +489,28 @@ function Splinter(sim, x, y, xvel, yvel, angleVel, width, height, time){
   this.angle = Math.random() * 2 * Math.PI;
   this.alpha = 1;
   this.time = time;
-  this.onTick = function (dt){
-    this.x += this.xvel * dt;
-    this.y += this.yvel * dt;
-    if (this.time > 0) this.time -= dt;
-    else this.alpha -= dt * 1/400;
-    this.angle += this.angleVel * dt;
-    if (this.alpha <= 0) this.cell.removeObject(this);
-    else Game.updateCell(this.sim, this, this.x, this.y);
-  }
-
-  this.onDraw = function(ctx){
-    ctx.globalAlpha = this.alpha;
-    ctx.translate(this.x, this.y);
-    ctx.rotate(this.angle);
-    ctx.fillStyle = this.color;
-    ctx.fillRect(-this.width/2, -this.height/2, this.width, this.height);
-    ctx.rotate(-this.angle);
-    ctx.translate(-this.x, -this.y);
-    ctx.globalAlpha = 1;
-  }
 }
+Splinter.prototype.onTick = function (dt){
+  this.x += this.xvel * dt;
+  this.y += this.yvel * dt;
+  if (this.time > 0) this.time -= dt;
+  else this.alpha -= dt * 1/400;
+  this.angle += this.angleVel * dt;
+  if (this.alpha <= 0) this.cell.removeObject(this);
+  else Game.updateCell(this.sim, this, this.x, this.y);
+}
+
+Splinter.prototype.onDraw = function(ctx){
+  ctx.globalAlpha = this.alpha;
+  ctx.translate(this.x, this.y);
+  ctx.rotate(this.angle);
+  ctx.fillStyle = this.color;
+  ctx.fillRect(-this.width/2, -this.height/2, this.width, this.height);
+  ctx.rotate(-this.angle);
+  ctx.translate(-this.x, -this.y);
+  ctx.globalAlpha = 1;
+}
+
 
 var shipDrawWidth = 112.5;
 var shipDrawHeight = 60.5;

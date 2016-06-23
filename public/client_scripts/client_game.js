@@ -204,9 +204,7 @@ function endClient() {
     clearInterval(server_loop);
     server_loop = 0;
   }
-  if (animation_loop == 0) {
-    animation_loop = window.requestAnimationFrame(animation);
-  }
+  Wheel.init('wheel');
   socket.disconnect();
 }
 
