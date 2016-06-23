@@ -281,16 +281,6 @@ io.on('connection', function(client){
 
 });
 
-// Allows array difference computation
-Array.prototype.diff = function(a) {
-    return this.filter(function(i) {return a.indexOf(i) < 0;});
-};
-
-Array.prototype.intersection = function(a) {
-  return this.filter(function(n) {
-    return a.indexOf(n) != -1;
-  });
-};
 
 function send_loop_func(){
   // Replenish treasures

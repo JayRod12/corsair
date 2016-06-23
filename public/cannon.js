@@ -1,8 +1,12 @@
 if (typeof exports === 'undefined'){
-  var server = false;
+
   //  Browser
+  var server = false;
+
+  //  Cannon rendering info
   var cannon_frames = new Array();
   var cannon_frame_count = 14;
+  //  Load cannon frames
   for (var i = 0; i < cannon_frame_count; i++){
     var cannon_frame = new Image();
     cannon_frame.src = "../media/cannon/"+i+".png";
@@ -10,42 +14,40 @@ if (typeof exports === 'undefined'){
   }
   var smoke_frames = new Array();
   var smoke_frame_count = 3;
+  //  Load smoke particle frames
   for (var i = 0; i < smoke_frame_count; i++){
     var smoke_frame = new Image();
     smoke_frame.src = "../media/smoke/smoke"+i+".png";
     smoke_frames.push(smoke_frame);
   }
+
 }
 else{
+  //  Server
   var server = true;
   Game = require ('./shared_game.js');
   Col = require('./collision_detection.js');
   Ship = require('./ship.js');
-  //  Server
 }
 
 (function(exports){
 
-var initialCannons = 3;
+var cannons_per_scale = 3;
 
 function Cannon(ship) {
 
   this.leftCannons = new Array();
   this.rightCannons = new Array();
+  //  Initial cannons are pushed onto the arrays on the first tick when their lengths
+  //  are found to be less than cannons_per_scale * ship scale
 
-  this.cannonNumber = initialCannons;
   this.ballSpeed = 0.36;
   this.spacing = 10;
   this.delay = 200;
 
-	for (var i = 0; i < initialCannons; i++) {
-    this.leftCannons.push(new SingleCannon(i, 1, ship, this));
-    this.rightCannons.push(new SingleCannon(i, -1, ship, this)); 
-  }
-
   this.offset_info = {length_offset_x: 0, length_offset_y: 0, 
-						edge_offset_x: 0, edge_offset_y: 0, 
-							origin_offset_x: 0, origin_offset_y: 0}; 
+						          edge_offset_x:   0, edge_offset_y:   0, 
+							        origin_offset_x: 0, origin_offset_y: 0}; 
 
   this.ship = ship;
   this.level = 3.5;
@@ -53,115 +55,112 @@ function Cannon(ship) {
   this.baseCooldown = 1200;
   this.cooldowns = [10, 10];
 
+}
   //  Used only in client
-  /// STILL HACKY
-  //  TODO Neaten
-  this.cosmeticShoot = function(side) {
+Cannon.prototype.cosmeticShoot = function(side) {
 
-    var xdif = player.state.x - this.ship.state.x
-    var ydif = player.state.y - this.ship.state.y
-    var dist = xdif * xdif + ydif * ydif;
-    var smother = Math.sqrt(dist)/500;
-    smother = Math.max(0, smother);
-    smother = Math.min(1, smother);
-    SFX.broadside(this.leftCannons.length, this.delay/this.leftCannons.length,
-        smother);
+  var xdif = player.state.x - this.ship.state.x
+  var ydif = player.state.y - this.ship.state.y
+  var dist = xdif * xdif + ydif * ydif;
+  var smother = Math.sqrt(dist)/500;
+  smother = Math.max(0, smother);
+  smother = Math.min(1, smother);
+  SFX.broadside(this.leftCannons.length, this.delay/this.leftCannons.length,
+      smother);
 
-    var index = ((side == 1) ? 0 : 1);
-    var cannonArray;
-    if (index == 0) {
-      cannonArray = this.leftCannons;
-    } else {
-      cannonArray = this.rightCannons;
+  var index = ((side == 1) ? 0 : 1);
+  var cannonArray;
+  if (index == 0) {
+    cannonArray = this.leftCannons;
+  } else {
+    cannonArray = this.rightCannons;
+  }
+
+  for (var i = 0; i < cannonArray.length; i++) {
+    var fire_delay = Math.random()*this.delay;
+    //tell each 
+    cannonArray[i].cosmeticFire(fire_delay);
+  } 
+
+}
+
+Cannon.prototype.onShoot = function(side) {
+
+  var index = ((side == 1) ? 0 : 1);
+  
+  var cannonArray;
+  if (index == 0) {
+    cannonArray = this.leftCannons;
+  } else {
+    cannonArray = this.rightCannons;
+  }
+
+  var cooldown = this.cooldowns[index];
+
+  if (cooldown > 0) return false;
+
+  //otherwise, we're firing!
+
+  //  Juicy shit
+  viewport.shake(15, 5);
+  var seed = Math.random();
+  toSendServer.push({type: "cannon_fire", uid: this.ship.uid, seed: seed, side
+      : side});
+  SFX.broadside(this.leftCannons.length, this.delay/this.leftCannons.length, 0.2);
+
+  //Ask server if we are allowed to shoot (MaybeTODO)
+  this.cooldowns[index] = this.baseCooldown;
+
+  for (var i = 0; i < cannonArray.length; i++) {
+    var fire_delay = Math.random()*this.delay;
+    //tell each 
+    cannonArray[i].fire(fire_delay);
+  } 
+};
+
+
+Cannon.prototype.onTick = function(dt){
+
+  //  Update the number of cannons
+  this.cannonNumber = this.ship.scale*cannons_per_scale;
+  if (this.cannonNumber >= this.leftCannons.length) {
+   for (var i = this.leftCannons.length; i < this.cannonNumber - this.leftCannons.length; i++) {
+    this.leftCannons.push(new SingleCannon(i, 1, this.ship, this));
+     this.rightCannons.push(new SingleCannon(i, -1, this.ship, this)); 
     }
-
-    for (var i = 0; i < cannonArray.length; i++) {
-      var fire_delay = Math.random()*this.delay;
-      //tell each 
-      cannonArray[i].cosmeticFire(fire_delay);
-    } 
-
   }
   
-  this.onShoot = function(side) {
+  var normalising_const_origin = -1*0.3*this.ship.scale*Ship.shipDrawWidth;
+  this.offset_info.origin_offset_x = normalising_const_origin*Math.cos(Col.trimBranch(this.ship.state.angle));
+  this.offset_info.origin_offset_y = normalising_const_origin*Math.sin(Col.trimBranch(this.ship.state.angle));
 
-    var index = ((side == 1) ? 0 : 1);
-    
-    var cannonArray;
-    if (index == 0) {
-      cannonArray = this.leftCannons;
-    } else {
-      cannonArray = this.rightCannons;
-    }
+  var normalising_const_edge = 0.5*this.ship.scale*Ship.shipHitHeight;
+  this.offset_info.edge_offset_x = normalising_const_edge*Math.cos(Col.trimBranch(this.ship.state.angle + Math.PI/2));
+  this.offset_info.edge_offset_y = normalising_const_edge*Math.sin(Col.trimBranch(this.ship.state.angle + Math.PI/2));
 
-    var cooldown = this.cooldowns[index];
-
-    if (cooldown > 0) return false;
-
-    //otherwise, we're firing!
-
-    //  Juicy shit
-    viewport.shake_dur = 15;
-    viewport.shake_intensity = 5;
-    var seed = Math.random();
-    toSendServer.push({type: "cannon_fire", uid: this.ship.uid, seed: seed, side
-        : side});
-    SFX.broadside(this.leftCannons.length, this.delay/this.leftCannons.length, 0.2);
-
-    //Ask server if we are allowed to shoot (MaybeTODO)
-    this.cooldowns[index] = this.baseCooldown;
-
-    for (var i = 0; i < cannonArray.length; i++) {
-      var fire_delay = Math.random()*this.delay;
-      //tell each 
-      cannonArray[i].fire(fire_delay);
-    } 
-  };
-
-  var cannon_scale = 3;
+  var normalising_const_length = 0.7*this.ship.scale*Ship.shipHitWidth;
+  this.offset_info.length_offset_x = normalising_const_length*Math.cos(this.ship.state.angle);
+  this.offset_info.length_offset_y = normalising_const_length*Math.sin(this.ship.state.angle);
   
-  this.onTick = function(dt){
-    //update the number of cannons
-    this.cannonNumber = this.ship.scale*cannon_scale;
-	    if (this.cannonNumber >= this.leftCannons.length) {
-	     for (var i = this.leftCannons.length; i < this.cannonNumber - this.leftCannons.length; i++) {
-	      this.leftCannons.push(new SingleCannon(i, 1, ship, this));
-         this.rightCannons.push(new SingleCannon(i, -1, ship, this)); 
-	      }
-	    }
-    
-    var normalising_const_origin = -1*0.3*this.ship.scale*Ship.shipDrawWidth;
-  	this.offset_info.origin_offset_x = normalising_const_origin*Math.cos(Col.trimBranch   (this.ship.state.angle));
-	  this.offset_info.origin_offset_y = normalising_const_origin*Math.sin(Col.trimBranch(this.ship.state.angle));
+  if (this.cooldowns[0] > 0) this.cooldowns[0] -= dt;
+  if (this.cooldowns[1] > 0) this.cooldowns[1] -= dt;
 
-    var normalising_const_edge = 0.5*this.ship.scale*Ship.shipHitHeight;
-  	this.offset_info.edge_offset_x = normalising_const_edge*Math.cos(Col.trimBranch(this.ship.state.angle + Math.PI/2));
-    this.offset_info.edge_offset_y = normalising_const_edge*Math.sin(Col.trimBranch(this.ship.state.angle + Math.PI/2));
+  for (var i = 0; i < this.leftCannons.length; i++) {
+    this.leftCannons[i].onTick(dt);
+  }
+  for (var i = 0; i < this.rightCannons.length; i++) {
+    this.rightCannons[i].onTick(dt);
+  }
+};
 
-	  var normalising_const_length = 0.7*this.ship.scale*Ship.shipHitWidth;
-    this.offset_info.length_offset_x = normalising_const_length*Math.cos(this.ship.state.angle);
-    this.offset_info.length_offset_y = normalising_const_length*Math.sin(this.ship.state.angle);
-    
-    if (this.cooldowns[0] > 0) this.cooldowns[0] -= dt;
-    if (this.cooldowns[1] > 0) this.cooldowns[1] -= dt;
-
-    for (var i = 0; i < this.leftCannons.length; i++) {
-      this.leftCannons[i].onTick(dt);
-    }
-    for (var i = 0; i < this.rightCannons.length; i++) {
-      this.rightCannons[i].onTick(dt);
-    }
-  };
-
-  this.onDraw = function() {
-    for (var i = 0; i < this.leftCannons.length; i++) {
-      this.leftCannons[i].onDraw();
-    }
-    for (var i = 0; i < this.rightCannons.length; i++) {
-      this.rightCannons[i].onDraw();
-    }
-  };
-}
+Cannon.prototype.onDraw = function() {
+  for (var i = 0; i < this.leftCannons.length; i++) {
+    this.leftCannons[i].onDraw();
+  }
+  for (var i = 0; i < this.rightCannons.length; i++) {
+    this.rightCannons[i].onDraw();
+  }
+};
 
 function cannonBallFromLocal(ship, offsetX, offsetY, side, ballSpeed, level){
   var sim = ship.sim;

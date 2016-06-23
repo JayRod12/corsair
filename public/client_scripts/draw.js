@@ -12,49 +12,68 @@ function Viewport(sim, ship, x, y, baseWidth, baseHeight){
   this.baseWidth = 1;
   this.scale = 1/this.ship.scale;
 
-  this.shake_dur = 0;
-  this.shake_intensity = 0;
-
-  this.getWidth = function(){
-    return this.baseWidth * this.scale;
-  }
-
-  this.getHeight = function(){
-    return this.baseWidth * this.scale;
-  }
-
-  this.draw = function(ctx, canvaswidth, canvasheight){
-
-    //  Update x, y, lerp
-    var new_x = (4*player.state.x + mouse_x)/5 - canvas.width / (2 * viewport.scale);
-    var new_y = (4*player.state.y + mouse_y)/5 - canvas.height / (2 * viewport.scale);
-
-    this.x = (this.x + new_x) / 2;
-    this.y = (this.y + new_y) / 2;
-
-    var x, y;
-    x = this.x;
-    y = this.y
-
-
-    if (this.shake_dur > 0){
-      this.shake_dur -= 1;
-      var angle = Math.random() * Math.PI * 2;
-      x += Math.cos(angle) * this.shake_intensity;
-      y += Math.sin(angle) * this.shake_intensity;
-    }
-
-    this.scale = 1 / this.ship.scale;
-    ctx.scale(this.scale, this.scale);
-    ctx.translate(-x, -y);
-
-    sim.draw(ctx);
-
-    ctx.translate(x, y);
-    ctx.scale(1/this.scale, 1/this.scale);
-  }
-
+  //this.shake_dur = 0;
+  //this.shake_intensity = 0;
+  this.shakes = [];
 }
+
+Viewport.prototype.shake = function(frames, intensity){
+  this.shakes.push({dur: frames, intensity: intensity});
+}
+
+Viewport.prototype.getWidth = function(){
+  return this.baseWidth * this.scale;
+}
+
+Viewport.prototype.getHeight = function(){
+  return this.baseWidth * this.scale;
+}
+
+Viewport.prototype.draw = function(ctx, canvaswidth, canvasheight){
+
+  //  Update x, y, lerp
+  var new_x = (4*player.state.x + mouse_x)/5 - canvas.width / (2 * viewport.scale);
+  var new_y = (4*player.state.y + mouse_y)/5 - canvas.height / (2 * viewport.scale);
+
+  this.x = (this.x + new_x) / 2;
+  this.y = (this.y + new_y) / 2;
+
+  var x, y;
+  x = this.x;
+  y = this.y;
+
+
+  //  Iterate accross shakes array
+  //  Decrease the frames of all shake requests by 1, and get the greatest
+  //  intensity, we use that for the view offset
+  if (this.shakes.length > 0){
+    var max_intensity = 0;
+    for (var i = 0; i < this.shakes.length; i++){
+      this.shakes[i].dur -= 1;
+      if (this.shakes[i].dur < 0){
+        this.shakes.splice(i, 1);
+        i-=1;
+        continue;
+      }
+      if (this.shakes[i].intensity > max_intensity){
+        max_intensity = this.shakes[i].intensity;
+      }
+    }
+    var angle = Utils.randAngle();
+    x += Math.cos(angle) * max_intensity;
+    y += Math.sin(angle) * max_intensity;
+  }
+
+  this.scale = 1 / this.ship.scale;
+  ctx.scale(this.scale, this.scale);
+  ctx.translate(-x, -y);
+
+  sim.draw(ctx);
+
+  ctx.translate(x, y);
+  ctx.scale(1/this.scale, 1/this.scale);
+}
+
 
 const seaHue = 222;
 const seaSat = 49;
