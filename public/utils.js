@@ -5,6 +5,17 @@ if (typeof exports == 'undefined') {
 }
 (function(exports) {
 
+// Allows array difference computation
+Array.prototype.diff = function(a) {
+    return this.filter(function(i) {return a.indexOf(i) < 0;});
+};
+
+Array.prototype.intersection = function(a) {
+  return this.filter(function(n) {
+    return a.indexOf(n) != -1;
+  });
+};
+
 // Sort treasures by distance (squared but its the same)
 function insertionSort(array, player) {
   var i, j, d1x, d1y, d2x, d2y, d1, d2, t1, t2, temp;
