@@ -17,7 +17,7 @@ var pirateNames = [
 ];
 
 exports.generate = function(){
-  var i = Math.floor(pirateNames.length * Math.random());
+  var i = Utils.randInt(pirateNames.length);
   return pirateNames[i];
 }
 
