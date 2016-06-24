@@ -117,7 +117,7 @@ function LootParticle(sim, x, y, angle, grow_rate, color){
 }
 
 LootParticle.prototype.onTick = function (dt){
-  this.size += grow_rate * dt;
+  this.size += this.grow_rate * dt;
   this.alpha -= dt * 1/2000;
   if (this.alpha <= 0) this.cell.removeObject(this);
 }
@@ -126,7 +126,7 @@ LootParticle.prototype.onDraw = function(ctx){
   ctx.globalAlpha = this.alpha;
   ctx.translate(this.x, this.y);
   ctx.rotate(this.angle);
-  ctx.strokeStyle = color; 
+  ctx.strokeStyle = this.color; 
   ctx.strokeRect(-this.size/2, -this.size/2, this.size, this.size);
   ctx.rotate(-this.angle);
   ctx.translate(-this.x, -this.y);
