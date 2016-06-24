@@ -44,11 +44,9 @@ var treasure_number = 2;//Math.floor(gridNumber * gridNumber / 2);
 var sim = new Sim.Class(remote, Date.now(), gridNumber, cellWidth, cellHeight, allCells);
 // serialized treasures
 ServerGame.generateTreasures(sim, gridNumber, cellWidth, cellHeight, treasure_number);
-ServerGame.generateIslands(sim, gridNumber, cellWidth, cellHeight);
-//var height_maps = ServerGame.generateIslands2(sim, gridNumber, cellWidth, cellHeight);
-//console.log('Height map size: ' + height_maps.length * height_maps[0].length * height_maps[0][0].length);
-
-//var island = new Island(100, 100, 100, 100, Math.PI/4, "black");
+//ServerGame.generateIslands(sim, gridNumber, cellWidth, cellHeight);
+var heightmaps = ServerGame.generateIslands2(sim, gridNumber, cellWidth, cellHeight);
+console.log('Height map size: ' + heightmaps.length * heightmaps[0].length * heightmaps[0][0].length);
 
 var lootState;
 for (var i = 0; i < 35; i ++){
@@ -153,8 +151,9 @@ io.on('connection', function(client){
   var new_cells_states = serializeNewCells(ac);
   var data = { id : client.userid, names : remote.getPlayerNames()
              , players : remote.getPlayers(), state: initState, meta: metadata
-             , new_cells_states: new_cells_states, treasures: serializer.serializeArray(sim.treasures)
-  };//height_maps : height_maps };
+             , new_cells_states: new_cells_states, treasures:
+             serializer.serializeArray(sim.treasures),
+  heightmaps : heightmaps };
   client.emit('on_connect', data);
 
 

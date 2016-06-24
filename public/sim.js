@@ -51,6 +51,7 @@ Cell.prototype.drawBackground = function(ctx) {
 }
 
 Cell.prototype.draw = function(ctx){
+  this.drawBackground(ctx);
   /*
     if (typeof this.gameObjects[i].onDraw != "undefined"){
       var toDraw = true;

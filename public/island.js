@@ -86,6 +86,7 @@ function CosmeticIsland(sim, x, y, height, width, angle, color) {
 }
 
 CosmeticIsland.prototype.onDraw = function(ctx){
+  return;
   //We translate to the origin of our island
   ctx.translate(this.x, this.y);
 

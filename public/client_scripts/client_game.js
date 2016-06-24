@@ -418,9 +418,12 @@ function deserializeNewStates(new_cells_states, server_time_diff) {
       cell.addObject(objects[j]);
     }
 
+    /*
+       TODO DAN HERE
     if (typeof cell.prerenderBackground == "undefined") {
       cell.prerenderedBackground = prerenderBackground(cell);
     }
+    */
   }
 }
 
@@ -459,13 +462,12 @@ function playClientGame(data) {
   serializer = new Serializer.Class(sim);
 
   sim.treasures = serializer.deserializeArray(data.treasures);
-  /*
-  for (var i = 0; i < data.height_maps.length; i++){
-    var cell = sim.numberToCell(i);
-    cell.height_map = data.height_maps[i];
 
+  for (var i = 0; i < data.heightmaps.length; i++){
+    var cell = sim.numberToCell(i);
+    cell.heightmap = data.heightmaps[i];
+    cell.prerenderedBackground = prerenderHeightmap(cell);
   }
-  */
 
   deserializeNewStates(data.new_cells_states, 0);
   updateHighScoresTable(data.scoresTable);

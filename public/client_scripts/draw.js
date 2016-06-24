@@ -111,14 +111,15 @@ function islandColor(height){
 //  TODO get this from somewhere (meta)
 var island_size = 32;
 function prerenderHeightmap(cell) {
+  console.log('awf');
   var canvas = document.createElement('canvas');
   canvas.width = meta.cellWidth;
   canvas.height = meta.cellHeight;
   var render_target = canvas.getContext('2d');
   //jjjjjjrender_target.translate(-cell.x * meta.cellWidth, -cell.y * meta.cellHeight);
-  for (var x = 0; x < cell.height_map.length; x++){
-    for (var y = 0; y < cell.height_map.length; y++){
-      render_target.fillStyle = islandColor(cell.height_map[x][y]);     
+  for (var x = 0; x < cell.heightmap.length; x++){
+    for (var y = 0; y < cell.heightmap.length; y++){
+      render_target.fillStyle = islandColor(cell.heightmap[x][y]);     
       render_target.fillRect(0, 0, island_size, island_size);
       render_target.translate(0, island_size);
     }
