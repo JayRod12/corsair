@@ -299,7 +299,6 @@ function SingleCannon(index, side, ship, handler) {
   this.offset_x;
   this.offset_y; 
   
-  //this.cur_frame = 0;
   this.fire_delay = 0;
   this.fire_timer = 0;
   this.cur_frame = 0; 
@@ -339,11 +338,11 @@ function SingleCannon(index, side, ship, handler) {
        }
        var xvel = ship.state.speed * Math.cos(ship.state.angle) / 5;
        var yvel = ship.state.speed * Math.sin(ship.state.angle) / 5;
-       var frame = Math.floor(Math.random() * smoke_frame_count);
-       var width = 16 + 32 * Math.random();
-       var height = 16 + 32 * Math.random();
+       var frame = Utils.randInt(smoke_frame_count);
+       var width = Utils.randBetween(16, 48);
+       var height = Utils.randBetween(16, 48);
        var smoke = new Smoke(sim,ship.state.x + this.offset_x, ship.state.y + 
-           this.offset_y, xvel, yvel, Math.random() * 2 * Math.PI, width,
+           this.offset_y, xvel, yvel, Utils.randAngle(), width,
            height, frame);
        if (smoke.cell) smoke.cell.addObject(smoke, 0.3);
         this.fired = false;
