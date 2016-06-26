@@ -336,8 +336,12 @@ function SingleCannon(index, side, ship, handler) {
                                              ship.state.y + this.offset_y);
         cell.addObject(ball);
        }
-       var xvel = ship.state.speed * Math.cos(ship.state.angle) / 5;
-       var yvel = ship.state.speed * Math.sin(ship.state.angle) / 5;
+       var driftvel = 0.006
+       var driftdir = Utils.randAngle();
+       var xvel = ship.state.speed * Math.cos(ship.state.angle) / 5 + driftvel *
+         Math.cos(driftdir);
+       var yvel = ship.state.speed * Math.sin(ship.state.angle) / 5 + driftvel *
+         Math.sin(driftdir);
        var frame = Utils.randInt(smoke_frame_count);
        var width = Utils.randBetween(16, 48);
        var height = Utils.randBetween(16, 48);
