@@ -156,14 +156,14 @@ function Ship(sim, state, uid, name, inputFunction){
       var oy = this.scale * shipDrawWidth/8 * Math.sin(this.state.angle +
           Math.PI / 2);
       var wake = new Wake(this.sim, this.state.x + ox, this.state.y + oy,
-          this.state.angle, w, h);
+          w, h, this.state.angle);
       if (wake.cell) wake.cell.addObject(wake, 0.2);
       var px = this.scale * shipDrawWidth/8 * Math.cos(this.state.angle -
           Math.PI / 2);
       var py = this.scale * shipDrawWidth/8 * Math.sin(this.state.angle -
           Math.PI / 2);
       wake = new Wake(this.sim, this.state.x + px, this.state.y + py,
-          this.state.angle, w, h);
+          w, h, this.state.angle);
       if (wake.cell) wake.cell.addObject(wake, 0.2);
     }
 
@@ -426,6 +426,7 @@ Ship.prototype.equals = function(o){
 
 //  TODO inherit from particle class, no idea how to do this in js
 
+/*
 function Wake(sim, x, y, angle, width, height){
   this.sim = sim;
   this.x = x;
@@ -453,7 +454,13 @@ Wake.prototype.onDraw = function(ctx){
   ctx.translate(-this.x, -this.y);
   ctx.globalAlpha = 1;
 }
+*/
 
+if (!server){
+var Wake =
+NewPart().rectangle().split_growrate().fix_height_growrate(-12/30).fix_width_growrate(0).fix_faderate(0.1/1200).fix_color("white").fix_alpha(0.28).make();
+
+}
 var splinterHueMin = 24;
 var splinterHueMax = 28;
 var splinterSatMin = 30;
@@ -514,7 +521,7 @@ var shipHitHeight = 28;
 
 exports.Class = Ship;
 exports.shipDrawWidth = shipDrawWidth;
-exports.shipDraweHeight = shipDrawHeight;
+exports.shipDrawHeight = shipDrawHeight;
 exports.shipHitWidth = shipHitWidth;
 exports.shipHitHeight = shipHitHeight;
 exports.Wake= Wake;
