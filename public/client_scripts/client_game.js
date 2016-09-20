@@ -431,8 +431,11 @@ function deserializeNewStates(new_cells_states, server_time_diff) {
 function onShipDeath() {
   $('#game_canvas').hide();
   $('body').css({'background':'black'});
-  $('#welcomeScreen').fadeIn('slow');
   console.log('Ship death ' + mouse_x + ', ' + mouse_y);
+  final_score = localHighScoreTable[player.uid];
+  console.log(final_score);
+  $('#death_score').html("<p>Final score " + final_score + "</p>");
+  $('#welcomeScreen').fadeIn('slow');
   endClient();
 }
 

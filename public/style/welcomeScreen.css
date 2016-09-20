@@ -57,6 +57,15 @@ form {
   opacity: 0.4;
 }
 
+#death_score {
+  margin: 0 auto;
+  width: 50%;
+  text-align:center;
+  font-family: "Times New Roman", Times, serif;
+  font-size: 20px;
+  color: red;
+  position:relative;
+}
 #buttonAndTextField {
   margin: 0 auto; 
   width: 50%;
