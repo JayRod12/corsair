@@ -1,5 +1,7 @@
 #CORSAIR
 
+![alt text](https://raw.githubusercontent.com/JayRod12/corsair/master/gameplay.png "Gameplay image")
+
 Agar.io / Slither.io style online arena game themed around Pirates and the High Seas
 
 
